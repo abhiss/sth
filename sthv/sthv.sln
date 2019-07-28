@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sthvClient", "sthv\sthvClient.csproj", "{B09212B0-009F-4700-895A-2CBE898F1813}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sthvServer", "sthvServer\sthvServer.csproj", "{18C0765D-5830-40F0-B268-FE7EC25921AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sthvClient", "sthvClient\sthvClient.csproj", "{B09212B0-009F-4700-895A-2CBE898F1813}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B09212B0-009F-4700-895A-2CBE898F1813}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B09212B0-009F-4700-895A-2CBE898F1813}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B09212B0-009F-4700-895A-2CBE898F1813}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B09212B0-009F-4700-895A-2CBE898F1813}.Release|Any CPU.Build.0 = Release|Any CPU
 		{18C0765D-5830-40F0-B268-FE7EC25921AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{18C0765D-5830-40F0-B268-FE7EC25921AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{18C0765D-5830-40F0-B268-FE7EC25921AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{18C0765D-5830-40F0-B268-FE7EC25921AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B09212B0-009F-4700-895A-2CBE898F1813}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B09212B0-009F-4700-895A-2CBE898F1813}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B09212B0-009F-4700-895A-2CBE898F1813}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B09212B0-009F-4700-895A-2CBE898F1813}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

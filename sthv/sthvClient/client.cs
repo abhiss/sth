@@ -13,7 +13,7 @@ namespace sthv
 	{
 		public client()
 		{
-
+			EventHandlers["licenseId"] += onF
 		}
 	}
 		

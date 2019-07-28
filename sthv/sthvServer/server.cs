@@ -10,14 +10,17 @@ namespace sthvServer
 {
 	class server : BaseScript
 	{
-
+		Player _playerObj; 
 
 		public server()
 		{
-			 
+			Identifiers id = new Identifiers();
+
+			
+			//EventHandlers[""]
 		}
 
-
+	
 
 
 
