@@ -11,8 +11,8 @@ namespace sthv
 {
 	class sthvPlayArea
 	{
-		Vector2 playAreaCenter { get; set; } = new Vector2(568f, -2184f);
-		float radius = 900f;
+		Vector2 playAreaCenter { get; set; } = new Vector2(-181f, -210f);
+		float radius = 9000f;
 
 		public sthvPlayArea()
 		{

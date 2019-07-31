@@ -20,13 +20,13 @@ namespace sthvServer
 
 			}), true);
 			API.RegisterCommand("spawnall", new Action<int, List<object>, string>((src, args, raw) =>
-			{
+			{	
 				TriggerClientEvent("sth:spawnall");
 
 			}), true);
 
 			EventHandlers["PlayerConnecting"] += new Action<Player>(OnPlayerPreload);   //when player is joining
-			EventHandlers["NeedLicense"] += new Action<Player>(OnPlayerPreload);        //license requested from client (not implemented clientside
+			EventHandlers["NeedLicense"] += new Action<Player>(OnPlayerPreload);        //license requested from client (not implemented clientside)
 
 		}
 		void OnPlayerPreload([FromSource] Player source)        //send client their license 
