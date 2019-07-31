@@ -8,21 +8,37 @@ using CitizenFX.Core.Native;
 
 namespace sthvServer
 {
+
 	class server : BaseScript
 	{
-		Player _playerObj; 
 
 		public server()
 		{
-			Identifiers id = new Identifiers();
+			API.RegisterCommand("resetspawns", new Action<int, List<object>, string>((src, args, raw) =>
+			{
+				TriggerClientEvent("sth:resetrespawncounter");
 
-			
-			//EventHandlers[""]
+			}), true);
+			API.RegisterCommand("spawnall", new Action<int, List<object>, string>((src, args, raw) =>
+			{
+				TriggerClientEvent("sth:spawnall");
+
+			}), true);
+
+			EventHandlers["PlayerConnecting"] += new Action<Player>(OnPlayerPreload);   //when player is joining
+			EventHandlers["NeedLicense"] += new Action<Player>(OnPlayerPreload);        //license requested from client (not implemented clientside
+
 		}
+		void OnPlayerPreload([FromSource] Player source)        //send client their license 
+		{
 
-	
-
+			string licenseId = source.Identifiers["license"];
+			TriggerClientEvent("sth:returnlicense", licenseId);
+		
+			Debug.WriteLine("done: OnPlayerPreload");
+		}
 
 
 	}
+
 }
