@@ -55,10 +55,7 @@ namespace sthvClient
 				}
 				
 			}), false);
-			API.RegisterCommand("unwanted", new Action<int, List<object>, string>((src, args, raw) =>
-			{
-				API.SetMaxWantedLevel(0);
-			}), false);
+
 			//Client.Managers.Spawn.SpawnPlayer("S_M_Y_MARINE_01", 0.916756f, 528.485f, 174.628f, 0f);
 		}
 		 
