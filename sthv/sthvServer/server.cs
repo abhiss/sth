@@ -25,8 +25,7 @@ namespace sthvServer
 
 			}), true);
 
-			EventHandlers["PlayerConnecting"] += new Action<Player>(OnPlayerPreload);   //when player is joining
-			EventHandlers["NeedLicense"] += new Action<Player>(OnPlayerPreload);        //license requested from client (not implemented clientside)
+ 			EventHandlers["NeedLicense"] += new Action<Player>(OnPlayerPreload);        //license requested from client (not implemented clientside)
 
 		}
 		void OnPlayerPreload([FromSource] Player source)        //send client their license 
@@ -34,8 +33,6 @@ namespace sthvServer
 
 			string licenseId = source.Identifiers["license"];
 			TriggerClientEvent("sth:returnlicense", licenseId);
-		
-			Debug.WriteLine("done: OnPlayerPreload");
 		}
 
 

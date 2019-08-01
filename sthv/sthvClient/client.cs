@@ -16,43 +16,42 @@ namespace sthvClient
 		bool isRunner { get; set; }
 		string License { get; set; }
 		int respawnCount = 0;
-		string RunnerLicense = "56e8e0ce67ae257ab5c4db6209ba4e0de0ea776e";
-
+		string RunnerLicense = "01770902dc02d7b6a2183071684a7582fec278fa";
+		string mapmanagerRes;
+		bool isAbhi;
 		public client()
 		{
 			//test 
-			TriggerServerEvent("NeedLicense");
-
-
+			EventHandlers["onClientMapStart"] += new Action<string>(onPlayerLoaded); // event from mapmanager_cliend.lua line 47
+			 
 			var playArea = new sthv.sthvPlayArea();
 			var rules = new sthv.sthvRules();
+
 			Tick += rules.AutoBrakeLight;
 			Tick += playArea.OnTickPlayArea;
 			
 			EventHandlers["sth:spawnall"] += new Action(Respawn);
 			EventHandlers["sth:resetrespawncounter"] += new Action(ResetRespawnCounter);
-			EventHandlers["sth:returnlicense"] += new Action<string>(ReceivedLicense);
+			EventHandlers["sth:returnlicense"] += new Action<string>(ReceivedLicense); //gets license from server
+			EventHandlers["sth:licenseStored"] += new Action(Respawn); //when client knows license
+			//because client must know license before spawning
 
-
-			
 			API.RegisterCommand("license", new Action<int, List<object>, string>((src, args, raw) =>
 			{
-				//Debug.WriteLine("triggered: NeedLicense");
-				TriggerServerEvent("NeedLicense");
 				Debug.WriteLine(License);
 			}), false);
 			API.RegisterCommand("spawn", new Action<int, List<object>, string>((src, args, raw) =>
 			{
 				Respawn();
 			}), false);
-			API.RegisterCommand("runner", new Action<int, List<object>, string>((src, args, raw) =>
+			API.RegisterCommand("checkrunner", new Action<int, List<object>, string>((src, args, raw) =>
 			{
 				if (RunnerLicense.Equals(License))
 				{
 					isRunner = true;
-					Debug.WriteLine("\nn\nn\nn\nnRunner= true");
+					Debug.WriteLine("Runner= ^2true^7");
+					SendChatMessage("server:", "youre a runner", 255, 255, 255);
 				}
-				Debug.WriteLine($"isRunner:{isRunner}\n runnerLicense: {RunnerLicense}, \n mylicense: {License}");
 
 			}), false);
 			API.RegisterCommand("giveguns", new Action<int, List<object>, string>((src, args, raw) =>
@@ -78,10 +77,19 @@ namespace sthvClient
 			//Client.Managers.Spawn.SpawnPlayer("S_M_Y_MARINE_01", 0.916756f, 528.485f, 174.628f, 0f);
 		}
 		 
-		void ReceivedLicense(string ID)
+
+		void onPlayerLoaded(string res) // res from mapmanager_cliend.lua line 47
 		{
-			Debug.WriteLine(ID);
-			License = ID;
+			TriggerServerEvent("NeedLicense");	//asks server for license, ends 
+			mapmanagerRes = res;
+			Debug.WriteLine($"^2iiiiiiiiiiiiiii mapmanagerRes = {mapmanagerRes}");
+		}
+
+		void ReceivedLicense(string license)	//gets license from server
+		{
+			Debug.WriteLine(license);
+			License = license;
+			TriggerEvent("sth:licenseStored"); //when license stored, to prevent spawning without client storing license
 		}
 		void ResetRespawnCounter()
 		{
