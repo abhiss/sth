@@ -2,7 +2,7 @@
 using CitizenFX.Core;
 using static CitizenFX.Core.Native.API;
 
-namespace Client.Managers
+namespace sthvClient
 {
 	public class Spawn : BaseScript
 	{
@@ -40,7 +40,7 @@ namespace Client.Managers
 					ClearPedTasksImmediately(ped);
 			}
 		}
-
+	
 		public static async Task SpawnPlayer(string skin, float x, float y, float z, float heading)
 		{
 			if (_spawnLock)

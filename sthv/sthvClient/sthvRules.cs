@@ -7,12 +7,13 @@ using System.Text;
 using System.Threading.Tasks;
 using CitizenFX;
 
-namespace sthv
+namespace sthvClient
 {
 	class sthvRules
 	{
 		int _ped;
 		int _pid;
+		bool showBigMap = false;
 		public sthvRules()
 		{
 			_ped = API.PlayerPedId();
@@ -25,10 +26,25 @@ namespace sthv
 			API.SetCanAttackFriendly(_ped, true, true);
 			API.SetMaxWantedLevel(0);
 
+			//sthvClient.client.eventhandlers			
+			
 
+		}
 
-
-
+		public async Task isZPressed()
+		{
+			if (API.IsControlJustReleased(20, 48)) //Z 
+			{
+				if (API.IsBigmapActive())
+				{
+					API.SetBigmapActive(false, false);
+				}
+				else
+				{
+					API.SetBigmapActive(true, false);
+				}
+			}
+			BaseScript.Delay(20);
 		}
 		public async Task AutoBrakeLight()              //autobrakelight
 		{

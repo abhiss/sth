@@ -7,22 +7,22 @@ using CitizenFX;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
 
-namespace sthv
+namespace sthvClient
 {
 	class sthvPlayArea
 	{
 		Vector2 playAreaCenter { get; set; } = new Vector2(-181f, -210f);
-		float radius = 9000f;
+		float radius = 200f;
 
 		public sthvPlayArea()
 		{
-			;
+			
 
 			int playArea = API.AddBlipForRadius(playAreaCenter.X, playAreaCenter.Y, 130, radius);
 			API.SetBlipAlpha(playArea, 90);
 			API.SetBlipColour(playArea, 30);
 			CitizenFX.Core.Debug.WriteLine("GameAreaManager initialized");
-
+			
 			API.RegisterCommand("printpos", new Action<int, List<object>, string>((src, args, raw) =>
 			{
 				Vector3 pos = Game.PlayerPed.Position;
