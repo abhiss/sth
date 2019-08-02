@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,10 +15,10 @@ namespace sthvClient
 	public class client : BaseScript
 	{
 		bool isRunner { get; set; }
-		int License { get; set; }
+		int License { get; set; } 
 		int RunnerLicense;
 		int respawnCount = 0;
-		
+
 		public client()
 		{
 			//test 
@@ -28,16 +29,22 @@ namespace sthvClient
 			Tick += rules.AutoBrakeLight;
 			Tick += playArea.OnTickPlayArea;
 			Tick += rules.isZPressed; //for big map toggle
+									  //Killfeed stuff:
+			EventHandlers["baseevents:onPlayerKilled"] += new Action<int, ExpandoObject>(OnPlayerKilled);
+			EventHandlers["baseevents:onPlayerDied"] += new Action( () => { Debug.WriteLine("onplayerdied"); }); // event from mapmanager_cliend.lua line 47
+			EventHandlers["baseevents:onPlayerWasted"] += new Action( () => { Debug.WriteLine("onplayerwasted"); }); // event from mapmanager_cliend.lua line 47
+			EventHandlers["sth:sendKillFeed"] += new Action<string, string>((string killerName, string killedName) => { SendChatMessage("killfeed", $"{killerName} killed {killedName}", 225, 0, 0); });
 
 
+
+
+			TriggerServerEvent("sth:showMeOnMap", Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y, Game.PlayerPed.Position.X);
 			TriggerServerEvent("sth:NeedLicense");
-
 			EventHandlers["onClientMapStart"] += new Action<string>(onPlayerLoaded); // event from mapmanager_cliend.lua line 47
 			EventHandlers["sth:spawnall"] += new Action(Respawn);
 			EventHandlers["sth:resetrespawncounter"] += new Action(ResetRespawnCounter);
 			EventHandlers["sth:returnlicense"] += new Action<int,int>(ReceivedLicense); //gets license from server
 			EventHandlers["sth:updateRunnerHandle"] += new Action<int>(RunnerHandleUpdate);
-			//EventHandlers["sth:licenseStored"] += new Action(Respawn); //when client knows license because client must know license before spawning
 			EventHandlers["playerSpawned"] += new Action(onPlayerSpawned); //basically just give guns 
 			//EventHandlers["basescript:"]
 			#region commands
@@ -47,8 +54,17 @@ namespace sthvClient
 			}), false);
 			API.RegisterCommand("spawn", new Action<int, List<object>, string>((src, args, raw) =>
 			{
-				Respawn();
-				
+
+				if(respawnCount < 500)
+				{
+					Respawn();
+					respawnCount++;		
+					Debug.WriteLine($"respawncount: {respawnCount}");
+				}
+				else{
+					Debug.WriteLine($"spawn limit reached: Limit = 1 RespawnCount = {respawnCount}");
+				}
+
 			}), false);
 			API.RegisterCommand("checkrunner", new Action<int, List<object>, string>((src, args, raw) =>
 			{
@@ -72,7 +88,7 @@ namespace sthvClient
 					if (isRunner)
 					{
 						Debug.WriteLine("gaverunnerguns");
-						Game.PlayerPed.Weapons.Give(WeaponHash.BullpupRifleMk2, 1000, false, true);
+						Game.PlayerPed.Weapons.Give(WeaponHash.BullpupRifleMk2, 3000, false, true);
 
 					}
 				}
@@ -87,7 +103,18 @@ namespace sthvClient
 				Game.PlayerPed.Weapons.RemoveAll();
 
 			}), false);
+			API.RegisterCommand("isdead", new Action<int, List<object>, string>((src, args, raw) =>
+			{
+				Debug.WriteLine(Game.Player.IsDead.ToString());
+				int killer = API.GetPedKiller(API.PlayerPedId());
+				Debug.WriteLine($"killer: {killer}");
+			}), false);
+			API.RegisterCommand("test", new Action<int, List<object>, string>((src, args, raw) =>
+			{
+				Debug.WriteLine(API.GetPlayerPed(-1).ToString());
+			}), false);
 			#endregion
+
 		}
 
 		void onPlayerLoaded(string res) // res from mapmanager_cliend.lua line 47, stores name of map resource
@@ -102,15 +129,43 @@ namespace sthvClient
 			Debug.WriteLine($"^2license recieved, mine: {myLicense} runner: {runnerLicense}^7");
 			License = myLicense;
 			RunnerLicense = runnerLicense;
-			TriggerEvent("sth:licenseStored"); //when license stored, to prevent spawning without client storing license
+			if(License == RunnerLicense)
+			{
+				isRunner = true;
+				Respawn();
+				SendChatMessage("", "you are now a runner", 255, 255, 255);
+			}
+			else if (isRunner == true && License != RunnerLicense)
+			{
+				isRunner = false;
+				Respawn();
+			}
+		}
+		void OnPlayerKilled(int killerServerIndex, ExpandoObject info) 
+		{
+
+			Debug.WriteLine($"killer: {killerServerIndex}");
+			TriggerServerEvent("sth:sendserverkillerserverindex", killerServerIndex);
 		}
 		void RunnerHandleUpdate(int newRunnerHandle)
 		{
 			RunnerLicense = newRunnerHandle;
+			Debug.WriteLine($"updated runner handle{RunnerLicense}");
+			if(License == RunnerLicense)
+			{
+				isRunner = true;
+				Respawn();
+			}
+			else if (isRunner == true && License != RunnerLicense)
+			{
+				isRunner = false;
+				Respawn();
+			}
 		}
 		void ResetRespawnCounter()
 		{
 			respawnCount = 0;
+			Debug.WriteLine("Spawns reset! RespawnCounts = 0");
 		}
 		void Respawn()
 		{

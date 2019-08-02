@@ -18,16 +18,18 @@ namespace sthvClient
 		{
 			_ped = API.PlayerPedId();
 			_pid = API.PlayerId();
-			API.StatSetInt((uint)Game.GenerateHash("STAMINA"), 100, true);
+			API.StatSetInt((uint)Game.GenerateHash("MP0_STAMINA"), 100, true);
 			//API.SetPoliceIgnorePlayer(_pid, true);  //works like "turn cops blind eye", you get cops if you shoot them or something 
 			API.SetMaxWantedLevel(0);
-			API.SetPlayerCanDoDriveBy(_pid, false);
+			API.SetPlayerCanDoDriveBy(_pid, true); 
 			API.NetworkSetFriendlyFireOption(true);
 			API.SetCanAttackFriendly(_ped, true, true);
 			API.SetMaxWantedLevel(0);
 
+
+
 			//sthvClient.client.eventhandlers			
-			
+
 
 		}
 

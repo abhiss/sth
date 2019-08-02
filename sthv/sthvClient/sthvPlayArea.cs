@@ -12,12 +12,12 @@ namespace sthvClient
 	class sthvPlayArea
 	{
 		Vector2 playAreaCenter { get; set; } = new Vector2(-181f, -210f);
-		float radius = 200f;
+		float radius { get; set; } = 9000f;
+
 
 		public sthvPlayArea()
 		{
 			
-
 			int playArea = API.AddBlipForRadius(playAreaCenter.X, playAreaCenter.Y, 130, radius);
 			API.SetBlipAlpha(playArea, 90);
 			API.SetBlipColour(playArea, 30);
@@ -44,6 +44,6 @@ namespace sthvClient
 			}
 			await BaseScript.Delay(1000);
 		}
-
+	
 	}
 }
