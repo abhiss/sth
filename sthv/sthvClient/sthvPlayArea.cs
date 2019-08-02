@@ -16,9 +16,9 @@ namespace sthv
 
 		public sthvPlayArea()
 		{
-;
+			;
 
-			int playArea = API.AddBlipForRadius(playAreaCenter.X,playAreaCenter.Y, 130, radius);
+			int playArea = API.AddBlipForRadius(playAreaCenter.X, playAreaCenter.Y, 130, radius);
 			API.SetBlipAlpha(playArea, 90);
 			API.SetBlipColour(playArea, 30);
 			CitizenFX.Core.Debug.WriteLine("GameAreaManager initialized");
@@ -37,13 +37,13 @@ namespace sthv
 		public async Task GetDistance()
 		{
 			float distance = Vector2.Distance(playAreaCenter, new Vector2(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y)); //get horizontal distance between player and playAreaCenter
-			if(distance > radius)
+			if (distance > radius)
 			{
 				API.ApplyDamageToPed(API.PlayerPedId(), 5, true);
 				sthvClient.client.SendChatMessage("WARNING:", "OUT OF PLAY AREA", 255, 0, 0);
 			}
 			await BaseScript.Delay(1000);
 		}
-		
+
 	}
 }

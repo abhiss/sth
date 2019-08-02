@@ -4,96 +4,91 @@ using static CitizenFX.Core.Native.API;
 
 namespace Client.Managers
 {
-    public class Spawn : BaseScript
-    {
-        private static bool _spawnLock = false;
-        
-        public static void FreezePlayer(int playerId, bool freeze)
-        {
-            var ped = GetPlayerPed(playerId);
-            
-            SetPlayerControl(playerId, !freeze, 0);
+	public class Spawn : BaseScript
+	{
+		private static bool _spawnLock = false;
 
-            if (!freeze)
-            {
-                if (!IsEntityVisible(ped))
-                    SetEntityVisible(ped, true, false);
-                
-                if (!IsPedInAnyVehicle(ped, true))
-                    SetEntityCollision(ped, true, true);
+		public static void FreezePlayer(int playerId, bool freeze)
+		{
+			var ped = GetPlayerPed(playerId);
 
-                FreezeEntityPosition(ped, false);
-                //SetCharNeverTargetted(ped, false)
-                SetPlayerInvincible(playerId, false);
-            } 
-            else 
-            {
-                if (IsEntityVisible(ped))
-                    SetEntityVisible(ped, false, false);
+			SetPlayerControl(playerId, !freeze, 0);
 
-                SetEntityCollision(ped, false, true);
-                FreezeEntityPosition(ped, true);
-                //SetCharNeverTargetted(ped, true)
-                SetPlayerInvincible(playerId, true);
-                
-                if (IsPedFatallyInjured(ped))
-                    ClearPedTasksImmediately(ped);
-            }
-        }
+			if (!freeze)
+			{
+				if (!IsEntityVisible(ped))
+					SetEntityVisible(ped, true, false);
 
-        public static async Task SpawnPlayer(string skin, float x, float y, float z, float heading)
-        {
-            if (_spawnLock)
-                return;
+				if (!IsPedInAnyVehicle(ped, true))
+					SetEntityCollision(ped, true, true);
 
-            _spawnLock = true;
+				FreezeEntityPosition(ped, false);
+				//SetCharNeverTargetted(ped, false)
+				SetPlayerInvincible(playerId, false);
+			}
+			else
+			{
+				if (IsEntityVisible(ped))
+					SetEntityVisible(ped, false, false);
 
-            DoScreenFadeOut(500);
+				SetEntityCollision(ped, false, true);
+				FreezeEntityPosition(ped, true);
+				//SetCharNeverTargetted(ped, true)
+				SetPlayerInvincible(playerId, true);
 
-            while (IsScreenFadingOut())
-            {
-                await Delay(1);
-            }
-			Debug.WriteLine("fadeout");                                 //
+				if (IsPedFatallyInjured(ped))
+					ClearPedTasksImmediately(ped);
+			}
+		}
 
-            FreezePlayer(PlayerId(), true);
-            await Game.Player.ChangeModel(GetHashKey(skin));
-            SetPedDefaultComponentVariation(GetPlayerPed(-1));
-            RequestCollisionAtCoord(x, y, z);
-			Debug.WriteLine("2");										//
+		public static async Task SpawnPlayer(string skin, float x, float y, float z, float heading)
+		{
+			if (_spawnLock)
+				return;
+
+			_spawnLock = true;
+
+			DoScreenFadeOut(500);
+
+			while (IsScreenFadingOut())
+			{
+				await Delay(1);
+			}
+
+			FreezePlayer(PlayerId(), true);
+			await Game.Player.ChangeModel(GetHashKey(skin));
+			SetPedDefaultComponentVariation(GetPlayerPed(-1));
+			RequestCollisionAtCoord(x, y, z);
 
 			var ped = GetPlayerPed(-1);
 
-            SetEntityCoordsNoOffset(ped, x, y, z, false, false, false);
-            NetworkResurrectLocalPlayer(x, y, z, heading, true, true);
-            ClearPedTasksImmediately(ped);
-            RemoveAllPedWeapons(ped, false);
-            ClearPlayerWantedLevel(PlayerId());
-			Debug.WriteLine("3");										//
+			SetEntityCoordsNoOffset(ped, x, y, z, false, false, false);
+			NetworkResurrectLocalPlayer(x, y, z, heading, true, true);
+			ClearPedTasksImmediately(ped);
+			RemoveAllPedWeapons(ped, false);
+			ClearPlayerWantedLevel(PlayerId());
 
 			while (!HasCollisionLoadedAroundEntity(ped))
-            {
-                await Delay(1);
+			{
+				await Delay(1);
 				Debug.WriteLine($"{HasCollisionLoadedAroundEntity(ped)}");
-            }
+			}
 
-            ShutdownLoadingScreen();
+			ShutdownLoadingScreen();
 
-			Debug.WriteLine("4");										//
 
 			DoScreenFadeIn(500);
-            
-            while (IsScreenFadingIn())
-            {
-                await Delay(1);
-            }
-			Debug.WriteLine("5");										
+
+			while (IsScreenFadingIn())
+			{
+				await Delay(1);
+			}
 
 			FreezePlayer(PlayerId(), false);
 
-            //TriggerEvent("playerSpawned", PlayerId());
-                
-            _spawnLock = false;
-        }
-    }
+			TriggerEvent("playerSpawned", PlayerId());
+
+			_spawnLock = false;
+		}
+	}
 }
