@@ -22,6 +22,7 @@ namespace sthvClient
 
 		public client()
 		{
+			int _ped = Game.Player.Character.Handle;
 			//test 		
 			API.RegisterCommand("sendpos", new Action<int, List<object>, string>((src, args, raw) =>
 			{
@@ -54,29 +55,49 @@ namespace sthvClient
 			EventHandlers["sth:resetrespawncounter"] += new Action(ResetRespawnCounter);
 			EventHandlers["sth:returnlicense"] += new Action<int, int>(ReceivedLicense); //gets license from server
 			EventHandlers["sth:updateRunnerHandle"] += new Action<int>(RunnerHandleUpdate);
-			EventHandlers["playerSpawned"] += new Action(onPlayerSpawned); //basically just give guns 
-			EventHandlers["sth:freezePlayer"] += new Action<bool>((bool freeze) => {
-				Debug.WriteLine($"freeze event executed, bool: {freeze}, hunter: {IsRunner}");
+			//EventHandlers["playerSpawned"] += new Action(onPlayerSpawned); //called from client
+			EventHandlers["sth:freezePlayer"] += new Action<bool>(async (bool freeze) => {
+				Debug.WriteLine($"freeze event executed, bool: {freeze}, runner: {IsRunner}");
 				if (!IsRunner) {
 					Spawn.FreezePlayer(-1, freeze);
 					this.isFrozen = freeze;
 					if (freeze == true)
 					{
+						Game.PlayerPed.ApplyDamage(900);
 						Game.PlayerPed.Weapons.RemoveAll();
 						Game.PlayerPed.IsInvincible = true;
+
+
+						
 					}
 					else if (!freeze) {
+						Respawn();
+						await BaseScript.Delay(30000);
+						
 						Game.PlayerPed.Weapons.Give(WeaponHash.CombatPistol, 225, false, true);
 						Game.PlayerPed.Weapons.Give(WeaponHash.PumpShotgun, 225, false, true);
 						Game.PlayerPed.Weapons.Give(WeaponHash.Flashlight, 2, false, true);
 						Game.PlayerPed.IsInvincible = false;
 
 					}
-
-
 				}
-					
-				else; });
+				if (IsRunner)
+				{
+					Game.PlayerPed.Weapons.Give(WeaponHash.CombatPistol, 225, false, true);
+					Game.PlayerPed.Weapons.Give(WeaponHash.PumpShotgun, 225, false, true);
+					Game.PlayerPed.Weapons.Give(WeaponHash.Flashlight, 2, false, true);
+					Game.PlayerPed.Weapons.Give(WeaponHash.CarbineRifle, 500, false, true);
+					Game.PlayerPed.IsInvincible = false;
+
+					if (freeze)
+					{
+						await sthv.sthvHuntStart.RemoveAllVehicles(true);
+						//Respawn();
+						await BaseScript.Delay(15000);
+						sthv.sthvHuntStart.HunterVehicles();
+					}
+				}
+			});
 					
 			EventHandlers["sendChatMessageToAll"] += new Action<string, string>((string header, string message) => { SendChatMessage(header, message, 225, 225, 225); });
 
@@ -89,10 +110,30 @@ namespace sthvClient
 			{
 				Debug.WriteLine(License.ToString());
 			}), false);
-			API.RegisterCommand("test", new Action<int, List<object>, string>((src, args, raw) =>
-			{
-				sthv.sthvHuntStart.HunterVehicles();
-			}), false);
+			//API.RegisterCommand("test", new Action<int, List<object>, string>(async (src, args, raw) =>
+			//{
+			//	//				await sthvClient.Spawn.SpawnPlayer("a_f_y_hipster_01", 367f, -1698f, 48f, 0f);
+			//	//Vehicle car = await World.CreateVehicle(new Model(VehicleHash.Warrener), new Vector3(367f, -1698f, 48f), 300f);
+			//	//while (!API.DoesEntityExist(car.Handle))
+			//	//{
+			//	//	await Delay(1);
+			//	//}
+			//	//API.SetPedIntoVehicle(Game.Player.Character.Handle, car.Handle, -1);
+
+			//	sthv.sthvHuntStart.HunterVehicles();
+			//	//TriggerServerEvent("testevent");
+			//}), false);
+			//API.RegisterCommand("test2", new Action<int, List<object>, string>(async (src, args, raw) =>
+			//{
+			//	Vector3 lastPos = Game.PlayerPed.Position;
+			//	Game.PlayerPed.Position = new Vector3(0, 0, 0);
+			//	await Delay(20);
+			//	Game.PlayerPed.Position = lastPos;
+				
+ 		//		//await sthv.sthvHuntStart.RemoveAllVehicles(true);
+			//}), false);
+
+
 			API.RegisterCommand("spawn", new Action<int, List<object>, string>((src, args, raw) =>
 			{
 
@@ -120,27 +161,7 @@ namespace sthvClient
 				Debug.WriteLine($"RUNNER:^2{IsRunner}\nyou:{License}\nrunner: {RunnerLicense}");
 
 			}), false);
-			API.RegisterCommand("giveguns", new Action<int, List<object>, string>((src, args, raw) =>
-			{
-				if (respawnCount < 99) //first spawn is the load in
-				{
-					Game.PlayerPed.Weapons.Give(WeaponHash.CombatPistol, 225, false, true);
-					Game.PlayerPed.Weapons.Give(WeaponHash.PumpShotgun, 225, false, true);
-					Game.PlayerPed.Weapons.Give(WeaponHash.Flashlight, 2, false, true);
 
-					if (IsRunner)
-					{
-						Debug.WriteLine("gaverunnerguns");
-						Game.PlayerPed.Weapons.Give(WeaponHash.BullpupRifleMk2, 3000, false, true);
-
-					}
-				}
-				else
-				{
-					return;
-				}
-
-			}), false);
 			API.RegisterCommand("removeguns", new Action<int, List<object>, string>((src, args, raw) =>
 			{
 				Game.PlayerPed.Weapons.RemoveAll();
@@ -177,7 +198,7 @@ namespace sthvClient
 				}
 			}
 			else { };
-			await BaseScript.Delay(500);
+			await BaseScript.Delay(1000);
 		} 
 		void OnPlayerLoaded(string res) // res from mapmanager_cliend.lua line 47, stores name of map resource
 		{
@@ -230,26 +251,32 @@ namespace sthvClient
 			respawnCount = 0;
 			Debug.WriteLine("Spawns reset! RespawnCounts = 0");
 		}
-		void Respawn()
+		async void Respawn()
 		{
 			isAlreadyDead = false;
 			isAlreadyKilled = false;
 			if (IsRunner)
 			{
-				sthvClient.Spawn.SpawnPlayer("a_f_y_hipster_01", -181f, -210f, 47f, 0f);
+
+				await Delay(1000);
+				await sthvClient.Spawn.SpawnPlayer("mp_m_freemode_01", 367f, -1698f, 48f, 0f);
+				API.SetPedRandomComponentVariation(Game.Player.Character.Handle, false);
+				Vehicle car = await World.CreateVehicle(new Model(VehicleHash.Warrener), new Vector3(367f, -1698f, 48f), 300f);
+				while (!API.DoesEntityExist(car.Handle))
+				{
+					await Delay(1);
+				}
+				API.SetPedIntoVehicle(Game.Player.Character.Handle, car.Handle, -1);
+
 			}
 			else
 			{
-				sthvClient.Spawn.SpawnPlayer("s_m_y_swat_01", -181f, -210f, 47f, 0f);
+				sthvClient.Spawn.SpawnPlayer("s_m_y_swat_01", 362f, -1705f, 48.3f, 300f);
 			}
 			respawnCount++;
 
 		}
-		void onPlayerSpawned()	//right after spawned
-		{
-			API.ExecuteCommand("giveguns");
-			
-		}
+
 
 		public void RegisterEventHandler(string eventName, Delegate action)
 		{

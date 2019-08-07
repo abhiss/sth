@@ -11,6 +11,7 @@ namespace sthvServer
 
 	class server : BaseScript
 	{
+
 		int runnerHandle = 0;
 		bool isRunnerKilled = false;
 		int totalTime;
@@ -74,13 +75,11 @@ namespace sthvServer
 						
 						Debug.WriteLine($"hunt total time in minutes: {totalTime}");
 						Debug.WriteLine("freeze hunters");
-						TriggerClientEvent("sth:spawnall");
 
-						await BaseScript.Delay(3);
-						TriggerClientEvent("sth:freezePlayer", true);
+						await Delay(1000);
 
-
-						Debug.WriteLine($"Hunt Started with Runner: {runner.Name}");    //hunt start
+						Debug.WriteLine($"Hunt will start in 1 minute! Runner: {runner.Name}");
+						TriggerClientEvent("sth:freezePlayer", true); //hunt start
 						for (int i = 0; i < totalTime; i++)
 
 						{
@@ -93,18 +92,19 @@ namespace sthvServer
 							}
 							if (!isRunnerKilled && !runnerKilledSelfOrAi)
 							{
-								Debug.WriteLine($"{timeLeft} minutes remaining");
+								Debug.WriteLine($"{timeLeft} minutes remaining"); //just the timer
 								if ((timeLeft % 10 == 0) || (timeLeft == totalTime) || (timeLeft == 5) || (timeLeft == 3) || (timeLeft == 2) || (timeLeft == 1))
 								{
-									TriggerClientEvent("sendChatMessageToAll", "^5HUNT", $"Time Left: {timeLeft}^7");
+									TriggerClientEvent("sendChatMessageToAll", "^5HUNT", $"^4Hunt Started! ^7Time Left: {timeLeft}^7");
+									
 								}
-								if ((timeLeft < totalTime - 1)&&(hasHuntStarted == false))
+								if ((timeLeft < totalTime)&&(hasHuntStarted == false)) //after hunters can go
 								{
 									TriggerClientEvent("sth:freezePlayer", false);
-									TriggerClientEvent("sendChatMessageToAll", "^5HUNT", $"Hunt Started! Time left: {timeLeft}, runner: {runner.Name}^7");
+									TriggerClientEvent("sendChatMessageToAll", "^5HUNT", $"^4Hunt Started! Time left: {timeLeft}, Runner: {runner.Name}^7");
 									hasHuntStarted = true;
 								}
-								await BaseScript.Delay(10000);
+								await BaseScript.Delay(60000);
 							}
 							else if (isRunnerKilled || runnerKilledSelfOrAi)
 							{
@@ -116,12 +116,14 @@ namespace sthvServer
 							}
 							
 						}
-					TriggerClientEvent("sth:freezePlayer", false, true); //after the for loop, so after hunt is over
+					TriggerClientEvent("sth:freezePlayer",true); //after the for loop, so after hunt is over
 					}
 					else { Debug.WriteLine("need valid arguments for starthunt"); }
 				}
 				catch(Exception ex) { Debug.WriteLine($"^5ERROR: {ex}"); }
 			}), true);
+
+			#region obsolete
 			API.RegisterCommand("assignrunner", new Action<int, List<object>, string>((source, args, raw) =>
 			{
 				try
@@ -154,14 +156,16 @@ namespace sthvServer
 				}
 
 			}), true);
+			#endregion //assignhunter
 
 			EventHandlers["sth:NeedLicense"] += new Action<Player>(OnRequestedLicense);
 			EventHandlers["sth:sendserverkillerserverindex"] += new Action<Player, int>(KillfeedStuff);
 			EventHandlers["sth:testevent"] += new Action<Player>(OnTestEvent);
 			EventHandlers["sth:showMeOnMap"] += new Action<float, float, float>((float x, float y, float z) => { TriggerClientEvent("sth:sendShowOnMap", x, y, z); });
 			EventHandlers["sth:killedSelfOrAi"] += new Action(KilledBySelfOrAi); //on suicide or killed by AI 
-			EventHandlers["testevent"] += new Action<Player>((Player player) => { Debug.WriteLine($"player:{player.Name}"); });
+			//EventHandlers["testevent"] += new Action<Player>(PrintPlayerName);
 		}
+
 		void KilledBySelfOrAi()
 		{
 			if (!isRunnerKilled)
@@ -217,6 +221,17 @@ namespace sthvServer
 
 				}
 			}
+		}
+
+
+		public static void SendChatMessage(string title, string message, int r, int g, int b)
+		{
+			var msg = new Dictionary<string, object>
+			{
+				["color"] = new[] { r, g, b },
+				["args"] = new[] { title, message }
+			};
+			TriggerClientEvent("chat:addMessage", msg);
 		}
 	}
 
