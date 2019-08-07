@@ -196,6 +196,10 @@ namespace sthvClient
 						Debug.WriteLine("runner is dead special");	
 					}
 				}
+				if (Game.PlayerPed.IsInHeli)
+				{
+					World.AddExplosion(Game.PlayerPed.Position, ExplosionType.Rocket, 5f, 2f);
+				}
 			}
 			else { };
 			await BaseScript.Delay(1000);
