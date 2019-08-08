@@ -40,7 +40,7 @@ namespace sthvClient
 					ClearPedTasksImmediately(ped);
 			}
 		}
-	
+		
 		public static async Task SpawnPlayer(string skin, float x, float y, float z, float heading)
 		{
 			if (_spawnLock)

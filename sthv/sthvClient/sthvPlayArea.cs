@@ -11,14 +11,15 @@ namespace sthvClient
 {
 	class sthvPlayArea
 	{
-		Vector2 playAreaCenter { get; set; } = new Vector2(-181f, -210f);
-		float radius { get; set; } = 9000f;
+		Vector2 playAreaCenter { get; set; } = new Vector2(100f, -1740f);
+		float radius { get; set; } = 570f; //570
 
 
 		public sthvPlayArea()
 		{
 			
 			int playArea = API.AddBlipForRadius(playAreaCenter.X, playAreaCenter.Y, 130, radius);
+
 			API.SetBlipAlpha(playArea, 90);
 			API.SetBlipColour(playArea, 30);
 			CitizenFX.Core.Debug.WriteLine("GameAreaManager initialized");
@@ -42,8 +43,10 @@ namespace sthvClient
 				API.ApplyDamageToPed(API.PlayerPedId(), 5, true);
 				sthvClient.client.SendChatMessage("WARNING:", "OUT OF PLAY AREA", 255, 0, 0);
 			}
+			//Debug.WriteLine($"1");
 			await BaseScript.Delay(1000);
 		}
 	
+
 	}
 }

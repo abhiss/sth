@@ -13,7 +13,6 @@ namespace sthvClient
 	{
 		int _ped;
 		int _pid;
-		bool showBigMap = false;
 		public sthvRules()
 		{
 			_ped = API.PlayerPedId();
@@ -21,19 +20,19 @@ namespace sthvClient
 			API.StatSetInt((uint)Game.GenerateHash("MP0_STAMINA"), 100, true);
 			//API.SetPoliceIgnorePlayer(_pid, true);  //works like "turn cops blind eye", you get cops if you shoot them or something 
 			API.SetMaxWantedLevel(0);
-			API.SetPlayerCanDoDriveBy(_pid, true); 
+			API.SetPlayerCanDoDriveBy(_pid, false); 
 			API.NetworkSetFriendlyFireOption(true);
 			API.SetCanAttackFriendly(_ped, true, true);
 			API.SetMaxWantedLevel(0);
-
-
+			API.DisablePlayerVehicleRewards(_pid);
 
 			//sthvClient.client.eventhandlers			
 
 
 		}
 
-		public async Task isZPressed()
+
+		public async Task isKeyPressed()
 		{
 			if (API.IsControlJustReleased(20, 48)) //Z 
 			{
@@ -46,7 +45,11 @@ namespace sthvClient
 					API.SetBigmapActive(true, false);
 				}
 			}
-			BaseScript.Delay(20);
+			if (API.IsControlJustPressed(0, 86))
+			{
+				Debug.WriteLine("show me on map");
+			}
+			//await BaseScript.Delay(0);
 		}
 		public async Task AutoBrakeLight()              //autobrakelight
 		{
@@ -68,5 +71,7 @@ namespace sthvClient
 				await BaseScript.Delay(200);
 			}
 		}
+
 	}
+
 }
