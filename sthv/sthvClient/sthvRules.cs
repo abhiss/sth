@@ -24,8 +24,7 @@ namespace sthvClient
 			API.NetworkSetFriendlyFireOption(true);
 			API.SetCanAttackFriendly(_ped, true, true);
 			API.SetMaxWantedLevel(0);
-
-
+			API.DisablePlayerVehicleRewards(_pid);
 
 			//sthvClient.client.eventhandlers			
 

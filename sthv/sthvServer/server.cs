@@ -17,13 +17,13 @@ namespace sthvServer
 		int totalTime;
 		bool runnerKilledSelfOrAi = false;
 		Player runner;
-		bool hasHuntStarted = false; 
+		bool hasHuntStarted = false;
 
 		public server()
 		{
 			var stuffythings = new Identifiers();
 			//test 
-			EventHandlers["sth:sendServerDebug"] += new Action<string>((string info) => {Debug.WriteLine(info); });
+			EventHandlers["sth:sendServerDebug"] += new Action<string>((string info) => { Debug.WriteLine(info); });
 
 			API.RegisterCommand("freeze", new Action<int, List<object>, string>((src, args, raw) =>
 			{
@@ -38,7 +38,10 @@ namespace sthvServer
 				TriggerClientEvent("sth:resetrespawncounter");
 
 			}), true);
-
+			API.RegisterCommand("remveh", new Action<int, List<object>, string>((src, args, raw) =>
+			{
+				TriggerClientEvent("removeveh");
+			}), true);
 
 
 			API.RegisterCommand("spawnall", new Action<int, List<object>, string>((src, args, raw) =>
@@ -46,6 +49,7 @@ namespace sthvServer
 				TriggerClientEvent("sth:spawnall");
 
 			}), true);
+
 			API.RegisterCommand("starthunt", new Action<int, List<object>, string>(async (src, args, raw) =>
 			{
 				try
@@ -53,7 +57,7 @@ namespace sthvServer
 					var argsList = args.Select((object o) => o.ToString()).ToList();
 					if (argsList.Any())
 					{
-						
+
 						totalTime = int.Parse(argsList[1]);
 						int playArea = int.Parse(argsList[2]);
 						TriggerClientEvent("sth:setPlayArea", playArea);
@@ -72,7 +76,7 @@ namespace sthvServer
 							}
 						}
 						#endregion
-						
+						TriggerClientEvent("sth:spawnall");
 						Debug.WriteLine($"hunt total time in minutes: {totalTime}");
 						Debug.WriteLine("freeze hunters");
 
@@ -96,9 +100,9 @@ namespace sthvServer
 								if ((timeLeft % 10 == 0) || (timeLeft == totalTime) || (timeLeft == 5) || (timeLeft == 3) || (timeLeft == 2) || (timeLeft == 1))
 								{
 									TriggerClientEvent("sendChatMessageToAll", "^5HUNT", $"^4Hunt Started! ^7Time Left: {timeLeft}^7");
-									
+
 								}
-								if ((timeLeft < totalTime)&&(hasHuntStarted == false)) //after hunters can go
+								if ((timeLeft < totalTime) && (hasHuntStarted == false)) //after hunters can go
 								{
 									TriggerClientEvent("sth:freezePlayer", false);
 									TriggerClientEvent("sendChatMessageToAll", "^5HUNT", $"^4Hunt Started! Time left: {timeLeft}, Runner: {runner.Name}^7");
@@ -114,13 +118,13 @@ namespace sthvServer
 							{
 								TriggerClientEvent("sendChatMessageToAll", "^5HUNT", $"Runner {runner.Name} won with {timeLeft} minutes left");
 							}
-							
+
 						}
-					TriggerClientEvent("sth:freezePlayer",true); //after the for loop, so after hunt is over
+						TriggerClientEvent("sth:freezePlayer", true); //after the for loop, so after hunt is over
 					}
 					else { Debug.WriteLine("need valid arguments for starthunt"); }
 				}
-				catch(Exception ex) { Debug.WriteLine($"^5ERROR: {ex}"); }
+				catch (Exception ex) { Debug.WriteLine($"^5ERROR: {ex}"); }
 			}), true);
 
 			#region obsolete
@@ -163,7 +167,7 @@ namespace sthvServer
 			EventHandlers["sth:testevent"] += new Action<Player>(OnTestEvent);
 			EventHandlers["sth:showMeOnMap"] += new Action<float, float, float>((float x, float y, float z) => { TriggerClientEvent("sth:sendShowOnMap", x, y, z); });
 			EventHandlers["sth:killedSelfOrAi"] += new Action(KilledBySelfOrAi); //on suicide or killed by AI 
-			//EventHandlers["testevent"] += new Action<Player>(PrintPlayerName);
+																				 //EventHandlers["testevent"] += new Action<Player>(PrintPlayerName);
 		}
 
 		void KilledBySelfOrAi()

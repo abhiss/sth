@@ -5,8 +5,7 @@ using System.Dynamic;
 using System.Threading.Tasks;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
-
-
+using CitizenFX.Core.UI;
 
 namespace sthvClient
 {
@@ -26,9 +25,12 @@ namespace sthvClient
 			//test 		
 			API.RegisterCommand("sendpos", new Action<int, List<object>, string>((src, args, raw) =>
 			{
-				TriggerServerEvent("sth:sendServerDebug", $"{Game.PlayerPed.CurrentVehicle.Position.X.ToString()}f, {Game.PlayerPed.CurrentVehicle.Position.Y.ToString()}f, {Game.PlayerPed.CurrentVehicle.Position.Z.ToString()}f");
-				Debug.WriteLine("sent pos");
+				//TriggerServerEvent("sth:sendServerDebug", $"{Game.PlayerPed.CurrentVehicle.Position.X.ToString()}f, {Game.PlayerPed.CurrentVehicle.Position.Y.ToString()}f, {Game.PlayerPed.CurrentVehicle.Position.Z.ToString()}f");
+				Debug.WriteLine($"{Game.PlayerPed.Position}");
+
 			}), false);
+
+		
 
 			var playArea = new sthvClient.sthvPlayArea();
 			var rules = new sthvClient.sthvRules();
@@ -39,6 +41,7 @@ namespace sthvClient
 			Tick += OnTick;
 
 			//Tick += 
+			EventHandlers["removeveh"] += new Action(() => { sthv.sthvHuntStart.RemoveAllVehicles(true); });
 
 			//Killfeed stuff:
 			EventHandlers["baseevents:onPlayerKilled"] += new Action<int, ExpandoObject>(OnPlayerKilled);
@@ -47,7 +50,7 @@ namespace sthvClient
 			EventHandlers["sth:sendKillFeed"] += new Action<string, string>((string killerName, string killedName) => { SendChatMessage("killfeed", $"{killerName} killed {killedName}", 225, 0, 0); });
 
 
-
+			
 			TriggerServerEvent("sth:showMeOnMap", Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y, Game.PlayerPed.Position.X);
 			TriggerServerEvent("sth:NeedLicense");
 			EventHandlers["onClientMapStart"] += new Action<string>(OnPlayerLoaded); // event from mapmanager_cliend.lua line 47
@@ -72,11 +75,12 @@ namespace sthvClient
 					}
 					else if (!freeze) {
 						Respawn();
-						await BaseScript.Delay(30000);
-						
-						Game.PlayerPed.Weapons.Give(WeaponHash.CombatPistol, 225, false, true);
-						Game.PlayerPed.Weapons.Give(WeaponHash.PumpShotgun, 225, false, true);
+						await BaseScript.Delay(15000);
+
 						Game.PlayerPed.Weapons.Give(WeaponHash.Flashlight, 2, false, true);
+						Game.PlayerPed.Weapons.Give(WeaponHash.PumpShotgun, 225, false, true);
+						Game.PlayerPed.Weapons.Give(WeaponHash.CombatPistol, 225, false, true);
+
 						Game.PlayerPed.IsInvincible = false;
 
 					}
@@ -91,9 +95,9 @@ namespace sthvClient
 
 					if (freeze)
 					{
-						await sthv.sthvHuntStart.RemoveAllVehicles(true);
+						sthv.sthvHuntStart.RemoveAllVehicles(true);
 						//Respawn();
-						await BaseScript.Delay(15000);
+						await BaseScript.Delay(7000);
 						sthv.sthvHuntStart.HunterVehicles();
 					}
 				}
@@ -123,15 +127,15 @@ namespace sthvClient
 			//	sthv.sthvHuntStart.HunterVehicles();
 			//	//TriggerServerEvent("testevent");
 			//}), false);
-			//API.RegisterCommand("test2", new Action<int, List<object>, string>(async (src, args, raw) =>
-			//{
-			//	Vector3 lastPos = Game.PlayerPed.Position;
-			//	Game.PlayerPed.Position = new Vector3(0, 0, 0);
-			//	await Delay(20);
-			//	Game.PlayerPed.Position = lastPos;
-				
- 		//		//await sthv.sthvHuntStart.RemoveAllVehicles(true);
-			//}), false);
+			API.RegisterCommand("test2", new Action<int, List<object>, string>(async (src, args, raw) =>
+			{
+				//Vector3 lastPos = Game.PlayerPed.Position;
+				//Game.PlayerPed.Position = new Vector3(0, 0, 0);
+				//await Delay(20);
+				//Game.PlayerPed.Position = lastPos;
+
+				await sthv.sthvHuntStart.RemoveAllVehicles(true);
+			}), false);
 
 
 			API.RegisterCommand("spawn", new Action<int, List<object>, string>((src, args, raw) =>
@@ -142,7 +146,7 @@ namespace sthvClient
 					Debug.WriteLine($"name = {Game.Player.ServerId}");
 					Respawn();
 					respawnCount++;
-					Debug.WriteLine($"respawncount: {respawnCount}");
+					Debug.WriteLine($"respawn : {respawnCount}");
 				}
 				else
 				{
@@ -186,16 +190,16 @@ namespace sthvClient
 		{
 			if(IsRunner == true)
 			{
-				if (Game.PlayerPed.IsDead)
-				{
-					//Debug.WriteLine($"isdead, isAlreadyDead: {isAlreadyDead} isAlreadyKilled: {isAlreadyKilled}");
-					if ((!isAlreadyDead) && (!isAlreadyKilled))
-					{	
-						isAlreadyDead = true;
-						TriggerServerEvent("sth:killedSelfOrAi");		//suicide or by AI 
-						Debug.WriteLine("runner is dead special");	
-					}
-				}
+				//if (Game.PlayerPed.IsDead)
+				//{
+				//	//Debug.WriteLine($"isdead, isAlreadyDead: {isAlreadyDead} isAlreadyKilled: {isAlreadyKilled}");
+				//	if ((!isAlreadyDead) && (!isAlreadyKilled))
+				//	{	
+				//		isAlreadyDead = true;
+				//		TriggerServerEvent("sth:killedSelfOrAi");		//suicide or by AI 
+				//		Debug.WriteLine("runner is dead special");	
+				//	}
+				//}
 				if (Game.PlayerPed.IsInHeli)
 				{
 					World.AddExplosion(Game.PlayerPed.Position, ExplosionType.Rocket, 5f, 2f);
@@ -265,13 +269,15 @@ namespace sthvClient
 				await Delay(1000);
 				await sthvClient.Spawn.SpawnPlayer("mp_m_freemode_01", 367f, -1698f, 48f, 0f);
 				API.SetPedRandomComponentVariation(Game.Player.Character.Handle, false);
-				Vehicle car = await World.CreateVehicle(new Model(VehicleHash.Warrener), new Vector3(367f, -1698f, 48f), 300f);
+				Vehicle car = await World.CreateVehicle(new Model(VehicleHash.Warrener), new Vector3(432f, -1392f, 29.4f), 300f);
+				API.ApplyForceToEntity(car.Handle, 4, 0, 50, 0, 0, 0, 0, 0, true, true, true, false, true);
 				while (!API.DoesEntityExist(car.Handle))
 				{
 					await Delay(1);
 				}
 				API.SetPedIntoVehicle(Game.Player.Character.Handle, car.Handle, -1);
-
+				//API.TaskVehicleDriveToCoord(Game.Player.Character.Handle, car.handle,)
+				
 			}
 			else
 			{

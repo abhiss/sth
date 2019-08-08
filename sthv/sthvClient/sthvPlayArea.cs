@@ -12,7 +12,7 @@ namespace sthvClient
 	class sthvPlayArea
 	{
 		Vector2 playAreaCenter { get; set; } = new Vector2(100f, -1740f);
-		float radius { get; set; } = 9000f;
+		float radius { get; set; } = 570f; //570
 
 
 		public sthvPlayArea()

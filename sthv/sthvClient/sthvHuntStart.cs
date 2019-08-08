@@ -50,6 +50,7 @@ namespace sthv
 		/// <returns></returns>
 		public static async Task RemoveAllVehicles(bool props)
 		{
+			Debug.WriteLine("^4destroy all vehicles^7");
 			Vehicle[] allVeh = World.GetAllVehicles();
 			foreach (Vehicle veh in allVeh)
 			{
@@ -60,7 +61,7 @@ namespace sthv
 				Prop[] allProp = World.GetAllProps();
 				foreach (Prop prop in allProp)
 				{
-					prop.Detach();
+					prop.Delete();
 				}
 			}
 		
