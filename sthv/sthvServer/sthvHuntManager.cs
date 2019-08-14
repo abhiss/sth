@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CitizenFX.Core;
+using CitizenFX.Core.Native;
+
 
 namespace sthvServer
 {
-	class sthvHuntManager
+	public class sthvHuntManager : BaseScript
 	{
-		public sthvHuntManager()
-		{
-			
-		}
+
 	}
 }

@@ -32,7 +32,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CitizenFX.Core.Client, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CitizenFX.Core.Client.1.0.1421\lib\net45\CitizenFX.Core.Client.dll</HintPath>
+      <HintPath>..\packages\CitizenFX.Core.Client.1.0.1503\lib\net45\CitizenFX.Core.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Downloads\code\Learning_FiveM\HyperAdmin-master\hyperadmin\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -45,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="client.cs" />
+    <Compile Include="NuiEventModel.cs" />
     <Compile Include="sthvHuntStart.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Spawn.cs" />
@@ -52,9 +57,7 @@
     <Compile Include="sthvRules.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

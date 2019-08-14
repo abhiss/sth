@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CitizenFX;
+using CitizenFX.Core.UI;
 
 namespace sthvClient
 {
@@ -27,13 +28,15 @@ namespace sthvClient
 			API.DisablePlayerVehicleRewards(_pid);
 
 			//sthvClient.client.eventhandlers			
-
+			Game.PlayerPed.IsInvincible = true;
 
 		}
 
 
 		public async Task isKeyPressed()
 		{
+			API.HideHudComponentThisFrame((int)HudComponent.Cash);
+			API.HideHudComponentThisFrame((int)HudComponent.CashChange);
 			if (API.IsControlJustReleased(20, 48)) //Z 
 			{
 				if (API.IsBigmapActive())
