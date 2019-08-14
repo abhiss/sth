@@ -19,7 +19,7 @@ namespace sthvServer
 		bool hasHuntStarted = false; //
 		List<Player> NextRunnerQueue = new List<Player>();
 		List<Player> AlivePlayerList = new List<Player>();
-		bool isHuntOver = false;
+		bool isHuntOver = true;
 		bool isEveryoneInvincible = true;
 
 		public server()
@@ -41,9 +41,9 @@ namespace sthvServer
 				TriggerClientEvent("removeveh");
 			}), true);
 
-			API.RegisterCommand("players", new Action<int, List<object>, string>((src, args, raw) =>
+			API.RegisterCommand("resetall", new Action<int, List<object>, string>((src, args, raw) =>
 			{
-				StartHunt(25);
+				TriggerClientEvent("onClientMapStart");
 			}), true);
 			API.RegisterCommand("hunt", new Action<int, List<object>, string>((src, args, raw) =>
 			{
@@ -205,6 +205,7 @@ namespace sthvServer
 			AlivePlayerList = new List<Player>();
 			isHuntOver = false;
 			isEveryoneInvincible = true;
+			
 			//NextRunnerQueue = new List<Player>(); doesnt reset till runner is chosen
 			#endregion
 		}
@@ -216,106 +217,138 @@ namespace sthvServer
 		/// <param name="playerId"></param>
 		async void StartHunt(int timeInMinutes, int playarea = 0, int runnerID = -1)
 		{
-			try
+			if (isHuntOver)
 			{
-				resetVars();
-
-				int totalTimeSecs = timeInMinutes * 60;
-				TriggerClientEvent("sth:starttimer", totalTimeSecs);
-				if (runnerID < 0) //picks random player from queue
+				try
 				{
-					foreach (Player p in NextRunnerQueue)
-					{
-						Debug.WriteLine($"^3players in list: {p.Name}^7");
-					}
-					Random rand = new Random();
-					int randIndex = rand.Next(0, NextRunnerQueue.Count());
-					runnerID = runnerHandle = int.Parse(NextRunnerQueue.ToArray()[randIndex].Handle); //runnerid and runnerhandle should be the same
-					Debug.WriteLine($"^4 playerchosen {randIndex} out of {NextRunnerQueue.Count() } options, handle: {runnerHandle}^7");
-					runner = GetPlayerFromHandle(runnerHandle);
-				}
-				else
-				{
-					try
-					{
-						runnerHandle = runnerID;
-						runner = GetPlayerFromHandle(runnerHandle);
-					}
-					catch (Exception ex)
-					{
-						Debug.WriteLine($"^1ERROR at assigning runner: {ex}");
-					}
-				}
-				Debug.WriteLine($"^2runner handle is now: {runnerHandle}^7");
-				TriggerClientEvent("sth:updateRunnerHandle", runnerHandle);
 
-				//place blip
+					resetVars();
 
-				SendChatMessage("^2HUNT", $"Hunt starting in 30 seconds with runner:{runner.Name}", 255, 255, 255);
-
-				runner.TriggerEvent("sth:spawndefault");
-				NextRunnerQueue = new List<Player>(); //resets the list after runner spawns while hunters weight
-											  //freezehunters, remveh, 
-				foreach(Player p in Players) //hunters can spawn after opting
-				{
-					if(int.Parse(p.Handle) != runnerHandle)
+					int totalTimeSecs = timeInMinutes * 60;
+					TriggerClientEvent("sth:starttimer", totalTimeSecs);
+					if (runnerID < 0) //picks random player from queue
 					{
-						p.TriggerEvent("AskRunnerOpt");
-					}
-				}
-				//offer hunters to opt into runner 
-				TriggerClientEvent("removeveh");
-				await Delay(500);
-				Players.First().TriggerEvent("sthv:spawnhuntercars");
-				TriggerClientEvent("sth:freezePlayer", true);
 
-				foreach (Player p in Players)
-				{ 
-					AlivePlayerList.Add(p);
-				}
-
-				for (int timeleft = totalTimeSecs; timeleft > 0; --timeleft) //game event loop
-				{	
-					if (!isHuntOver)
-					{
-						if (!hasHuntStarted && (totalTimeSecs - timeleft > 30))
+						foreach (Player p in NextRunnerQueue)
 						{
-							SendChatMessage("^5HUNT", "Hunt started!", 255, 255, 255);
-							//spawn hunter cars, spawn hunters
-							TriggerClientEvent("sthv:spawnhuntercars");
-							TriggerClientEvent("sth:freezePlayer", false);
-							hasHuntStarted = true;
+							Debug.WriteLine($"^3players in list: {p.Name}^7");
 						}
-						if (!isEveryoneInvincible && (totalTime - timeleft > 60))
+						Random rand = new Random();
+						if (NextRunnerQueue.Count > 0)
 						{
-							//give guns, invincible false
-							TriggerClientEvent("sth:invincible", false);
-							TriggerClientEvent("sth:giveguns", true);
-							SendChatMessage("^5HUNT", "You now have guns");
-							isEveryoneInvincible = false;
+							int randIndex = rand.Next(0, NextRunnerQueue.Count());
+							runnerID = runnerHandle = int.Parse(NextRunnerQueue.ToArray()[randIndex].Handle); //runnerid and runnerhandle should be the same
+							runner = GetPlayerFromHandle(runnerHandle);
+							Debug.WriteLine($"^4 playerchosen {randIndex} out of {NextRunnerQueue.Count() } options, handle: {runnerHandle}^7");
 						}
-						if ((timeleft % 10) == 0)
-						{
-							Debug.WriteLine($"timeleft: {timeleft}");
-							TriggerClientEvent("sth:starttimer", timeleft);
+						else {
+							int randIndex = rand.Next(0, Players.Count());
+							runnerID = runnerHandle = int.Parse(Players.ToArray()[randIndex].Handle);
+							runner = GetPlayerFromHandle(runnerHandle);
+							Debug.WriteLine($"^3Noone wanted to be runner so a random one was chosen. new runnerid: {runnerID}");
+							SendChatMessage($"^1HUNT", $"Noone wanted to be runner so {runner.Name} was randomly chosen");
 						}
-						await Delay(1000);
+							
+						
 					}
 					else
 					{
-						TriggerClientEvent("sth:giveguns", false);
-						SendChatMessage("^5HUNT", $"Runner {runner.Name} lost with {timeleft} seconds remaining");
-						TriggerClientEvent("sth:starttimer", 0);
-						break;
+						try
+						{
+							runnerHandle = runnerID;
+							runner = GetPlayerFromHandle(runnerHandle);
+						}
+						catch (Exception ex)
+						{
+							Debug.WriteLine($"^1ERROR at assigning runner: {ex}");
+						}
 					}
+					Debug.WriteLine($"^2runner handle is now: {runnerHandle}^7");
+					TriggerClientEvent("sth:updateRunnerHandle", runnerHandle);
+
+					//place blip
+
+					SendChatMessage("^2HUNT", $"Hunt starting in 30 seconds with runner:{runner.Name}", 255, 255, 255);
+					await Delay(100);
+					runner.TriggerEvent("sth:spawn", 1);
+					runner.TriggerEvent("sthv:nuifocus", false);
+					Debug.WriteLine("spawned runner and nuifocus false");
+
+
+					NextRunnerQueue = new List<Player>(); //resets the list after runner spawns while hunters weight
+														  //freezehunters, remveh, 
+					foreach (Player p in Players) //hunters can spawn after opting
+					{
+						if (int.Parse(p.Handle) != runnerHandle)
+						{
+							p.TriggerEvent("AskRunnerOpt");
+						}
+					}
+					//offer hunters to opt into runner 
+					TriggerClientEvent("removeveh");
+					await Delay(500);
+					//Players.First().TriggerEvent("sthv:spawnhuntercars");
+					foreach(Player p in Players)
+					{
+						if(p != runner)
+						{
+							p.TriggerEvent("sth:freezePlayer", true);
+						}
+					}
+
+					foreach (Player p in Players)
+					{
+						AlivePlayerList.Add(p);
+					}
+
+					for (int timeleft = totalTimeSecs; timeleft > 0; --timeleft) //game event loop
+					{
+						if (!isHuntOver)
+						{
+							if (!hasHuntStarted && (totalTimeSecs - timeleft > 30))
+							{
+								SendChatMessage("^5HUNT", "Hunt started!", 255, 255, 255);
+								//spawn hunter cars, spawn hunters
+								TriggerClientEvent("sthv:spawnhuntercars");
+								TriggerClientEvent("sth:freezePlayer", false);
+								hasHuntStarted = true;
+							}
+							if (isEveryoneInvincible && (totalTimeSecs - timeleft > 60))
+							{
+								//give guns, invincible false
+								TriggerClientEvent("sth:invincible", false);
+								TriggerClientEvent("sth:giveguns", true);
+								SendChatMessage("^5HUNT", "You now have guns");
+								isEveryoneInvincible = false;
+							}
+							if ((timeleft % 10) == 0)
+							{
+								Debug.WriteLine($"timeleft: {timeleft}");
+								TriggerClientEvent("sth:starttimer", timeleft);
+							}
+							await Delay(1000);
+						}
+						else
+						{
+							TriggerClientEvent("sth:giveguns", false);
+							SendChatMessage("^5HUNT", $"Runner {runner.Name} lost with {timeleft} seconds remaining");
+							TriggerClientEvent("sth:starttimer", 0);
+							break;
+						}
+					}
+					onHuntOver();
+
+
+
 				}
-
-
-
+				catch (Exception ex)
+				{
+					Debug.WriteLine($"^2ERROR in StartHunt: {ex}^7");
+				}
 			}
-			catch(Exception ex)
+			else
 			{
-				Debug.WriteLine($"^2ERROR in StartHunt: {ex}^7");
+				Debug.WriteLine("^1ERORR: A HUNT IS ALREADY IN PROGRESS");
 			}
 		}
 		async Task OntickCheckPlayers()
@@ -327,6 +360,14 @@ namespace sthvServer
 			}
 
 			await BaseScript.Delay(5000);
+		}
+		void onHuntOver()
+		{
+			TriggerClientEvent("sth:spawnall");
+			TriggerClientEvent("removeveh");
+			TriggerClientEvent("sth:freezePlayer", true);
+			isEveryoneInvincible = true;
+			isHuntOver = true;
 		}
 		/// <summary>
 		/// check for null return

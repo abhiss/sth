@@ -81,7 +81,27 @@ namespace sthvClient
 			EventHandlers["sth:returnlicense"] += new Action<int, int>(ReceivedLicense); //gets license from server
 																						 //EventHandlers["playerSpawned"] += new Action(onPlayerSpawned); //called from client
 			EventHandlers["sth:updateRunnerHandle"] += new Action<int>(RunnerHandleUpdate);
-			EventHandlers["sth:spawndefault"] += new Action(() => { DefaultSpawn(); });
+			EventHandlers["sth:spawn"] += new Action<int>(async(int i) => {
+				isAlreadyDead = false;
+				if (i == 1)
+				{
+					await sthvClient.Spawn.SpawnPlayer("mp_m_freemode_01", 367f, -1698f, 48f, 0f);
+					API.SetPedRandomComponentVariation(Game.Player.Character.Handle, false);
+					Vehicle car = await World.CreateVehicle(new Model(VehicleHash.Warrener), new Vector3(432f, -1392f, 29.4f), 300f);
+					while (!API.DoesEntityExist(car.Handle))
+					{
+						await Delay(1);
+					}
+					API.SetPedIntoVehicle(Game.Player.Character.Handle, car.Handle, -1);
+					IsRunner = true;
+					
+				}
+				else if(i == 2) 
+				{
+					await sthvClient.Spawn.SpawnPlayer("s_m_y_swat_01", 362f, -1705f, 48.3f, 300f);
+					IsRunner = false;
+				}
+			});
 			EventHandlers["sth:freezePlayer"] += new Action<bool>((bool freeze) => {
 				Debug.WriteLine($"freeze event executed, bool: {freeze}, runner: {IsRunner}");
 				if (!IsRunner) {
@@ -92,6 +112,7 @@ namespace sthvClient
 						//Game.PlayerPed.ApplyDamage(900);
 						//Game.PlayerPed.Weapons.RemoveAll();
 						API.SetNuiFocus(true, true);
+						Debug.WriteLine("nui focus true to freeze");
 
 						
 					}
@@ -254,21 +275,21 @@ namespace sthvClient
 		{
 			RunnerLicense = newRunnerHandle;
 			Debug.WriteLine($"updated runner handle{RunnerLicense}");
-			//if(License == RunnerLicense) //forced spawn to update runner weapon/ outfit
+			//if (License == RunnerLicense) //forced spawn to update runner weapon/ outfit
 			//{
 			//	IsRunner = true;
-			//	Respawn();
+			//	DefaultSpawn();
 			//}
 			//else if (IsRunner == true && License != RunnerLicense)
 			//{
 			//	IsRunner = false;
-			//	Respawn();
+			//	DefaultSpawn();
 			//}
 		}
 		async void DefaultSpawn()
 		{
 			isAlreadyDead = false;
-			if (IsRunner)
+			if (false)//IsRunner)
 			{
 				await sthvClient.Spawn.SpawnPlayer("mp_m_freemode_01", 367f, -1698f, 48f, 0f);
 				API.SetPedRandomComponentVariation(Game.Player.Character.Handle, false);
@@ -279,7 +300,7 @@ namespace sthvClient
 				}
 				API.SetPedIntoVehicle(Game.Player.Character.Handle, car.Handle, -1);
 
-				
+
 			}
 			else
 			{
