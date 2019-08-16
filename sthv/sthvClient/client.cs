@@ -62,7 +62,7 @@ namespace sthvClient
 			RegisterNuiEventHandler(("nui:returnWantsToRun"), new Action<IDictionary<string, object>>((i) => {
 				bool wanttorun = (bool)i["opt"];
 				Debug.WriteLine($"opt returned: {wanttorun}");
-				//API.SetNuiFocus(false, false);
+				API.SetNuiFocus(false, false);
 				if (wanttorun)
 				{
 					TriggerServerEvent("sthv:opttorun");
@@ -275,16 +275,16 @@ namespace sthvClient
 		{
 			RunnerLicense = newRunnerHandle;
 			Debug.WriteLine($"updated runner handle{RunnerLicense}");
-			//if (License == RunnerLicense) //forced spawn to update runner weapon/ outfit
-			//{
-			//	IsRunner = true;
-			//	DefaultSpawn();
-			//}
-			//else if (IsRunner == true && License != RunnerLicense)
-			//{
-			//	IsRunner = false;
-			//	DefaultSpawn();
-			//}
+			if (License == RunnerLicense) //forced spawn to update runner weapon/ outfit
+			{
+				IsRunner = true;
+				//DefaultSpawn();
+			}
+			else if (IsRunner == true && License != RunnerLicense)
+			{
+				IsRunner = false;
+				//DefaultSpawn();
+			}
 		}
 		async void DefaultSpawn()
 		{

@@ -12,7 +12,7 @@ namespace sthvClient
 	class sthvPlayArea
 	{
 		Vector2 playAreaCenter { get; set; } = new Vector2(100f, -1740f);
-		float radius { get; set; } = 10000f; //570
+		float radius { get; set; } = 570f; //570
 
 		Blip blippy = null;
 
@@ -22,7 +22,7 @@ namespace sthvClient
 			int playArea = API.AddBlipForRadius(playAreaCenter.X, playAreaCenter.Y, 130, radius);
 			API.SetBlipAlpha(playArea, 90);
 			API.SetBlipColour(playArea, 30);
-			API.RemoveBlip(ref playArea);
+			//API.RemoveBlip(ref playArea);
 			Blip blippy = new Blip(playArea);
 			CitizenFX.Core.Debug.WriteLine("GameAreaManager initialized");
 			

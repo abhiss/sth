@@ -234,11 +234,21 @@ namespace sthvServer
 							Debug.WriteLine($"^3players in list: {p.Name}^7");
 						}
 						Random rand = new Random();
-						if (NextRunnerQueue.Count > 0)
+						if ((NextRunnerQueue.Count > 0))
 						{
+							foreach(Player p in NextRunnerQueue)
+							{
+								if (!Players.Contains(p))
+								{
+									NextRunnerQueue.Remove(p);
+								}
+							}
 							int randIndex = rand.Next(0, NextRunnerQueue.Count());
 							runnerID = runnerHandle = int.Parse(NextRunnerQueue.ToArray()[randIndex].Handle); //runnerid and runnerhandle should be the same
+							
 							runner = GetPlayerFromHandle(runnerHandle);
+
+							
 							Debug.WriteLine($"^4 playerchosen {randIndex} out of {NextRunnerQueue.Count() } options, handle: {runnerHandle}^7");
 						}
 						else {
@@ -274,7 +284,6 @@ namespace sthvServer
 					runner.TriggerEvent("sthv:nuifocus", false);
 					Debug.WriteLine("spawned runner and nuifocus false");
 
-
 					NextRunnerQueue = new List<Player>(); //resets the list after runner spawns while hunters weight
 														  //freezehunters, remveh, 
 					foreach (Player p in Players) //hunters can spawn after opting
@@ -287,7 +296,7 @@ namespace sthvServer
 					//offer hunters to opt into runner 
 					TriggerClientEvent("removeveh");
 					await Delay(500);
-					//Players.First().TriggerEvent("sthv:spawnhuntercars");
+					Players.First().TriggerEvent("sthv:spawnhuntercars");
 					foreach(Player p in Players)
 					{
 						if(p != runner)
@@ -309,7 +318,8 @@ namespace sthvServer
 							{
 								SendChatMessage("^5HUNT", "Hunt started!", 255, 255, 255);
 								//spawn hunter cars, spawn hunters
-								TriggerClientEvent("sthv:spawnhuntercars");
+								//TriggerClientEvent("sthv:spawnhuntercars");
+								TriggerClientEvent("sthv:nuifocus", false);
 								TriggerClientEvent("sth:freezePlayer", false);
 								hasHuntStarted = true;
 							}
@@ -344,6 +354,7 @@ namespace sthvServer
 				catch (Exception ex)
 				{
 					Debug.WriteLine($"^2ERROR in StartHunt: {ex}^7");
+					isHuntOver = true;
 				}
 			}
 			else
