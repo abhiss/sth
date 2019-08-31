@@ -28,6 +28,24 @@ namespace sthvServer
 			//test 
 			EventHandlers["sth:sendServerDebug"] += new Action<string>((string info) => { Debug.WriteLine(info); });
 
+			API.RegisterCommand("spawn", new Action<int, List<object>, string>((src, args, raw) =>
+			{
+				try
+				{
+					int playerHandle = int.Parse(args[0].ToString());
+					Player _playerToSpawn = GetPlayerFromHandle(playerHandle);
+					_playerToSpawn.TriggerEvent("sth:spawnall", true);
+
+				}
+				catch(Exception ex)
+				{
+					Debug.WriteLine($"^1Error (probably passed invalid arguments): {ex}^7");
+				}
+			}), true);
+			API.RegisterCommand("endhunt", new Action<int, List<object>, string>((src, args, raw) =>
+			{
+				isHuntOver = true;
+			}), true);
 			API.RegisterCommand("freeze", new Action<int, List<object>, string>((src, args, raw) =>
 			{
 				TriggerClientEvent("sth:freezePlayer", true);
@@ -186,12 +204,22 @@ namespace sthvServer
 		}
 		void OnPlayerDead([FromSource]Player source)
 		{
-			if (AlivePlayerList.Contains(source))
+			if (true)//AlivePlayerList.Contains(source))
 			{
 				AlivePlayerList.Remove(source);
 				Debug.WriteLine($"^2{source.Name} removed from alive players list");
 				Debug.WriteLine($"{AlivePlayerList.Count} alive players remain");
-				SendChatMessage("^5HUNT", $"{source.Name} is dead, {AlivePlayerList.Count} people remain");
+				
+				if (runner != null && source.Handle == runner.Handle)
+				{
+					SendChatMessage("^5HUNT", $"Runner {runner.Name} died, hunt over");
+
+					isHuntOver = true;
+				}
+				else
+				{
+					SendChatMessage("^5HUNT", $"{source.Name} is dead, {AlivePlayerList.Count} people remain");
+				}
 			}
 		}
 		void resetVars()
@@ -281,8 +309,8 @@ namespace sthvServer
 					SendChatMessage("^2HUNT", $"Hunt starting in 30 seconds with runner:{runner.Name}", 255, 255, 255);
 					await Delay(100);
 					runner.TriggerEvent("sth:spawn", 1);
-					runner.TriggerEvent("sthv:nuifocus", false);
-					Debug.WriteLine("spawned runner and nuifocus false");
+					//runner.TriggerEvent("sthv:nuifocus", false);
+					//Debug.WriteLine("spawned runner and nuifocus false");
 
 					NextRunnerQueue = new List<Player>(); //resets the list after runner spawns while hunters weight
 														  //freezehunters, remveh, 
@@ -335,6 +363,8 @@ namespace sthvServer
 							{
 								Debug.WriteLine($"timeleft: {timeleft}");
 								TriggerClientEvent("sth:starttimer", timeleft);
+								Debug.WriteLine($"{AlivePlayerList.Count} people still alive");
+
 							}
 							await Delay(1000);
 						}
@@ -369,7 +399,7 @@ namespace sthvServer
 			{
 				Debug.WriteLine($"alive players: {p.Name}");
 			}
-
+			
 			await BaseScript.Delay(5000);
 		}
 		void onHuntOver()
@@ -448,6 +478,8 @@ namespace sthvServer
 					else
 					{
 						SendChatMessage("^1KILLFEED", $"{i.Name} killed {killed.Name}");
+						i.TriggerEvent("sthv:kill");
+						SendChatMessage("", $"^5{i.Name} was killed by Karma");
 					}
 
 				}

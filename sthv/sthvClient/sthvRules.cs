@@ -26,17 +26,32 @@ namespace sthvClient
 			API.SetCanAttackFriendly(_ped, true, true);
 			API.SetMaxWantedLevel(0);
 			API.DisablePlayerVehicleRewards(_pid);
-
+			API.SetEveryoneIgnorePlayer(_pid, true);
 			//sthvClient.client.eventhandlers			
 			Game.PlayerPed.IsInvincible = true;
 
+			//calm ai 
+		API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_HILLBILLY"),	(uint)API.GetHashKey("PLAYER"));
+		API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_BALLAS"),	(uint)API.GetHashKey("PLAYER"));
+		API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_MEXICAN"),	(uint)API.GetHashKey("PLAYER"));
+		API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_FAMILY"),	(uint)API.GetHashKey("PLAYER"));
+		API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_MARABUNTE"),	(uint)API.GetHashKey("PLAYER"));
+		API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_SALVA"),		(uint)API.GetHashKey("PLAYER"));
+		API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("GANG_1"),		(uint)API.GetHashKey("PLAYER"));
+		API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("GANG_2"),		(uint)API.GetHashKey("PLAYER"));
+		API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("GANG_9"),		(uint)API.GetHashKey("PLAYER"));
+		API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("GANG_10"),	(uint)API.GetHashKey("PLAYER"));
+		API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("FIREMAN"),	(uint)API.GetHashKey("PLAYER"));
+		API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("MEDIC"),		(uint)API.GetHashKey("PLAYER"));
+		API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("COP"),		(uint)API.GetHashKey("PLAYER"));
 		}
 
 
-		public async Task isKeyPressed()
+		public async Task isKeyPressed() //happens always
 		{
 			API.HideHudComponentThisFrame((int)HudComponent.Cash);
 			API.HideHudComponentThisFrame((int)HudComponent.CashChange);
+			API.DisablePlayerVehicleRewards(_pid);
 			if (API.IsControlJustReleased(20, 48)) //Z 
 			{
 				if (API.IsBigmapActive())
@@ -73,6 +88,8 @@ namespace sthvClient
 			{
 				await BaseScript.Delay(200);
 			}
+
+
 		}
 
 	}

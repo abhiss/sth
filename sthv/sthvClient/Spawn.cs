@@ -6,6 +6,7 @@ namespace sthvClient
 {
 	public class Spawn : BaseScript
 	{
+		
 		private static bool _spawnLock = false;
 
 		public static void FreezePlayer(int playerId, bool freeze)

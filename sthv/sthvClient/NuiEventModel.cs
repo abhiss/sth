@@ -4,12 +4,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace sthv
+namespace sthv.NuiModels
 {
 	public class NuiEventModel
 	{
 		public string EventName { get; set; }
 		public object EventData { get; set; }
+	}
+	public class NuiScoreboardModel
+	{
+		 
+	}
+	public class Player
+	{
+		public string name { get; set; }
+		public int serverid { get; set; }
+		public bool runner { get; set; }
+		public int score { get; set; }
+		public bool alive { get; set; }
+		public bool spectating { get; set; }
+
 	}
 	public class NuiMessageModel
 	{
