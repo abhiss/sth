@@ -359,5 +359,25 @@ namespace sthvClient
 			}));
 			API.SetCursorLocation(0.5f, 0.5f);
 		}
+
+		public static Player GetPlayerFromServerId(int playerId, PlayerList players)
+		{
+			try
+			{
+				foreach (Player p in players)
+				{
+					if (p.ServerId == playerId)
+					{
+						return p;
+					}
+				}
+				return null;
+			}
+			catch (Exception ex)
+			{
+				Debug.Write($"^3ERROR THROWN IN GetPlayerFromId (client): {ex}");
+				return null;
+			}
+		}
 	}
 }

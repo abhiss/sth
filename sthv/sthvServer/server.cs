@@ -74,6 +74,8 @@ namespace sthvServer
 
 			}), true);
 
+
+			#region obsolete
 			API.RegisterCommand("starthunt", new Action<int, List<object>, string>(async (src, args, raw) =>
 			{
 				try
@@ -156,7 +158,6 @@ namespace sthvServer
 				catch (Exception ex) { Debug.WriteLine($"^5ERROR: {ex}"); }
 			}), true);
 
-			#region obsolete
 			API.RegisterCommand("assignrunner", new Action<int, List<object>, string>((source, args, raw) =>
 			{
 				try
@@ -262,15 +263,19 @@ namespace sthvServer
 							Debug.WriteLine($"^3players in list: {p.Name}^7");
 						}
 						Random rand = new Random();
+						NextRunnerQueue.RemoveAll(item => !Players.Contains(item)); //needs to be tested
 						if ((NextRunnerQueue.Count > 0))
 						{
-							foreach(Player p in NextRunnerQueue)
-							{
-								if (!Players.Contains(p))
-								{
-									NextRunnerQueue.Remove(p);
-								}
-							}
+							//foreach (Player p in NextRunnerQueue) //throws exception: 'collection was modified enumeration may not execute'
+							//{
+							//	if (Players.Contains(p))
+							//	{
+							//		var currentPlayerQueue = new List<Player>();
+							//		var currentPlayerQueue.appa
+							//	}
+							//}
+							
+
 							int randIndex = rand.Next(0, NextRunnerQueue.Count());
 							runnerID = runnerHandle = int.Parse(NextRunnerQueue.ToArray()[randIndex].Handle); //runnerid and runnerhandle should be the same
 							
@@ -404,6 +409,7 @@ namespace sthvServer
 		}
 		void onHuntOver()
 		{
+			TriggerClientEvent("sthv:spectate");
 			TriggerClientEvent("sth:spawnall");
 			TriggerClientEvent("removeveh");
 			TriggerClientEvent("sth:freezePlayer", true);

@@ -13,7 +13,7 @@ namespace sthv.NuiModels
 	}
 	public class NuiScoreboardModel
 	{
-		 
+
 	}
 	public class Player
 	{
@@ -29,5 +29,9 @@ namespace sthv.NuiModels
 	{
 		public string Message { get; set; }
 		public int Seconds { get; set; }
+	}
+	public class NuiSpectatorInfoModel
+	{
+		public int nui_HandleOfSpectatedPlayer { get; set; }
 	}
 }

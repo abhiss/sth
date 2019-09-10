@@ -40,7 +40,7 @@ namespace sthvClient
 		public async Task GetDistance()
 		{
 			float distance = Vector2.Distance(playAreaCenter, new Vector2(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y)); //get horizontal distance between player and playAreaCenter
-			if ((distance > radius) && (distance != 0))
+			if ((Game.PlayerPed.IsAlive) && (distance > radius) && (distance != 0))
 			{
 				API.ApplyDamageToPed(API.PlayerPedId(), 5, true);
 				sthvClient.client.SendChatMessage("WARNING:", "OUT OF PLAY AREA", 255, 0, 0);

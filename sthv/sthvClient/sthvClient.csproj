@@ -61,6 +61,9 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ui\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy /y /d "$(TargetPath)" "C:\Servers\FiveM\FiveM-STH\server-data\resources\[local]\sthv"</PostBuildEvent>
