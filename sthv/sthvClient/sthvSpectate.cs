@@ -100,7 +100,6 @@ namespace sthv
 				isSpectating = true;
 				_handleOfSpectatedPlayer = runnerPeds[runnerToSpectate].ServerId;
 
-
 			}
 
 			await Delay(10000);

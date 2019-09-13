@@ -156,7 +156,7 @@ namespace sthvClient
 			}), false);
 
 			
-			API.RegisterCommand("starttimer", new Action<int, List<object>, string>(async (src, args, raw) =>
+			API.RegisterCommand("starttimer", new Action<int, List<object>, string>((src, args, raw) =>
 			{
 				try {
 					int timerCountInSeconds = int.Parse(args[0].ToString());
@@ -305,26 +305,11 @@ namespace sthvClient
 				//DefaultSpawn();
 			}
 		}
-		async void DefaultSpawn()
+		async void DefaultSpawn() //only used for /spawnall i think
 		{
 			isAlreadyDead = false;
-			if (false)//IsRunner)
-			{
-				await sthvClient.Spawn.SpawnPlayer("mp_m_freemode_01", 367f, -1698f, 48f, 0f);
-				API.SetPedRandomComponentVariation(Game.Player.Character.Handle, false);
-				Vehicle car = await World.CreateVehicle(new Model(VehicleHash.Warrener), new Vector3(432f, -1392f, 29.4f), 300f);
-				while (!API.DoesEntityExist(car.Handle))
-				{
-					await Delay(1);
-				}
-				API.SetPedIntoVehicle(Game.Player.Character.Handle, car.Handle, -1);
 
-
-			}
-			else
-			{
-				await sthvClient.Spawn.SpawnPlayer("s_m_y_swat_01", 362f, -1705f, 48.3f, 300f);
-			}
+			await sthvClient.Spawn.SpawnPlayer("s_m_y_swat_01", 362f, -1705f, 48.3f, 300f);
 		}
 
 
@@ -366,7 +351,7 @@ namespace sthvClient
 			{
 				foreach (Player p in players)
 				{
-					if (p.ServerId == playerId)
+					if (p.ServerId == playerId) 
 					{
 						return p;
 					}
