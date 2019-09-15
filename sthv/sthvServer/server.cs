@@ -24,6 +24,7 @@ namespace sthvServer
 
 		public server()
 		{
+			
 			var stuffythings = new Identifiers();
 			//test 
 			EventHandlers["sth:sendServerDebug"] += new Action<string>((string info) => { Debug.WriteLine(info); });
@@ -192,7 +193,7 @@ namespace sthvServer
 			#endregion //assignhunter
 
 			//new hunt related
-			EventHandlers["sthv:playerIsDead"] += new Action<Player>(OnPlayerDead);
+			EventHandlers["sthv:playerJustDead"] += new Action<Player>(OnPlayerDead);
 
 			EventHandlers["sth:NeedLicense"] += new Action<Player>(OnRequestedLicense);
 			EventHandlers["sth:sendserverkillerserverindex"] += new Action<Player, int>(KillfeedStuff);
@@ -203,7 +204,7 @@ namespace sthvServer
 		void addToRunnerList([FromSource]Player source) {
 			NextRunnerQueue.Add(source);
 		}
-		void OnPlayerDead([FromSource]Player source)
+		void OnPlayerDead([FromSource]Player source)	//not good
 		{
 			if (true)//AlivePlayerList.Contains(source))
 			{

@@ -244,19 +244,8 @@ namespace sthvClient
 			//SendChatMessage("test", $"word: {API.IsPointOnRoad(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y, Game.PlayerPed.Position.Z, 0)}", 255, 255, 255);
 			// ^ sends in chat if player is on street
 			await BaseScript.Delay(5000);
-		} 
-		async Task CheckIfDead()
-		{
-			if (Game.PlayerPed.IsDead && !isAlreadyDead)
-			{
-
-				Debug.WriteLine("you are now dead! :D");
-				TriggerServerEvent("sthv:playerIsDead");
-				isAlreadyDead = true;
-			}
-			
-			await Delay(1000);
 		}
+
 		void OnPlayerLoaded(string res) // res from mapmanager_cliend.lua line 47, stores name of map resource
 		{
 			TriggerServerEvent("sth:NeedLicense");  //asks server for license, ends

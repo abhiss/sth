@@ -33,7 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CitizenFX.Core.Client, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CitizenFX.Core.Client.1.0.1503\lib\net45\CitizenFX.Core.Client.dll</HintPath>
+      <HintPath>..\packages\CitizenFX.Core.Client.1.0.1594\lib\net45\CitizenFX.Core.Client.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -55,11 +55,15 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Spawn.cs" />
     <Compile Include="sthvPlayArea.cs" />
+    <Compile Include="sthvPlayerCache.cs" />
     <Compile Include="sthvRules.cs" />
     <Compile Include="sthvSpectate.cs" />
+    <Compile Include="syncLobbyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ui\" />

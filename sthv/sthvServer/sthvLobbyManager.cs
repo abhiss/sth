@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CitizenFX.Core.Native;
 using CitizenFX.Core;
+using CitizenFX;
 
 
 
@@ -12,7 +13,7 @@ namespace sthvServer
 {
 	class sthvPlayer : BaseScript
 	{
-
+		
 	}
 	class sthvLobbyManager : BaseScript
 	{
@@ -21,28 +22,41 @@ namespace sthvServer
 		public PlayerList PlayersHunters { get; set; }
 		public PlayerList PlayersRunners { get; set; }
 		Dictionary<Player, bool> playerPing = new Dictionary<Player, bool >();
+		Dictionary<Player, bool> playerIsAlive = new Dictionary<Player, bool>();
 
 		public sthvLobbyManager()
 		{
-			EventHandlers["sthv:syncserver"] += new Action<Player, bool>(ServerSync);
-			
+			EventHandlers["sthv:playerJustAlive"] += new Action<Player>(SyncJustAlive);
 			Tick += UpdatePlayers;
-
-
+ 
 
 		}
-		void ServerSync([FromSource] Player source, bool isAlive)
+		void SyncJustAlive([FromSource] Player source)
 		{
-			if (playerPing.TryGetValue(source, out bool val)) //declares val inline 
+			if (playerIsAlive.TryGetValue(source, out bool val)) //declares val inline 
 			{
-				if (val != isAlive)
+				if (val != true)
 				{
-					playerPing[source] = isAlive;
+					playerIsAlive[source] = true;
 				}
 			}
 			else
 			{
-				playerPing.Add(source, isAlive);
+				playerIsAlive.Add(source, true);
+			}
+		}
+
+		void SyncJustdead([FromSource] Player source)
+		{
+			if(playerIsAlive.TryGetValue(source, out bool val)){
+				if(val != false)
+				{
+					playerIsAlive[source] = false;
+				}
+			}
+			else
+			{
+				playerIsAlive[source] += 
 			}
 		}
 		private async Task UpdatePlayers()
