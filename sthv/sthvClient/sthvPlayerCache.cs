@@ -44,7 +44,7 @@ namespace sthv
 				}));
 
 			}
-			await Delay(2000);
+			await Delay(20000);
 		}
 		async Task CheckIfDead()
 		{
@@ -53,15 +53,15 @@ namespace sthv
 			{
 
 				Debug.WriteLine("you are now just dead! :D");
-				TriggerServerEvent("sthv:playerJustDead"); //for killfeed?
-				TriggerEvent("sthv:updateAlive", true);
+				TriggerServerEvent("sthv:playerJustDead");
+				TriggerEvent("sthv:updateAlive", ServerId, false);
 				isAlreadyDead = true;
 
 			}
 			else if (Game.PlayerPed.IsAlive && isAlreadyDead) //is alive was dead
 			{
 				TriggerServerEvent("sthv:playerJustAlive");
-				TriggerEvent("sthv:updateAlive", true);
+				TriggerEvent("sthv:updateAlive", ServerId, true);
 
 				isAlreadyDead = false;
 			}

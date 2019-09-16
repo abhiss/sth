@@ -14,13 +14,21 @@ namespace sthv
 	{
 		public sthvSyncLobbyInfo()
 		{
-			TriggerEvent("sthv:updateAlive", true);
-			EventHandlers["sthv:updateAlive"] += new Action<Player, bool>(onSomoneDiedOrSomething);
+			EventHandlers["sthv:updateAlive"] += new Action<int, bool>(onSomoneDiedOrSomething);
 		}
-		void onSomoneDiedOrSomething([FromSource]Player source, bool isAlive)
+		void onSomoneDiedOrSomething(int serverId, bool isAlive)
 		{
-			API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "sthvnui:updateAlive", EventData = new sthv.NuiModels.updateAlive { serverid = source.ServerId, isalive = isAlive } }));
+			API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel
+			{
+				EventName = "sthvnui:updateAlive",
+				EventData = new sthv.NuiModels.updateAlive
+				{
+					serverid = serverId,
+					isalive = isAlive
+				}
+			}));
 			
+
 		}
 
 	}
