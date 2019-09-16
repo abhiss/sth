@@ -11,6 +11,17 @@ namespace sthv.NuiModels
 		public string EventName { get; set; }
 		public object EventData { get; set; }
 	}
+	public class dataBool
+	{
+		public bool data { get; set; }
+	}
+	public class updateAlive
+	{
+		public int serverid { get; set; }
+		public bool isalive { get; set; }
+		
+	}
+
 	public class NuiScoreboardModel
 	{
 

@@ -56,6 +56,8 @@ namespace sthvClient
 				await Delay(1);
 			}
 
+			NetworkSetInSpectatorMode(false, 0); //changed to take out of spectator mode
+
 			FreezePlayer(PlayerId(), true);
 			await Game.Player.ChangeModel(GetHashKey(skin));
 			SetPedDefaultComponentVariation(GetPlayerPed(-1));

@@ -208,19 +208,11 @@ namespace sthvServer
 		{
 			if (true)//AlivePlayerList.Contains(source))
 			{
-				AlivePlayerList.Remove(source);
-				Debug.WriteLine($"^2{source.Name} removed from alive players list");
-				Debug.WriteLine($"{AlivePlayerList.Count} alive players remain");
-				
 				if (runner != null && source.Handle == runner.Handle)
 				{
-					SendChatMessage("^5HUNT", $"Runner {runner.Name} died, hunt over");
+					SendChatMessage("^5HUNT", $"Runner {runner.Name} died, hunt over^7");
 
 					isHuntOver = true;
-				}
-				else
-				{
-					SendChatMessage("^5HUNT", $"{source.Name} is dead, {AlivePlayerList.Count} people remain");
 				}
 			}
 		}

@@ -35,7 +35,7 @@ namespace sthv
 		{
 			try
 			{
-				if (isSpectating && (_handleOfSpectatedPlayer > 0))
+				if (sthvPlayerCache.isAlreadyDead && isSpectating && (_handleOfSpectatedPlayer > 0))
 				{
 
 					API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel
@@ -47,9 +47,9 @@ namespace sthv
 						}
 					}));
 				}
-
 				else
 				{
+
 					API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel
 					{
 						EventName = "sthvui:spectatorinfo",
@@ -58,11 +58,7 @@ namespace sthv
 							nameOfSpectatedPlayer = ""
 						}
 					}));
-					if (isSpectating == false)
-					{
-
-					}
-				}
+				}			
 			}
 			catch(Exception ex)
 			{

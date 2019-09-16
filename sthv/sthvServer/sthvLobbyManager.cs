@@ -21,53 +21,80 @@ namespace sthvServer
 		public PlayerList PlayersDead { get; set; }
 		public PlayerList PlayersHunters { get; set; }
 		public PlayerList PlayersRunners { get; set; }
-		Dictionary<Player, bool> playerPing = new Dictionary<Player, bool >();
-		Dictionary<Player, bool> playerIsAlive = new Dictionary<Player, bool>();
+		Dictionary<string, bool> playerPing = new Dictionary<string, bool >();
+		Dictionary<string, bool> AlivePlayers = new Dictionary<string, bool>();
 
 		public sthvLobbyManager()
 		{
 			EventHandlers["sthv:playerJustAlive"] += new Action<Player>(SyncJustAlive);
-			Tick += UpdatePlayers;
- 
+			EventHandlers["sthv:playerJustDead"] += new Action<Player>(SyncJustDead);
+			EventHandlers["playerDropped"] += new Action<Player, string>(OnPlayerDropped);
 
+			//Tick += UpdatePlayers;
+			API.RegisterCommand("testaliveplayers", new Action<int, List<object>, string>((src, args, raw) =>
+			{
+				foreach(Player p in Players)
+				{
+					if(AlivePlayers.TryGetValue(p.Handle, out bool val) && val){
+
+						Debug.WriteLine($"player {p.Name} is alive, ping is {p.Ping}");
+						
+					}
+					else
+					{
+						Debug.WriteLine($"player {p.Name} is dead, ping is {p.Ping}");
+					}
+				}
+			}), false);
+
+
+		}
+		void OnPlayerDropped([FromSource]Player source, string reason)
+		{
+			if (AlivePlayers.ContainsKey(source.Handle)){
+				AlivePlayers.Remove(source.Name);
+			}
+			if (playerPing.ContainsKey(source.Handle))
+			{
+				playerPing.Remove(source.Handle);
+			}
+		
+			Debug.WriteLine($"dropped {source.Name}");
 		}
 		void SyncJustAlive([FromSource] Player source)
 		{
-			if (playerIsAlive.TryGetValue(source, out bool val)) //declares val inline 
+			Debug.WriteLine($"^4player {source.Name} just alive^7");
+			if (AlivePlayers.TryGetValue(source.Handle, out bool val)) //declares val inline 
 			{
 				if (val != true)
 				{
-					playerIsAlive[source] = true;
+					AlivePlayers[source.Handle] = true;
 				}
 			}
 			else
 			{
-				playerIsAlive.Add(source, true);
+				AlivePlayers.Add(source.Handle, true);
 			}
 		}
 
-		void SyncJustdead([FromSource] Player source)
+		void SyncJustDead([FromSource] Player source)
 		{
-			if(playerIsAlive.TryGetValue(source, out bool val)){
+			Debug.WriteLine($"^4player {source.Name} just dead^7");
+			if(AlivePlayers.TryGetValue(source.Handle, out bool val)){
 				if(val != false)
 				{
-					playerIsAlive[source] = false;
+					AlivePlayers[source.Handle] = false;
 				}
 			}
 			else
 			{
-				playerIsAlive[source] += 
+				AlivePlayers.Add(source.Handle, false);
 			}
 		}
 		private async Task UpdatePlayers()
 		{
-			foreach( Player p in Players)
-			{
 
-
-			}
-
-			await Delay(100);
+			await Delay(3000);
 		}
 	}
 }
