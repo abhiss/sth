@@ -19,9 +19,11 @@ namespace sthvServer
 		bool hasHuntStarted = false; //
 		List<Player> NextRunnerQueue = new List<Player>();
 		List<Player> AlivePlayerList = new List<Player>();
-		bool isHuntOver = true;
+		static public bool isHuntOver = true;
 		bool isEveryoneInvincible = true;
 
+
+		public bool AutoHunt { get; set; }
 		public server()
 		{
 			
@@ -60,9 +62,9 @@ namespace sthvServer
 				TriggerClientEvent("removeveh");
 			}), true);
 
-			API.RegisterCommand("resetall", new Action<int, List<object>, string>((src, args, raw) =>
+			API.RegisterCommand("toggleautohunt", new Action<int, List<object>, string>((src, args, raw) =>
 			{
-				TriggerClientEvent("onClientMapStart");
+				AutoHunt = !AutoHunt;
 			}), true);
 			API.RegisterCommand("hunt", new Action<int, List<object>, string>((src, args, raw) =>
 			{
@@ -195,7 +197,7 @@ namespace sthvServer
 			//new hunt related
 			EventHandlers["sthv:playerJustDead"] += new Action<Player>(OnPlayerDead);
 
-			EventHandlers["sth:NeedLicense"] += new Action<Player>(OnRequestedLicense);
+			EventHandlers["sth:NeedLicense"] += new Action<Player>(OnRequestedLicense); //kind of means when they load in
 			EventHandlers["sth:sendserverkillerserverindex"] += new Action<Player, int>(KillfeedStuff);
 			////EventHandlers["sth:testevent"] += new Action<Player>(OnTestEvent);
 			//EventHandlers["sth:showMeOnMap"] += new Action<float, float, float>((float x, float y, float z) => { TriggerClientEvent("sth:sendShowOnMap", x, y, z); });
@@ -211,7 +213,6 @@ namespace sthvServer
 				if (runner != null && source.Handle == runner.Handle)
 				{
 					SendChatMessage("^5HUNT", $"Runner {runner.Name} died, hunt over^7");
-
 					isHuntOver = true;
 				}
 			}
@@ -243,7 +244,19 @@ namespace sthvServer
 			{
 				try
 				{
+					if (Players.Count() < 2)
+					{
+						Console.WriteLine("not enough players to start hunt, waiting till more join");
+						SendChatMessage("hunt-error", "not enough players to start hunt, waiting till more join");
+						while(Players.Count() < 2)
+						{
+							SendChatMessage("hunt-error", "waiting for 2 people before we start");
+							Debug.WriteLine("^8 Not enough players to start^7");
+							await Delay(20000);
+						}
 
+
+					}
 					resetVars();
 
 					int totalTimeSecs = timeInMinutes * 60;
@@ -330,7 +343,7 @@ namespace sthvServer
 							p.TriggerEvent("sth:freezePlayer", true);
 						}
 					}
-
+					TriggerClientEvent("sthv:refreshsb");
 					foreach (Player p in Players)
 					{
 						AlivePlayerList.Add(p);
@@ -361,8 +374,6 @@ namespace sthvServer
 							{
 								Debug.WriteLine($"timeleft: {timeleft}");
 								TriggerClientEvent("sth:starttimer", timeleft);
-								Debug.WriteLine($"{AlivePlayerList.Count} people still alive");
-
 							}
 							await Delay(1000);
 						}
@@ -400,14 +411,28 @@ namespace sthvServer
 			
 			await BaseScript.Delay(5000);
 		}
-		void onHuntOver()
+		async void onHuntOver()
 		{
-			TriggerClientEvent("sthv:spectate");
+			TriggerClientEvent("sthv:spectate", false);
 			TriggerClientEvent("sth:spawnall");
 			TriggerClientEvent("removeveh");
 			TriggerClientEvent("sth:freezePlayer", true);
+			runnerHandle = -1;
+			TriggerClientEvent("sth:updateRunnerHandle", runnerHandle);
 			isEveryoneInvincible = true;
 			isHuntOver = true;
+
+			await Delay(10000);
+			if (AutoHunt)
+			{
+				StartHunt(25);
+				
+			}
+			else
+			{
+				SendChatMessage("hunt", "autohunt is off");
+			}
+
 		}
 		/// <summary>
 		/// check for null return
@@ -444,6 +469,7 @@ namespace sthvServer
 			Debug.WriteLine($"^3triggered:onRequestedLicense from: {source.Name}^7");
 			string licenseId = source.Handle;
 			TriggerClientEvent(source, "sth:returnlicense", licenseId, runnerHandle);
+			TriggerClientEvent("sthv:refreshsb");
 		}
 		void KillfeedStuff([FromSource]Player killed, int KillerIndex)
 		{

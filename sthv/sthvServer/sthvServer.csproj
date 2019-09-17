@@ -51,6 +51,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="server.cs" />
     <Compile Include="sthvLobbyManager.cs" />
+    <Compile Include="sthvSyncClients.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

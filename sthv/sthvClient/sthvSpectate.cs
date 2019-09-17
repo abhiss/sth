@@ -26,7 +26,6 @@ namespace sthv
 					API.NetworkSetInSpectatorMode(false, Game.PlayerPed.Handle);
 					Debug.WriteLine("leaving spectator mode");
 					isSpectating = false;
-
 			} });
 			
 		}

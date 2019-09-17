@@ -26,25 +26,32 @@ namespace sthv
 			Tick += ScoreboardUpdater;
 			ServerId = Game.Player.ServerId;
 
+			EventHandlers["sthv:refreshsb"] += new Action(async () => { await ScoreboardUpdater(); Debug.WriteLine("^5updated sb"); });
+
 		}
-		
-		async Task ScoreboardUpdater()
+
+		public async Task ScoreboardUpdater()
 		{
-			foreach(Player p in Players)
+			List<NuiModels.Player> playerInfoList = new List<NuiModels.Player>();
+			foreach (Player p in Players)
 			{
-				Debug.WriteLine($"{p.ServerId} {p.Name} {p.IsAlive} {(sthvClient.client.RunnerHandle == p.ServerId)}");
-				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel {
-					EventName = "hunt.testNuiEvent",
-					EventData = new sthv.NuiModels.Player {
+				playerInfoList.Add(
+					new NuiModels.Player
+					{
 						alive = p.IsAlive,
 						name = p.Name,
 						runner = (sthvClient.client.RunnerHandle == p.ServerId),
 						serverid = p.ServerId
 					}
-				}));
-
+				);
 			}
-			await Delay(20000);
+			API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel
+			{
+				EventName = "sthv:updatesb",
+				EventData = playerInfoList
+			}));
+
+			await Delay(60000);
 		}
 		async Task CheckIfDead()
 		{
@@ -52,11 +59,10 @@ namespace sthv
 			if (Game.PlayerPed.IsDead && !isAlreadyDead)
 			{
 
-				Debug.WriteLine("you are now just dead! :D");
+				Debug.WriteLine("you just dead! ;D");
 				TriggerServerEvent("sthv:playerJustDead");
 				TriggerEvent("sthv:updateAlive", ServerId, false);
 				isAlreadyDead = true;
-
 			}
 			else if (Game.PlayerPed.IsAlive && isAlreadyDead) //is alive was dead
 			{

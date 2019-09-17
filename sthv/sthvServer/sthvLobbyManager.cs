@@ -29,8 +29,10 @@ namespace sthvServer
 			EventHandlers["sthv:playerJustAlive"] += new Action<Player>(SyncJustAlive);
 			EventHandlers["sthv:playerJustDead"] += new Action<Player>(SyncJustDead);
 			EventHandlers["playerDropped"] += new Action<Player, string>(OnPlayerDropped);
+			EventHandlers["playerConnecting"] += new Action( async() =>
+			{ 
+			});
 
-			//Tick += UpdatePlayers;
 			API.RegisterCommand("testaliveplayers", new Action<int, List<object>, string>((src, args, raw) =>
 			{
 				foreach(Player p in Players)
@@ -51,19 +53,24 @@ namespace sthvServer
 		}
 		void OnPlayerDropped([FromSource]Player source, string reason)
 		{
-			if (AlivePlayers.ContainsKey(source.Handle)){
+			if (AlivePlayers.ContainsKey(source.Handle))
+			{
 				AlivePlayers.Remove(source.Name);
 			}
 			if (playerPing.ContainsKey(source.Handle))
 			{
 				playerPing.Remove(source.Handle);
 			}
-		
+
 			Debug.WriteLine($"dropped {source.Name}");
+			CheckAlivePlayers();
+			TriggerClientEvent("sthv:refreshsb");
 		}
 		void SyncJustAlive([FromSource] Player source)
 		{
+			TriggerClientEvent("sthv:updateAlive", source.Handle, true);
 			Debug.WriteLine($"^4player {source.Name} just alive^7");
+
 			if (AlivePlayers.TryGetValue(source.Handle, out bool val)) //declares val inline 
 			{
 				if (val != true)
@@ -75,11 +82,15 @@ namespace sthvServer
 			{
 				AlivePlayers.Add(source.Handle, true);
 			}
+			CheckAlivePlayers();
+
 		}
 
 		void SyncJustDead([FromSource] Player source)
 		{
+			TriggerClientEvent("sthv:updateAlive", source.Handle, false);
 			Debug.WriteLine($"^4player {source.Name} just dead^7");
+
 			if(AlivePlayers.TryGetValue(source.Handle, out bool val)){
 				if(val != false)
 				{
@@ -90,11 +101,25 @@ namespace sthvServer
 			{
 				AlivePlayers.Add(source.Handle, false);
 			}
-		}
-		private async Task UpdatePlayers()
-		{
+			CheckAlivePlayers();
 
-			await Delay(3000);
+		}
+		private void CheckAlivePlayers()
+		{
+			int numberOfAlivePlayers = 0;
+			foreach(var i in AlivePlayers)
+			{
+				if( i.Value == true)
+				{
+					numberOfAlivePlayers++;
+				}
+			}
+			Debug.WriteLine($"{numberOfAlivePlayers} alive players remaining, {AlivePlayers.Count()} total");
+			if(numberOfAlivePlayers < 2)
+			{
+				server.isHuntOver = true;
+				server.SendChatMessage("^4Hunt", "All runners dead, hunt over :D");
+			}
 		}
 	}
 }

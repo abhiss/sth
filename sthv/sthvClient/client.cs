@@ -253,6 +253,7 @@ namespace sthvClient
 			//Respawn();
 			TriggerNuiEvent("sthv:runneropt");
 			API.SetNuiFocus(true, true);
+			
 		}
 
 
@@ -284,15 +285,18 @@ namespace sthvClient
 		{
 			RunnerHandle = newRunnerHandle;
 			Debug.WriteLine($"updated runner handle{RunnerHandle}");
+			if( newRunnerHandle == -1)
+			{
+				sthv.sthvPlayerCache.isHuntActive = false;
+				//means hunt is over
+			}
 			if (License == RunnerHandle) //forced spawn to update runner weapon/ outfit
 			{
 				IsRunner = true;
-				//DefaultSpawn();
 			}
 			else if (IsRunner == true && License != RunnerHandle)
 			{
 				IsRunner = false;
-				//DefaultSpawn();
 			}
 		}
 		async void DefaultSpawn() //only used for /spawnall i think
