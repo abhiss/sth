@@ -16,11 +16,12 @@ namespace sthvServer
 		bool isRunnerKilled = false;
 		int totalTime;
 		public Player runner;
-		bool hasHuntStarted = false; //
+		public static bool hasHuntStarted = false; //
 		List<Player> NextRunnerQueue = new List<Player>();
 		List<Player> AlivePlayerList = new List<Player>();
 		static public bool isHuntOver = true;
 		bool isEveryoneInvincible = true;
+		public bool HavePlayersGottenGuns { get; set; }
 
 
 		public bool AutoHunt { get; set; }
@@ -322,7 +323,7 @@ namespace sthvServer
 					runner.TriggerEvent("sth:spawn", 1);
 					//runner.TriggerEvent("sthv:nuifocus", false);
 					//Debug.WriteLine("spawned runner and nuifocus false");
-
+					TriggerClientEvent("sth:invincible", false);
 					NextRunnerQueue = new List<Player>(); //resets the list after runner spawns while hunters weight
 														  //freezehunters, remveh, 
 					foreach (Player p in Players) //hunters can spawn after opting
@@ -344,6 +345,7 @@ namespace sthvServer
 						}
 					}
 					TriggerClientEvent("sthv:refreshsb");
+
 					foreach (Player p in Players)
 					{
 						AlivePlayerList.Add(p);
@@ -367,6 +369,7 @@ namespace sthvServer
 								//give guns, invincible false
 								TriggerClientEvent("sth:invincible", false);
 								TriggerClientEvent("sth:giveguns", true);
+								HavePlayersGottenGuns = true;
 								SendChatMessage("^5HUNT", "You now have guns");
 								isEveryoneInvincible = false;
 							}
@@ -419,6 +422,8 @@ namespace sthvServer
 			TriggerClientEvent("sth:freezePlayer", true);
 			runnerHandle = -1;
 			TriggerClientEvent("sth:updateRunnerHandle", runnerHandle);
+
+			TriggerClientEvent("sth:invincible", true);
 			isEveryoneInvincible = true;
 			isHuntOver = true;
 

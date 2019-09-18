@@ -115,7 +115,7 @@ namespace sthvServer
 				}
 			}
 			Debug.WriteLine($"{numberOfAlivePlayers} alive players remaining, {AlivePlayers.Count()} total");
-			if(numberOfAlivePlayers < 2)
+			if(numberOfAlivePlayers < 2 && server.hasHuntStarted)
 			{
 				server.isHuntOver = true;
 				server.SendChatMessage("^4Hunt", "All runners dead, hunt over :D");
