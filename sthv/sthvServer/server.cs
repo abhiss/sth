@@ -15,7 +15,7 @@ namespace sthvServer
 		int runnerHandle = 0;
 		bool isRunnerKilled = false;
 		int totalTime;
-		public Player runner;
+		static public Player runner;
 		public static bool hasHuntStarted = false; //
 		List<Player> NextRunnerQueue = new List<Player>();
 		List<Player> AlivePlayerList = new List<Player>();
@@ -146,12 +146,10 @@ namespace sthvServer
 							else if (isRunnerKilled)
 							{
 								TriggerClientEvent("sendChatMessageToAll", "^5HUNT", $"Runner {runner.Name} lost with {timeLeft} minutes left");
-								TriggerClientEvent("sth:starttimer", 0); //end timer
 							}
 							else if (!isRunnerKilled)
 							{
 								TriggerClientEvent("sendChatMessageToAll", "^5HUNT", $"Runner {runner.Name} won with {timeLeft} minutes left");
-								TriggerClientEvent("sth:starttimer", 0); //end  timer
 							}
 
 						}
@@ -323,14 +321,16 @@ namespace sthvServer
 					runner.TriggerEvent("sth:spawn", 1);
 					//runner.TriggerEvent("sthv:nuifocus", false);
 					//Debug.WriteLine("spawned runner and nuifocus false");
-					TriggerClientEvent("sth:invincible", false);
-					NextRunnerQueue = new List<Player>(); //resets the list after runner spawns while hunters weight
+					TriggerClientEvent("sth:invincible", true);
+					NextRunnerQueue = new List<Player>(); //resets the list after runner spawns while hunters wait
 														  //freezehunters, remveh, 
 					foreach (Player p in Players) //hunters can spawn after opting
 					{
 						if (int.Parse(p.Handle) != runnerHandle)
 						{
 							p.TriggerEvent("AskRunnerOpt");
+							p.TriggerEvent("sth:invincible", true);
+
 						}
 					}
 					//offer hunters to opt into runner 
@@ -416,6 +416,7 @@ namespace sthvServer
 		}
 		async void onHuntOver()
 		{
+			TriggerClientEvent("sth:starttimer", 0); //end timer
 			TriggerClientEvent("sthv:spectate", false);
 			TriggerClientEvent("sth:spawnall");
 			TriggerClientEvent("removeveh");

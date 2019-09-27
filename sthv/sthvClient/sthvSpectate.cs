@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace sthv
 {
-	class sthvSpectate : BaseScript
+	class sthvSpectate : BaseScript //shows runner on map sometimes
 	{
 		public bool shouldSpectateOnDeath { get; set; } = true;
 		public int RunnerServerId { get; set; }
@@ -27,8 +27,9 @@ namespace sthv
 					Debug.WriteLine("leaving spectator mode");
 					isSpectating = false;
 			} });
-			
+
 		}
+
 
 		async Task updateNuiOnSpectateStatus()
 		{

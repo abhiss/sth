@@ -237,14 +237,10 @@ namespace sthvClient
 					World.AddExplosion(Game.PlayerPed.Position, ExplosionType.Rocket, 5f, 2f);
 				}
 			}
-			else {
-
-			};
 
 
-			//SendChatMessage("test", $"word: {API.IsPointOnRoad(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y, Game.PlayerPed.Position.Z, 0)}", 255, 255, 255);
-			// ^ sends in chat if player is on street
-			await BaseScript.Delay(5000);
+
+			await BaseScript.Delay(9000);
 		}
 
 		void OnPlayerLoaded(string res) // res from mapmanager_cliend.lua line 47, stores name of map resource
@@ -285,6 +281,8 @@ namespace sthvClient
 		{
 			RunnerHandle = newRunnerHandle;
 			Debug.WriteLine($"updated runner handle{RunnerHandle}");
+			sthv.sthvPlayerCache.runnerPlayer =  GetPlayerFromServerId(RunnerHandle, Players);
+
 			if( newRunnerHandle == -1)
 			{
 				sthv.sthvPlayerCache.isHuntActive = false;

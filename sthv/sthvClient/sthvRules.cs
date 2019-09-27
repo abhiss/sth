@@ -11,13 +11,18 @@ using Newtonsoft.Json;
 
 namespace sthvClient
 {
-	class sthvRules
+	class sthvRules : BaseScript
 	{
 		int _ped;
 		int _pid;
+
+		public Blip RunnerRadiusBlip { get; set; }
+
 		public sthvRules()
 		{
-			_ped = API.PlayerPedId();
+			Tick += ShowRunnerOnMap;
+
+		_ped = API.PlayerPedId();
 			_pid = API.PlayerId();
 			API.StatSetInt((uint)Game.GenerateHash("MP0_STAMINA"), 100, true);
 			//API.SetPoliceIgnorePlayer(_pid, true);  //works like "turn cops blind eye", you get cops if you shoot them or something 
@@ -49,7 +54,36 @@ namespace sthvClient
 			#endregion
 		}
 
+		async Task ShowRunnerOnMap()
+		{
+			if (sthv.sthvPlayerCache.isHuntActive)
+			{
+				Player _runner = sthv.sthvPlayerCache.runnerPlayer;
+				RunnerRadiusBlip = new Blip(API.AddBlipForRadius(_runner.Character.Position.X, _runner.Character.Position.Y, _runner.Character.Position.Z, 50));
 
+				Debug.WriteLine("showing runner on map :D");
+				Debug.WriteLine(_runner.Name.ToString());
+
+				RunnerRadiusBlip.Color = BlipColor.Red;
+				RunnerRadiusBlip.Alpha = 80;
+				RunnerRadiusBlip.ShowRoute = true;
+				Debug.WriteLine($"is on minimap: {RunnerRadiusBlip.IsOnMinimap}");
+
+				//API.SetBlipColour(RunnerRadiusBlip.Handle, 20);
+				//API.SetBlipAlpha(RunnerRadiusBlip.Handle, 50);
+
+
+				await Delay(25000);
+				RunnerRadiusBlip.Delete();
+			}
+			else
+			{
+				Debug.WriteLine("hunt isnt active :(");
+			}
+
+			await Delay(50000);
+			RunnerRadiusBlip.Delete();
+		}
 		public async Task isKeyPressed() //happens always
 		{
 			API.HideHudComponentThisFrame((int)HudComponent.Cash);

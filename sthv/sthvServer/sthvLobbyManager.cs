@@ -55,13 +55,17 @@ namespace sthvServer
 		{
 			if (AlivePlayers.ContainsKey(source.Handle))
 			{
-				AlivePlayers.Remove(source.Name);
+				AlivePlayers.Remove(source.Handle);
 			}
 			if (playerPing.ContainsKey(source.Handle))
 			{
 				playerPing.Remove(source.Handle);
 			}
-
+			if (source.Handle == server.runner.Handle)
+			{
+				Debug.WriteLine("^1Runner left :( ^7");
+				server.isHuntOver = true;
+			}
 			Debug.WriteLine($"dropped {source.Name}");
 			CheckAlivePlayers();
 			TriggerClientEvent("sthv:refreshsb");
@@ -118,8 +122,13 @@ namespace sthvServer
 			if(numberOfAlivePlayers < 2 && server.hasHuntStarted)
 			{
 				server.isHuntOver = true;
-				server.SendChatMessage("^4Hunt", "All runners dead, hunt over :D");
+				server.SendChatMessage("^4Hunt", "All hunters dead, hunt over.");
 			}
+
 		}
 	}
 }
+
+
+
+

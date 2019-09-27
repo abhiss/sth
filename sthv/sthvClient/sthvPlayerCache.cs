@@ -17,6 +17,8 @@ namespace sthv
 		static public bool isHuntActive { get; set; }
 		static public int playerid = Game.Player.Handle;
 		static public int playerpedid = Game.Player.Character.Handle;
+		static public Player runnerPlayer { get; set; }
+
 		Dictionary<string, int> playersPing = new Dictionary<string, int>();//key is serverid
 
 		public sthvPlayerCache()
@@ -51,7 +53,7 @@ namespace sthv
 				EventData = playerInfoList
 			}));
 
-			await Delay(60000);
+			await Delay(10000);
 		}
 		async Task CheckIfDead()
 		{
