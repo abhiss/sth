@@ -6,6 +6,7 @@ namespace sthvClient
 {
 	public class Spawn : BaseScript
 	{
+		
 		private static bool _spawnLock = false;
 
 		public static void FreezePlayer(int playerId, bool freeze)
@@ -40,7 +41,7 @@ namespace sthvClient
 					ClearPedTasksImmediately(ped);
 			}
 		}
-	
+		
 		public static async Task SpawnPlayer(string skin, float x, float y, float z, float heading)
 		{
 			if (_spawnLock)
@@ -54,6 +55,8 @@ namespace sthvClient
 			{
 				await Delay(1);
 			}
+
+			NetworkSetInSpectatorMode(false, 0); //changed to take out of spectator mode
 
 			FreezePlayer(PlayerId(), true);
 			await Game.Player.ChangeModel(GetHashKey(skin));
