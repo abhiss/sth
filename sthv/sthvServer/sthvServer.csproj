@@ -32,7 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CitizenFX.Core.Server, Version=0.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\CitizenFX.Core.Server.1.0.1421\lib\net45\CitizenFX.Core.Server.dll</HintPath>
+      <HintPath>..\packages\CitizenFX.Core.Server.1.0.1626\lib\net45\CitizenFX.Core.Server.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -47,13 +47,14 @@
     <Compile Include="Identifiers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="server.cs" />
-    <Compile Include="sthvHuntManager.cs" />
+    <Compile Include="sthvLobbyManager.cs" />
+    <Compile Include="sthvSyncClients.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /y /d "$(TargetPath)" "C:\Servers\FiveM\FiveM-STH\server-data\resources\[local]\sthv"</PostBuildEvent>
+    <PostBuildEvent>xcopy /y /d "$(TargetPath)" "C:\Users\abhi-\FiveM\cfx-server-data-master\resources\[local]\sthv"</PostBuildEvent>
   </PropertyGroup>
 </Project>
