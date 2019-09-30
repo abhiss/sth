@@ -5,5 +5,5 @@ toggleautohunt toggles autohunt
 hunt does a hunt
 endhunt ends a hunt
 
-*Feedback*
+**Feedback**
 Join and yell at me to fix stuff https://discord.gg/vNEaxe8
