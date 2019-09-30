@@ -17,11 +17,10 @@ namespace sthvServer
 	}
 	class sthvLobbyManager : BaseScript
 	{
-		PlayerList PlayersAlive { get; set; }
 		public PlayerList PlayersDead { get; set; }
 		public PlayerList PlayersHunters { get; set; }
 		public PlayerList PlayersRunners { get; set; }
-		Dictionary<string, bool> playerPing = new Dictionary<string, bool >();
+		Dictionary<string, bool> PlayerPing = new Dictionary<string, bool >();
 		Dictionary<string, bool> AlivePlayers = new Dictionary<string, bool>();
 
 		public sthvLobbyManager()
@@ -53,18 +52,27 @@ namespace sthvServer
 		}
 		void OnPlayerDropped([FromSource]Player source, string reason)
 		{
-			if (AlivePlayers.ContainsKey(source.Handle))
+			if (source != null)
 			{
-				AlivePlayers.Remove(source.Handle);
+				Debug.WriteLine("1");
+
+				string _leftHandle = source.Name;
+				Debug.WriteLine("1");
+				if (AlivePlayers.ContainsKey(_leftHandle))
+				{
+					AlivePlayers.Remove(_leftHandle);
+				}
+				Debug.WriteLine("1");
+				if (server.hasHuntStarted && _leftHandle == server.runner.Handle)
+				{
+					Debug.WriteLine("^1Runner left :( ^7");
+					server.isHuntOver = true;
+				
+				}
 			}
-			if (playerPing.ContainsKey(source.Handle))
+			else
 			{
-				playerPing.Remove(source.Handle);
-			}
-			if (source.Handle == server.runner.Handle)
-			{
-				Debug.WriteLine("^1Runner left :( ^7");
-				server.isHuntOver = true;
+				Debug.WriteLine("source returned null onplayerdropped");
 			}
 			Debug.WriteLine($"dropped {source.Name}");
 			CheckAlivePlayers();
