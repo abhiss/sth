@@ -84,6 +84,7 @@ namespace sthvClient
 				{
 					TriggerServerEvent("sthv:opttorun");
 				}
+				
 				DefaultSpawn();
 
 			}));

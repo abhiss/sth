@@ -22,7 +22,7 @@ namespace sthvServer
 		static public bool isHuntOver = true;
 		bool isEveryoneInvincible = true;
 		public bool HavePlayersGottenGuns { get; set; }
-
+		public bool TestMode { get; set; } = false;
 
 		public bool AutoHunt { get; set; }
 		public server()
@@ -30,6 +30,7 @@ namespace sthvServer
 			
 			var stuffythings = new Identifiers();
 			//test 
+
 			EventHandlers["sth:sendServerDebug"] += new Action<string>((string info) => { Debug.WriteLine(info); });
 
 			API.RegisterCommand("spawn", new Action<int, List<object>, string>((src, args, raw) =>
@@ -45,6 +46,11 @@ namespace sthvServer
 				{
 					Debug.WriteLine($"^1Error (probably passed invalid arguments): {ex}^7");
 				}
+			}), true);
+			API.RegisterCommand("testmode", new Action<int, List<object>, string>((src, args, raw) =>
+			{
+				TestMode = !TestMode;
+				Debug.WriteLine("testmode: " + TestMode.ToString());
 			}), true);
 			API.RegisterCommand("endhunt", new Action<int, List<object>, string>((src, args, raw) =>
 			{
@@ -243,13 +249,13 @@ namespace sthvServer
 			{
 				try
 				{
-					if (Players.Count() < 2)
+					if (Players.Count() < 2 && !TestMode)
 					{
 						Console.WriteLine("not enough players to start hunt, waiting till more join");
 						SendChatMessage("hunt-error", "not enough players to start hunt, waiting till more join");
 						while(Players.Count() < 2)
 						{
-							SendChatMessage("hunt-error", "waiting for 2 people before we start");
+							SendChatMessage("hunt", "waiting for 2 people before we start", 105,0,225);
 							Debug.WriteLine("^8 Not enough players to start^7");
 							await Delay(20000);
 						}
