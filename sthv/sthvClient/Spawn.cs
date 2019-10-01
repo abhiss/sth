@@ -2,7 +2,7 @@
 using CitizenFX.Core;
 using static CitizenFX.Core.Native.API;
 
-namespace sthvClient
+namespace sthv
 {
 	public class Spawn : BaseScript
 	{

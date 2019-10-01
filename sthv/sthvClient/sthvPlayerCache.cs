@@ -42,7 +42,7 @@ namespace sthv
 					{
 						alive = p.IsAlive,
 						name = p.Name,
-						runner = (sthvClient.client.RunnerHandle == p.ServerId),
+						runner = (sthv.client.RunnerHandle == p.ServerId),
 						serverid = p.ServerId
 					}
 				);

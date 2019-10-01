@@ -9,7 +9,7 @@ using CitizenFX;
 using CitizenFX.Core.UI;
 using Newtonsoft.Json;
 
-namespace sthvClient
+namespace sthv
 {
 	class sthvRules : BaseScript
 	{
@@ -56,8 +56,8 @@ namespace sthvClient
 
 		async Task ShowRunnerOnMap()
 		{
-			if (sthv.sthvPlayerCache.isHuntActive)
-			{
+			if (sthv.sthvPlayerCache.isHuntActive && sthvPlayerCache.runnerPlayer != null)
+			{	
 				Player _runner = sthv.sthvPlayerCache.runnerPlayer;
 				RunnerRadiusBlip = new Blip(API.AddBlipForRadius(_runner.Character.Position.X, _runner.Character.Position.Y, _runner.Character.Position.Z, 50));
 
@@ -78,7 +78,7 @@ namespace sthvClient
 			}
 			else
 			{
-				Debug.WriteLine("hunt isnt active :(");
+				Debug.WriteLine("There is no hunter lol");
 			}
 
 			await Delay(50000);
@@ -103,14 +103,16 @@ namespace sthvClient
 			if (API.IsControlJustReleased(0, 86))
 			{
 				Debug.WriteLine("show me on map");
+				//sthv.test.addCoordToList();
 			}
 			if (API.IsControlJustPressed(0, 171))
 			{
-				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "sthv.showsb", EventData = new sthv.NuiModels.dataBool { data = true } }));
+				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "sthv.showsb", EventData = new NuiModels.dataBool { data = true } }));
 			}
 			if (API.IsControlJustReleased(0, 171))
 			{
-				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "sthv.showsb", EventData = new sthv.NuiModels.dataBool { data = false } }));
+				await Delay(1000);
+				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "sthv.showsb", EventData = new NuiModels.dataBool { data = false } }));
 			}
 			//await BaseScript.Delay(0);
 		}

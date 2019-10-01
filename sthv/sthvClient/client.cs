@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 
 
 
-namespace sthvClient
+namespace sthv
 {
 	public class client : BaseScript
 	{
@@ -20,7 +20,7 @@ namespace sthvClient
 		static public int RunnerHandle { get; set; }
 
 		bool isFrozen = false;
-		bool areSpawnsAllowed { get; set; } = false;
+		public static sthv.sthvMapModel CurrentMap { get; set; }
 
 
 		public client()
@@ -44,8 +44,8 @@ namespace sthvClient
 			}), false);
 
 
-			var playArea = new sthvClient.sthvPlayArea();
-			var rules = new sthvClient.sthvRules();
+			var playArea = new sthv.sthvPlayArea();
+			var rules = new sthv.sthvRules();
 
 			Tick += rules.AutoBrakeLight;
 			Tick += playArea.OnTickPlayArea;
@@ -91,8 +91,10 @@ namespace sthvClient
 			EventHandlers["sthv:nuifocus"] += new Action<bool>((bool focus) => { API.SetNuiFocus(focus, focus); }); //used as makeshift freeze
 
 			EventHandlers["sthv:spawnhuntercars"] += new Action(() => sthv.sthvHuntStart.HunterVehicles());
+			EventHandlers["sthv:sendChosenMap"] += new Action<int>(i => sthvHuntStart.SetMap(i));
 
-			TriggerServerEvent("sth:showMeOnMap", Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y, Game.PlayerPed.Position.X);
+			TriggerServerEvent("NumberOfAvailableMaps", sthvMaps.Maps.Length);
+			
 			TriggerServerEvent("sth:NeedLicense");
 			EventHandlers["onClientMapStart"] += new Action<string>(OnPlayerLoaded); // event from mapmanager_cliend.lua line 47
 			EventHandlers["sth:spawnall"] += new Action(DefaultSpawn);
@@ -102,9 +104,10 @@ namespace sthvClient
 			EventHandlers["sth:spawn"] += new Action<int>(async(int i) => {
 				if (i == 1)
 				{
-					await sthvClient.Spawn.SpawnPlayer("mp_m_freemode_01", 367f, -1698f, 48f, 0f);
+					Debug.WriteLine("Runner spawned");
+					await sthv.Spawn.SpawnPlayer("mp_m_freemode_01", CurrentMap.RunnerSpawn.X, CurrentMap.RunnerSpawn.Y, CurrentMap.RunnerSpawn.Z, CurrentMap.RunnerSpawn.W);
 					API.SetPedRandomComponentVariation(Game.Player.Character.Handle, false);
-					Vehicle car = await World.CreateVehicle(new Model(VehicleHash.Warrener), new Vector3(432f, -1392f, 29.4f), 300f);
+					Vehicle car = await World.CreateVehicle(new Model(VehicleHash.Warrener), new Vector3(CurrentMap.RunnerSpawn.X, CurrentMap.RunnerSpawn.Y, CurrentMap.RunnerSpawn.Z), CurrentMap.RunnerSpawn.W);
 					while (!API.DoesEntityExist(car.Handle))
 					{
 						await Delay(1);
@@ -115,7 +118,7 @@ namespace sthvClient
 				}
 				else if(i == 2) 
 				{
-					await sthvClient.Spawn.SpawnPlayer("s_m_y_swat_01", 362f, -1705f, 48.3f, 300f);
+					await sthv.Spawn.SpawnPlayer("s_m_y_swat_01", CurrentMap.HunterSpawn.X, CurrentMap.HunterSpawn.Y, CurrentMap.HunterSpawn.Z, CurrentMap.HunterSpawn.W);
 					IsRunner = false;
 				}
 			});
@@ -300,7 +303,14 @@ namespace sthvClient
 		}
 		async void DefaultSpawn() //only used for /spawnall i think
 		{
-			await sthvClient.Spawn.SpawnPlayer("s_m_y_swat_01", 362f, -1705f, 48.3f, 300f);
+			if (CurrentMap != null)
+			{
+				await sthv.Spawn.SpawnPlayer("s_m_y_swat_01", CurrentMap.HunterSpawn.X, CurrentMap.HunterSpawn.Y, CurrentMap.HunterSpawn.Z, CurrentMap.HunterSpawn.W);
+			}
+			else
+			{
+				await sthv.Spawn.SpawnPlayer("s_m_y_swat_01", 1800, 2600, 45, 200);
+			}
 		}
 
 
