@@ -29,7 +29,7 @@ namespace sthvServer
 		public int currentplayarea { get; set; }
 
 
-		public bool AutoHunt { get; set; }
+		public bool AutoHunt { get; set; } = true;
 		public server()
 		{
 
@@ -77,11 +77,16 @@ namespace sthvServer
 			API.RegisterCommand("toggleautohunt", new Action<int, List<object>, string>((src, args, raw) =>
 			{
 				AutoHunt = !AutoHunt;
+				Debug.WriteLine("autohunt now " + AutoHunt);
 			}), true);
 			API.RegisterCommand("hunt", new Action<int, List<object>, string>((src, args, raw) =>
 			{
-
-				StartHunt(25);
+				
+				//int time = int.Parse(args[0].ToString());
+				int huntplayarea = int.Parse(args[0].ToString());
+				int huntrunnerindex = int.Parse(args[1].ToString());
+				
+				StartHunt(25, huntplayarea, huntrunnerindex);
 			}), true);
 
 			API.RegisterCommand("spawnall", new Action<int, List<object>, string>((src, args, raw) =>
@@ -247,6 +252,7 @@ namespace sthvServer
 			EventHandlers["sthv:opttorun"] += new Action<Player>(addToRunnerList);
 
 			EventHandlers["NumberOfAvailableMaps"] += new Action<int>(i => numberOfAvailableMaps = i);
+
 		}
 
 		void addToRunnerList([FromSource]Player source) {
@@ -294,7 +300,7 @@ namespace sthvServer
 					{
 						Console.WriteLine("not enough players to start hunt, waiting till more join");
 						SendChatMessage("hunt-error", "not enough players to start hunt, waiting till more join");
-						while (Players.Count() < 2)
+						while ((Players.Count() < 2) && !TestMode)
 						{
 							SendChatMessage("hunt", "waiting for 2 people before we start", 105, 0, 225);
 							Debug.WriteLine("^8 Not enough players to start^7");
@@ -398,6 +404,7 @@ namespace sthvServer
 							p.TriggerEvent("sth:freezePlayer", true);
 						}
 					}
+					runner.TriggerEvent("sthv:spectate", false);
 					TriggerClientEvent("sthv:refreshsb");
 
 					foreach (Player p in Players)

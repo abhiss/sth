@@ -88,7 +88,7 @@ namespace sthv
 				DefaultSpawn();
 
 			}));
-			EventHandlers["sthv:nuifocus"] += new Action<bool>((bool focus) => { API.SetNuiFocus(focus, focus); }); //used as makeshift freeze
+			EventHandlers["sthv:nuifocus"] += new Action<bool>((bool focus) => { API.SetNuiFocus(focus, focus); }); //used as freeze
 
 			EventHandlers["sthv:spawnhuntercars"] += new Action(() => sthv.sthvHuntStart.HunterVehicles());
 			EventHandlers["sthv:sendChosenMap"] += new Action<int>(i => sthvHuntStart.SetMap(i));
@@ -155,36 +155,36 @@ namespace sthv
 			});
 
 			#region commands
-			API.RegisterCommand("license", new Action<int, List<object>, string>((src, args, raw) =>
+			API.RegisterCommand("serverid", new Action<int, List<object>, string>((src, args, raw) =>
 			{
 				Debug.WriteLine(License.ToString());
 			}), false);
 
 			
-			API.RegisterCommand("starttimer", new Action<int, List<object>, string>((src, args, raw) =>
-			{
-				try {
-					int timerCountInSeconds = int.Parse(args[0].ToString());
-					//Debug.WriteLine($"^3 {args[0].ToString()}");
+			//API.RegisterCommand("starttimer", new Action<int, List<object>, string>((src, args, raw) =>
+			//{
+			//	try {
+			//		int timerCountInSeconds = int.Parse(args[0].ToString());
+			//		//Debug.WriteLine($"^3 {args[0].ToString()}");
 
 
-					Debug.WriteLine("started timer");
-					API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "hunt.countdown", EventData = new sthv.NuiModels.NuiMessageModel { Message = "", Seconds = timerCountInSeconds } }));
+			//		Debug.WriteLine("started timer");
+			//		API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "hunt.countdown", EventData = new sthv.NuiModels.NuiMessageModel { Message = "", Seconds = timerCountInSeconds } }));
 
-						//string testObj = JsonConvert.SerializeObject(new sthv.NuiEventModel { EventName = "this is the eventname" });
-						//sthv.NuiEventModel deserializedObj = JsonConvert.DeserializeObject<sthv.NuiEventModel>(testObj);
-						//Debug.WriteLine(deserializedObj.EventName);
-				}
+			//			//string testObj = JsonConvert.SerializeObject(new sthv.NuiEventModel { EventName = "this is the eventname" });
+			//			//sthv.NuiEventModel deserializedObj = JsonConvert.DeserializeObject<sthv.NuiEventModel>(testObj);
+			//			//Debug.WriteLine(deserializedObj.EventName);
+			//	}
 
-				catch (Exception ex) { Debug.WriteLine($"^3{ex}"); }
+			//	catch (Exception ex) { Debug.WriteLine($"^3{ex}"); }
 
 
-			}), false);
-			API.RegisterCommand("test2", new Action<int, List<object>, string>((src, args, raw) =>
-			{
-				API.SetNuiFocus(true, true);
-				TriggerNuiEvent("sthv:runneropt");
-			}), false);
+			//}), false);
+			//API.RegisterCommand("test2", new Action<int, List<object>, string>((src, args, raw) =>
+			//{
+			//	API.SetNuiFocus(true, true);
+			//	TriggerNuiEvent("sthv:runneropt");
+			//}), false);
 
 
 			//API.RegisterCommand("spawn", new Action<int, List<object>, string>((src, args, raw) =>
@@ -236,7 +236,7 @@ namespace sthv
 		{
 			if(IsRunner == true)
 			{
-				if (Game.PlayerPed.IsInHeli)
+				if ( Game.PlayerPed.IsInSub || Game.PlayerPed.IsInFlyingVehicle)
 				{
 					World.AddExplosion(Game.PlayerPed.Position, ExplosionType.Rocket, 5f, 2f);
 				}
