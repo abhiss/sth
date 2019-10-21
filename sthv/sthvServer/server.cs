@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using System.IO;
+
 
 namespace sthvServer
 {
@@ -23,11 +25,14 @@ namespace sthvServer
 		bool isEveryoneInvincible = true;
 		public bool HavePlayersGottenGuns { get; set; }
 		public bool TestMode { get; set; } = false;
+		int numberOfAvailableMaps = 1;
+		public int currentplayarea { get; set; }
 
-		public bool AutoHunt { get; set; }
+
+		public bool AutoHunt { get; set; } = true;
 		public server()
 		{
-			
+
 			var stuffythings = new Identifiers();
 			//test 
 
@@ -42,7 +47,7 @@ namespace sthvServer
 					_playerToSpawn.TriggerEvent("sth:spawnall", true);
 
 				}
-				catch(Exception ex)
+				catch (Exception ex)
 				{
 					Debug.WriteLine($"^1Error (probably passed invalid arguments): {ex}^7");
 				}
@@ -72,10 +77,16 @@ namespace sthvServer
 			API.RegisterCommand("toggleautohunt", new Action<int, List<object>, string>((src, args, raw) =>
 			{
 				AutoHunt = !AutoHunt;
+				Debug.WriteLine("autohunt now " + AutoHunt);
 			}), true);
 			API.RegisterCommand("hunt", new Action<int, List<object>, string>((src, args, raw) =>
 			{
-				StartHunt(25);
+				
+				//int time = int.Parse(args[0].ToString());
+				int huntplayarea = int.Parse(args[0].ToString());
+				int huntrunnerindex = int.Parse(args[1].ToString());
+				
+				StartHunt(25, huntplayarea, huntrunnerindex);
 			}), true);
 
 			API.RegisterCommand("spawnall", new Action<int, List<object>, string>((src, args, raw) =>
@@ -83,6 +94,38 @@ namespace sthvServer
 				TriggerClientEvent("sth:spawnall");
 
 			}), true);
+			//test 
+
+			EventHandlers["logCoords"] += new Action<List<dynamic>>((coordlist) =>
+			{
+				Debug.WriteLine("triggered log");
+				if (coordlist.Count > 0)
+				{
+					string userpath = $"{API.GetResourcePath(API.GetCurrentResourceName())}/coordsData.txt";
+					Debug.WriteLine($"{userpath}");
+					var exists = File.Exists(userpath);
+
+					File.Delete(userpath);
+					if (true)
+					{
+						using (var file = File.CreateText(userpath))
+						{
+
+							foreach (var i in coordlist)
+							{
+								file.WriteLine($"new Vector4({i.X}f, {i.Y}f, {i.Z}f, {i.W}f),");
+								Console.WriteLine($"new Vector4({i.X}f, {i.Y}f, {i.Z}f, {i.W}f),");
+
+							}
+							file.Flush();
+						}
+					}
+				}
+				else
+				{
+					Debug.WriteLine("coordlist was empty");
+				}
+			});
 
 
 			#region obsolete
@@ -128,7 +171,7 @@ namespace sthvServer
 						{
 							int timeLeft = totalTime - i;
 
-							if (isRunnerKilled )
+							if (isRunnerKilled)
 							{
 								TriggerClientEvent("sendChatMessageToAll", "^5HUNT", $"Runner {runner.Name} lost with {timeLeft} minutes left. Hunters win!");
 								break;
@@ -207,7 +250,11 @@ namespace sthvServer
 			////EventHandlers["sth:testevent"] += new Action<Player>(OnTestEvent);
 			//EventHandlers["sth:showMeOnMap"] += new Action<float, float, float>((float x, float y, float z) => { TriggerClientEvent("sth:sendShowOnMap", x, y, z); });
 			EventHandlers["sthv:opttorun"] += new Action<Player>(addToRunnerList);
+
+			EventHandlers["NumberOfAvailableMaps"] += new Action<int>(i => numberOfAvailableMaps = i);
+
 		}
+
 		void addToRunnerList([FromSource]Player source) {
 			NextRunnerQueue.Add(source);
 		}
@@ -243,7 +290,7 @@ namespace sthvServer
 		/// <param name="timeInMinutes"></param>
 		/// <param name="playarea"></param>
 		/// <param name="playerId"></param>
-		async void StartHunt(int timeInMinutes, int playarea = 0, int runnerID = -1)
+		async void StartHunt(int timeInMinutes, int playarea = -1, int runnerID = -1)
 		{
 			if (isHuntOver)
 			{
@@ -253,9 +300,9 @@ namespace sthvServer
 					{
 						Console.WriteLine("not enough players to start hunt, waiting till more join");
 						SendChatMessage("hunt-error", "not enough players to start hunt, waiting till more join");
-						while(Players.Count() < 2)
+						while ((Players.Count() < 2) && !TestMode)
 						{
-							SendChatMessage("hunt", "waiting for 2 people before we start", 105,0,225);
+							SendChatMessage("hunt", "waiting for 2 people before we start", 105, 0, 225);
 							Debug.WriteLine("^8 Not enough players to start^7");
 							await Delay(20000);
 						}
@@ -263,7 +310,14 @@ namespace sthvServer
 
 					}
 					resetVars();
-
+					if (playarea < 0)
+					{
+						Random r = new Random();
+						playarea = r.Next(0, numberOfAvailableMaps);
+						Debug.WriteLine($"{numberOfAvailableMaps} maps available, {playarea} chosen");
+					}
+					TriggerClientEvent("sthv:sendChosenMap", playarea);
+					currentplayarea = playarea;
 					int totalTimeSecs = timeInMinutes * 60;
 					TriggerClientEvent("sth:starttimer", totalTimeSecs);
 					if (runnerID < 0) //picks random player from queue
@@ -350,6 +404,7 @@ namespace sthvServer
 							p.TriggerEvent("sth:freezePlayer", true);
 						}
 					}
+					runner.TriggerEvent("sthv:spectate", false);
 					TriggerClientEvent("sthv:refreshsb");
 
 					foreach (Player p in Players)
@@ -364,9 +419,8 @@ namespace sthvServer
 							if (!hasHuntStarted && (totalTimeSecs - timeleft > 30))
 							{
 								SendChatMessage("^5HUNT", "Hunt started!", 255, 255, 255);
-								//spawn hunter cars, spawn hunters
-								//TriggerClientEvent("sthv:spawnhuntercars");
-								TriggerClientEvent("sthv:nuifocus", false);
+							
+								//TriggerClientEvent("sthv:nuifocus", false);
 								TriggerClientEvent("sth:freezePlayer", false);
 								hasHuntStarted = true;
 							}
@@ -482,6 +536,10 @@ namespace sthvServer
 			string licenseId = source.Handle;
 			TriggerClientEvent(source, "sth:returnlicense", licenseId, runnerHandle);
 			TriggerClientEvent("sthv:refreshsb");
+
+			source.TriggerEvent("sth:updateRunnerHandle", runnerHandle);
+			source.TriggerEvent("sthv:sendChosenMap", currentplayarea);
+
 		}
 		void KillfeedStuff([FromSource]Player killed, int KillerIndex)
 		{
@@ -504,15 +562,22 @@ namespace sthvServer
 
 							isRunnerKilled = true;
 							isHuntOver = true;
-							SendChatMessage("^5HUNT", $"Runner {runner.Name} was killed by hunter {i.Name}");
+							SendChatMessage("^5HUNT", $"{i.Name} killed runner: {runner.Name}");
 						}
-						if (i.Handle == runner.Handle) //if runner gets a kill
+						else if (i.Handle == runner.Handle) //if runner gets a kill
 						{
 
 							SendChatMessage("^1HUNT", $"Runner {i.Name} killed hunter {killed.Name}");
 						}
+						else
+						{
+							SendChatMessage("^1KILLFEED", $"{i.Name} teamkilled {killed.Name}");
+							i.TriggerEvent("sthv:kill");
+							SendChatMessage("", $"^5{i.Name} was killed by Karma");
+						}
+						
 					}
-					else
+					else //means before hunt started
 					{
 						SendChatMessage("^1KILLFEED", $"{i.Name} killed {killed.Name}");
 						i.TriggerEvent("sthv:kill");
