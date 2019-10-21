@@ -242,8 +242,11 @@ namespace sthv
 					World.AddExplosion(Game.PlayerPed.Position, ExplosionType.Rocket, 5f, 2f);
 				}
 			}
-
-			if(Game.PlayerPed.IsSittingInVehicle() && (Game.PlayerPed.LastVehicle.ClassType == VehicleClass.Super))
+			if (Game.PlayerPed.IsInSub || Game.PlayerPed.IsInFlyingVehicle)
+			{
+				World.AddExplosion(Game.PlayerPed.Position, ExplosionType.Rocket, 5f, 2f);
+			}
+			if (Game.PlayerPed.IsSittingInVehicle() && (Game.PlayerPed.LastVehicle.ClassType == VehicleClass.Super))
 			{
 				Vehicle veh = Game.PlayerPed.LastVehicle;
 				veh.MaxSpeed = 30;
@@ -251,9 +254,9 @@ namespace sthv
 			if (API.IsPedInAnyPoliceVehicle(sthvPlayerCache.playerpedid))
 			{
 				Debug.WriteLine("in pol car");
-				API.SetVehicleColours(Game.PlayerPed.LastVehicle.Handle, (int)VehicleColor.Chrome, (int)VehicleColor.MatteDarkRed);
+				API.SetVehicleColours(Game.PlayerPed.LastVehicle.Handle, (int)VehicleColor.MetallicRaceYellow, (int)VehicleColor.MatteDarkRed);
+				//API.SetVehicleTyreBurst(Game.PlayerPed.LastVehicle.Handle, 0, true, 100);
 			}
-
 
 			await BaseScript.Delay(15000);
 		}

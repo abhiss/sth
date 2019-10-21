@@ -562,15 +562,22 @@ namespace sthvServer
 
 							isRunnerKilled = true;
 							isHuntOver = true;
-							SendChatMessage("^5HUNT", $"Runner {runner.Name} was killed by hunter {i.Name}");
+							SendChatMessage("^5HUNT", $"{i.Name} killed runner: {runner.Name}");
 						}
-						if (i.Handle == runner.Handle) //if runner gets a kill
+						else if (i.Handle == runner.Handle) //if runner gets a kill
 						{
 
 							SendChatMessage("^1HUNT", $"Runner {i.Name} killed hunter {killed.Name}");
 						}
+						else
+						{
+							SendChatMessage("^1KILLFEED", $"{i.Name} teamkilled {killed.Name}");
+							i.TriggerEvent("sthv:kill");
+							SendChatMessage("", $"^5{i.Name} was killed by Karma");
+						}
+						
 					}
-					else
+					else //means before hunt started
 					{
 						SendChatMessage("^1KILLFEED", $"{i.Name} killed {killed.Name}");
 						i.TriggerEvent("sthv:kill");
