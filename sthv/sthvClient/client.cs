@@ -141,7 +141,9 @@ namespace sthv
 				}
 
 			});
-			EventHandlers["sth:invincible"] += new Action<bool>((bool makeGod) => { Game.PlayerPed.IsInvincible = makeGod; });
+			EventHandlers["sth:invincible"] += new Action<bool>((bool makeGod) => { Game.Player.IsInvincible = makeGod;
+				Debug.WriteLine(makeGod.ToString());
+			});
 			EventHandlers["sth:giveguns"] += new Action<bool>((bool shouldgivegun) =>
 			{
 				if (shouldgivegun)
@@ -155,9 +157,8 @@ namespace sthv
 			});
 
 			#region commands
-			API.RegisterCommand("serverid", new Action<int, List<object>, string>((src, args, raw) =>
+			API.RegisterCommand("test2", new Action<int, List<object>, string>((src, args, raw) =>
 			{
-				Debug.WriteLine(License.ToString());
 			}), false);
 
 			
@@ -242,9 +243,19 @@ namespace sthv
 				}
 			}
 
+			if(Game.PlayerPed.IsSittingInVehicle() && (Game.PlayerPed.LastVehicle.ClassType == VehicleClass.Super))
+			{
+				Vehicle veh = Game.PlayerPed.LastVehicle;
+				veh.MaxSpeed = 30;
+			}
+			if (API.IsPedInAnyPoliceVehicle(sthvPlayerCache.playerpedid))
+			{
+				Debug.WriteLine("in pol car");
+				API.SetVehicleColours(Game.PlayerPed.LastVehicle.Handle, (int)VehicleColor.Chrome, (int)VehicleColor.MatteDarkRed);
+			}
 
 
-			await BaseScript.Delay(9000);
+			await BaseScript.Delay(15000);
 		}
 
 		void OnPlayerLoaded(string res) // res from mapmanager_cliend.lua line 47, stores name of map resource

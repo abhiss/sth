@@ -420,7 +420,7 @@ namespace sthvServer
 							{
 								SendChatMessage("^5HUNT", "Hunt started!", 255, 255, 255);
 							
-								TriggerClientEvent("sthv:nuifocus", false);
+								//TriggerClientEvent("sthv:nuifocus", false);
 								TriggerClientEvent("sth:freezePlayer", false);
 								hasHuntStarted = true;
 							}

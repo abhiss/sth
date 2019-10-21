@@ -29,6 +29,7 @@ namespace sthv
 			missionBlip.Color = BlipColor.TrevorOrange;
 			missionBlip.Alpha = 0;
 
+	
 			Tick += CheckPedMission;
 			//Tick += ShowRunnerOnMap;
 

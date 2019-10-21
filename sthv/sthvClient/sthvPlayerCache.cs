@@ -16,7 +16,7 @@ namespace sthv
 		public int ServerId { get; set; }
 		static public bool isHuntActive { get; set; }
 		static public int playerid = Game.Player.Handle;
-		static public int playerpedid = Game.Player.Character.Handle;
+		static public int playerpedid = Game.PlayerPed.Handle;
 		static public Player runnerPlayer { get; set; } = null;
 
 		Dictionary<string, int> playersPing = new Dictionary<string, int>();//key is serverid
