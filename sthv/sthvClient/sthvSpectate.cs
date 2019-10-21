@@ -43,7 +43,7 @@ namespace sthv
 						EventName = "sthvui:spectatorinfo",
 						EventData = new
 						{
-							nameOfSpectatedPlayer = sthvClient.client.GetPlayerFromServerId(_handleOfSpectatedPlayer, Players).Name
+							nameOfSpectatedPlayer = sthv.client.GetPlayerFromServerId(_handleOfSpectatedPlayer, Players).Name
 						}
 					}));
 				}

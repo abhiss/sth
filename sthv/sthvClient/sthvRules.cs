@@ -9,7 +9,7 @@ using CitizenFX;
 using CitizenFX.Core.UI;
 using Newtonsoft.Json;
 
-namespace sthvClient
+namespace sthv
 {
 	class sthvRules : BaseScript
 	{
@@ -18,11 +18,24 @@ namespace sthvClient
 
 		public Blip RunnerRadiusBlip { get; set; }
 
+
+		public Ped MissionPed { get; set; }
+		public bool ismissionactive { get; set; }
+		public Blip missionBlip { get; set; }
+		int missionPedNetID = 0;
 		public sthvRules()
 		{
-			Tick += ShowRunnerOnMap;
+			missionBlip = new Blip(API.AddBlipForRadius(0, 0, 0, 50));
+			missionBlip.Color = BlipColor.TrevorOrange;
+			missionBlip.Alpha = 0;
 
-		_ped = API.PlayerPedId();
+			Tick += CheckPedMission;
+			//Tick += ShowRunnerOnMap;
+
+			EventHandlers["sthv:setnewpedmission"] += new Action(SetNewMission); 
+
+
+			_ped = API.PlayerPedId();
 			_pid = API.PlayerId();
 			API.StatSetInt((uint)Game.GenerateHash("MP0_STAMINA"), 100, true);
 			//API.SetPoliceIgnorePlayer(_pid, true);  //works like "turn cops blind eye", you get cops if you shoot them or something 
@@ -35,6 +48,34 @@ namespace sthvClient
 			API.SetEveryoneIgnorePlayer(_pid, true);
 			//sthvClient.client.eventhandlers			
 			Game.PlayerPed.IsInvincible = true;
+
+			EventHandlers["sthv:updatepednetid"] += new Action<int>(netid =>
+			{
+				missionPedNetID = netid;
+				if (API.NetworkDoesEntityExistWithNetworkId(netid))
+				{
+					Ped missionped = new Ped(API.NetToPed(netid));
+					Debug.WriteLine($"^1 health {missionped.Health} position = {missionped.Position.DistanceToSquared2D(Game.PlayerPed.Position)}");
+				}
+				else
+				{
+					Debug.WriteLine("entity not found");
+				}
+
+			});
+			EventHandlers["updateonmped"] += new Action<bool, int, Vector3>((bool show, int radius, Vector3 pos) =>
+			{
+				if (show)
+				{
+					missionBlip.Alpha = 70;
+					missionBlip.Position = pos;
+				}
+				else
+				{
+					missionBlip.Alpha = 0;
+				}
+
+			});
 
 			#region ai relationships
 			//calm ai 
@@ -56,7 +97,7 @@ namespace sthvClient
 
 		async Task ShowRunnerOnMap()
 		{
-			if (sthv.sthvPlayerCache.isHuntActive)
+			if (sthv.sthvPlayerCache.isHuntActive && sthvPlayerCache.runnerPlayer != null)
 			{
 				Player _runner = sthv.sthvPlayerCache.runnerPlayer;
 				RunnerRadiusBlip = new Blip(API.AddBlipForRadius(_runner.Character.Position.X, _runner.Character.Position.Y, _runner.Character.Position.Z, 50));
@@ -74,11 +115,15 @@ namespace sthvClient
 
 
 				await Delay(25000);
-				RunnerRadiusBlip.Delete();
+				if (RunnerRadiusBlip.Exists())
+				{
+					RunnerRadiusBlip.Delete();
+				}
+
 			}
 			else
 			{
-				Debug.WriteLine("hunt isnt active :(");
+				Debug.WriteLine("There is no hunter lol");
 			}
 
 			await Delay(50000);
@@ -103,17 +148,19 @@ namespace sthvClient
 			if (API.IsControlJustReleased(0, 86))
 			{
 				Debug.WriteLine("show me on map");
+				//sthv.test.addCoordToList();
 			}
 			if (API.IsControlJustPressed(0, 171))
 			{
-				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "sthv.showsb", EventData = new sthv.NuiModels.dataBool { data = true } }));
+				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "sthv.showsb", EventData = new NuiModels.dataBool { data = true } }));
 			}
 			if (API.IsControlJustReleased(0, 171))
 			{
-				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "sthv.showsb", EventData = new sthv.NuiModels.dataBool { data = false } }));
+				await Delay(2000);
+				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "sthv.showsb", EventData = new NuiModels.dataBool { data = false } }));
 			}
-			//await BaseScript.Delay(0);
 		}
+
 		public async Task AutoBrakeLight()              //autobrakelight
 		{
 			_ped = API.PlayerPedId();
@@ -137,6 +184,57 @@ namespace sthvClient
 
 		}
 
+		async void SetNewMission()
+		{
+			if (!ismissionactive)
+			{
+				//Debug.WriteLine(Game.Player.LastVehicle.DisplayName);
+				MissionPed = await World.CreatePed(new Model(PedHash.Autoshop01SMM), Game.PlayerPed.Position);
+
+				missionPedNetID = MissionPed.NetworkId;
+				MissionPed.Task.StandStill(-1);
+				MissionPed.IsPersistent = true;
+				TriggerServerEvent("sthv:missionpedmade", MissionPed.NetworkId);
+
+				API.SetBlockingOfNonTemporaryEvents(MissionPed.Handle, true);
+				API.TaskSetBlockingOfNonTemporaryEvents(MissionPed.Handle, true);
+			
+				ismissionactive = true;
+			}
+			else
+			{
+				Debug.WriteLine("mission already active");
+				ismissionactive = false;
+			}
+		}
+
+		async Task CheckPedMission()
+		{
+			if (missionPedNetID != 0 && API.NetworkDoesNetworkIdExist(missionPedNetID))
+			{
+
+				
+				
+				int _mped = API.NetToPed(missionPedNetID);
+				Ped mped = new Ped(_ped);
+				if (API.DoesEntityExist(_mped))
+				{
+					Debug.WriteLine("mped exists");
+				
+						
+					TriggerServerEvent("missionpedstatus", API.GetEntityHealth(_mped), API.GetEntityCoords(_mped, true));
+
+					
+				}
+				else
+				{
+					Debug.WriteLine("mped doesnt exist");
+				}
+
+			}
+			
+			await Delay(2000);
+		}
 	}
 
 }

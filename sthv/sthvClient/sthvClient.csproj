@@ -53,11 +53,13 @@
     <Compile Include="sthvHuntStart.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Spawn.cs" />
+    <Compile Include="sthvMapModel.cs" />
     <Compile Include="sthvPlayArea.cs" />
     <Compile Include="sthvPlayerCache.cs" />
     <Compile Include="sthvRules.cs" />
     <Compile Include="sthvSpectate.cs" />
     <Compile Include="sthvSyncLobbyInfo.cs" />
+    <Compile Include="test.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

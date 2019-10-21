@@ -21,8 +21,7 @@ namespace sthvServer
 		public PlayerList PlayersHunters { get; set; }
 		public PlayerList PlayersRunners { get; set; }
 		Dictionary<string, bool> PlayerPing = new Dictionary<string, bool >();
-		Dictionary<string, bool> AlivePlayers = new Dictionary<string, bool>();
-
+		List<Player> AlivePlayers = new List<Player>();
 		public sthvLobbyManager()
 		{
 			EventHandlers["sthv:playerJustAlive"] += new Action<Player>(SyncJustAlive);
@@ -36,10 +35,9 @@ namespace sthvServer
 			{
 				foreach(Player p in Players)
 				{
-					if(AlivePlayers.TryGetValue(p.Handle, out bool val) && val){
+					if(AlivePlayers.Contains(p)){
 
 						Debug.WriteLine($"player {p.Name} is alive, ping is {p.Ping}");
-						
 					}
 					else
 					{
@@ -54,20 +52,19 @@ namespace sthvServer
 		{
 			if (source != null)
 			{
-				Debug.WriteLine("1");
-
 				string _leftHandle = source.Name;
-				Debug.WriteLine("1");
-				if (AlivePlayers.ContainsKey(_leftHandle))
+				if (AlivePlayers.Contains(source))
 				{
-					AlivePlayers.Remove(_leftHandle);
+					AlivePlayers.Remove(source);
 				}
-				Debug.WriteLine("1");
+				else
+				{
+					Debug.WriteLine($"player {source.Name} not in alive list anyways :(");
+				}
 				if (server.hasHuntStarted && _leftHandle == server.runner.Handle)
 				{
 					Debug.WriteLine("^1Runner left :( ^7");
 					server.isHuntOver = true;
-				
 				}
 			}
 			else
@@ -83,16 +80,13 @@ namespace sthvServer
 			TriggerClientEvent("sthv:updateAlive", source.Handle, true);
 			Debug.WriteLine($"^4player {source.Name} just alive^7");
 
-			if (AlivePlayers.TryGetValue(source.Handle, out bool val)) //declares val inline 
+			if (AlivePlayers.Contains(source))//declares val inline 
 			{
-				if (val != true)
-				{
-					AlivePlayers[source.Handle] = true;
-				}
+				Debug.WriteLine($"player {source.Name} was already in alive list");
 			}
 			else
 			{
-				AlivePlayers.Add(source.Handle, true);
+				AlivePlayers.Add(source);
 			}
 			CheckAlivePlayers();
 
@@ -103,31 +97,22 @@ namespace sthvServer
 			TriggerClientEvent("sthv:updateAlive", source.Handle, false);
 			Debug.WriteLine($"^4player {source.Name} just dead^7");
 
-			if(AlivePlayers.TryGetValue(source.Handle, out bool val)){
-				if(val != false)
-				{
-					AlivePlayers[source.Handle] = false;
-				}
+			if(AlivePlayers.Contains(source))
+			{
+				AlivePlayers.Remove(source);
 			}
 			else
 			{
-				AlivePlayers.Add(source.Handle, false);
+				Debug.WriteLine($"player {source.Name} wasnt in alivelist :(");
 			}
 			CheckAlivePlayers();
 
 		}
 		private void CheckAlivePlayers()
 		{
-			int numberOfAlivePlayers = 0;
-			foreach(var i in AlivePlayers)
-			{
-				if( i.Value == true)
-				{
-					numberOfAlivePlayers++;
-				}
-			}
-			Debug.WriteLine($"{numberOfAlivePlayers} alive players remaining, {AlivePlayers.Count()} total");
-			if(numberOfAlivePlayers < 2 && server.hasHuntStarted)
+			Debug.WriteLine($"{AlivePlayers.Count} alive players remaining");
+
+			if(AlivePlayers.Count < 2 && server.hasHuntStarted)
 			{
 				server.isHuntOver = true;
 				server.SendChatMessage("^4Hunt", "All hunters dead, hunt over.");
