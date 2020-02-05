@@ -25,6 +25,7 @@ namespace sthv
 		int missionPedNetID = 0;
 		public sthvRules()
 		{
+			Ped _thisPed = Game.PlayerPed;
 			missionBlip = new Blip(API.AddBlipForRadius(0, 0, 0, 50));
 			missionBlip.Color = BlipColor.TrevorOrange;
 			missionBlip.Alpha = 0;
@@ -135,7 +136,7 @@ namespace sthv
 			API.HideHudComponentThisFrame((int)HudComponent.Cash);
 			API.HideHudComponentThisFrame((int)HudComponent.CashChange);
 			API.DisablePlayerVehicleRewards(_pid);
-			if (API.IsControlJustReleased(20, 48)) //Z 
+			if (API.IsControlJustReleased(20, 48)) //Z
 			{
 				if (API.IsBigmapActive())
 				{
@@ -160,6 +161,17 @@ namespace sthv
 				await Delay(2000);
 				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "sthv.showsb", EventData = new NuiModels.dataBool { data = false } }));
 			}
+			if (SpawnNuiController.GetInput)
+			{
+				if (API.IsControlJustReleased(0, 163))
+				{
+					TriggerEvent("sthv:input:key:9");
+				}
+				else if (API.IsControlJustReleased(0, 162))
+				{
+					TriggerEvent("sthv:input:key:8");
+				} 
+			}
 		}
 
 		public async Task AutoBrakeLight()              //autobrakelight
@@ -175,7 +187,6 @@ namespace sthv
 				{
 					API.SetVehicleBrakeLights(vehId, true);
 				}
-				else;
 			}
 			else
 			{

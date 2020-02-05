@@ -41,7 +41,6 @@ namespace sthv
 					ClearPedTasksImmediately(ped);
 			}
 		}
-		
 		public static async Task SpawnPlayer(string skin, float x, float y, float z, float heading)
 		{
 			if (_spawnLock)
@@ -51,9 +50,10 @@ namespace sthv
 
 			DoScreenFadeOut(500);
 
-			while (IsScreenFadingOut())
+			while (IsScreenFadingOut() && HasModelLoaded((uint)GetHashKey(skin)))
 			{
 				await Delay(1);
+				
 			}
 
 			NetworkSetInSpectatorMode(false, 0); //changed to take out of spectator mode
