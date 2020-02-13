@@ -42,14 +42,14 @@ namespace sthvServer
 		public string fivemHunters = "fivem-hunters";
 		public string fivemRunner = "fivem-runner";
 		public string fivemDead = "fivem-dead";
-		
+
 		/// <summary>returns list of discordId's of members in channel. Empty list if channel is empty.</summary>
 		public async Task<string[]> GetPlayersInChannel(string channelName)
 		{
-			var requestBody = new{
+			var requestBody = new {
 				name = "GetPlayersInChannel",
 				data = new {
-					channel = channelName 
+					channel = channelName
 				}
 			};
 			var response = await UploadString(_discordUrl, JsonConvert.SerializeObject(requestBody));
@@ -57,7 +57,7 @@ namespace sthvServer
 			var output = JsonConvert.DeserializeObject<string[]>(response);
 			return output;
 		}
-		public async Task<bool> GetIsPlayerInGuild (string discordid)
+		public async Task<bool> GetIsPlayerInGuild(string discordid)
 		{
 			var requestBody = new
 			{
@@ -92,6 +92,10 @@ namespace sthvServer
 			var output = JsonConvert.DeserializeObject<bool>(response);
 			Debug.WriteLine(output.ToString());
 			return output;
+		}
+		public string getDiscordId(Player player)
+		{
+			return player.Identifiers["discord"];
 		}
 		private async Task<string> DownloadString(string url)
 		{

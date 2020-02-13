@@ -25,7 +25,7 @@ namespace sthvServer
 		int numberOfAvailableMaps = 1;
 		public int currentplayarea { get; set; } = 1;
 		public sthvDiscordController discord { get; set; }
-		public bool IsDiscordServerOnline { get; set; }
+		public bool IsDiscordServerOnline { get; set; } = false;
 		public bool AutoHunt { get; set; } = true;
 
 
@@ -199,6 +199,7 @@ namespace sthvServer
 							{
 								p.TriggerEvent("AskRunnerOpt");
 							}
+
 						}
 						await Delay(8000);
 						foreach (Player p in NextRunnerQueue)
@@ -263,10 +264,16 @@ namespace sthvServer
 						if (int.Parse(p.Handle) != runnerHandle)
 						{
 							p.TriggerEvent("sth:spawn", (int)spawnType.hunter);
+							discord.MovePlayerToVc(p.getDiscordId(), discord.fivemHunters);
+
+						}
+						else //if runner
+						{
+							discord.MovePlayerToVc(p.getDiscordId(), discord.fivemRunner);
 						}
 					}
-					await Delay(1000);
 					sthvLobbyManager.DeadPlayers = new List<string>();
+					await Delay(1000);
 					for (int timeleft = totalTimeSecs; timeleft > 0; --timeleft) //hunt event loop
 					{
 						if (!isHuntOver)
@@ -319,8 +326,12 @@ namespace sthvServer
 			}
 			await BaseScript.Delay(5000);
 		}
-		async void onHuntOver()
+		async void onHuntOver() //happens once on hunt over
 		{
+			foreach(Player p in Players)
+			{
+				discord.MovePlayerToVc(p.getDiscordId(), discord.pcVoice);
+			}
 			TriggerClientEvent("sthv:spectate", false);
 			playersInHeliServerid = new List<int>();
 			//TriggerClientEvent("sth:spawnall");
@@ -487,11 +498,14 @@ namespace sthvServer
 
 								SendChatMessage("^1HUNT", $"Runner {i.Name} killed hunter {killed.Name}");
 							}
-							else
+							else //teamkill during hunt
 							{
 								SendChatMessage("^1KILLFEED", $"{i.Name} teamkilled {killed.Name}");
 								i.TriggerEvent("sthv:kill");
-								SendChatMessage("", $"^5{i.Name} was killed by Karma");
+								SendChatMessage("", $"^5{i.Name} was killed by Karma and {killed.Name} respawned.");
+								TriggerClientEvent("sth:spawn", 2);
+								sthvLobbyManager.DeadPlayers.RemoveAll(p => p == getLicense(i));
+								
 							}
 
 						}
@@ -540,6 +554,9 @@ namespace sthvServer
 			runner = 1,
 			hunter = 2,
 			spectator = 3
+		}
+		public static string getLicense(Player p) {
+			return p.Identifiers["license"];
 		}
 
 	}
