@@ -2,15 +2,5 @@
 
 discord.gg/HygTs4s
 
-**Commands:**
-
-
-toggleautohunt toggles autohunt
-
-hunt does a hunt
-
-endhunt ends a hunt
-
-remveh removes all vehicles
-
+**A gamemode based on FailRace's Survive the Hunt. Written in C# for FiveM.**
 
