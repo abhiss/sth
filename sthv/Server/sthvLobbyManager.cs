@@ -17,39 +17,34 @@ namespace sthvServer
 		/// <summary>
 		/// reset and used in server.cs to check if joining player had died before so people cant rejoin and get a second life.
 		/// </summary>
-		public static List<Player> DeadPlayers = new List<Player>();
+		public static List<string> DeadPlayers = new List<string>();
 		//public PlayerList PlayersHunters { get; set; }
 		//public PlayerList PlayersRunners { get; set; }
 		Dictionary<string, bool> PlayerPing = new Dictionary<string, bool >();
 		List<Player> AlivePlayers = new List<Player>();
 		public sthvLobbyManager()
 		{
-			EventHandlers["sthv:playerJustAlive"] += new Action<Player>(SyncJustAlive);
-			EventHandlers["sthv:playerJustDead"] += new Action<Player>(SyncJustDead);
 			EventHandlers["playerDropped"] += new Action<Player, string>(OnPlayerDropped);
 			EventHandlers["playerConnecting"] += new Action(() =>
-			{ 
+			{
 			});
 
 
-			API.RegisterCommand("testaliveplayers", new Action<int, List<object>, string>((src, args, raw) =>
+			API.RegisterCommand("checkaliveplayers", new Action<int, List<object>, string>((src, args, raw) =>
 			{
 				foreach(Player p in Players)
 				{
-					if(AlivePlayers.Contains(p)){
-
-						Debug.WriteLine($"player {p.Name} is alive, ping is {p.Ping}");
+					if(DeadPlayers.Contains(p.Identifiers["license"])){
+						Debug.WriteLine($"player {p.Name} is dead, ping is {p.Ping}");
 					}
 					else
 					{
-						Debug.WriteLine($"player {p.Name} is dead, ping is {p.Ping}");
+						Debug.WriteLine($"player {p.Name} is alive, ping is {p.Ping}");
 					}
 				}
 			}), false);
-
-			EventHandlers["test:logIdentifiers"] += new Action<Player>(logIdentifiers);
-			
 		}
+		[EventHandler("test:logIdentifiers")]
 		void logIdentifiers([FromSource]Player player)
 		{
 			Debug.WriteLine(player.Identifiers["discord"]);
@@ -79,50 +74,26 @@ namespace sthvServer
 			}
 			Debug.WriteLine($"dropped {source.Name}");
 			CheckAlivePlayers();
-			TriggerClientEvent("sthv:refreshsb");
+			server.refreshscoreboard();
 		}
-		void SyncJustAlive([FromSource] Player source)
+		[EventHandler("sthv:checkaliveplayers")]
+		public void CheckAlivePlayers()
 		{
-			TriggerClientEvent("sthv:updateAlive", source.Handle, true);
-			Debug.WriteLine($"^4player {source.Name} just alive^7");
-
-			if (AlivePlayers.Contains(source))//declares val inline 
+			var alivePlayerCount = 0;
+			foreach(Player p in Players)
 			{
-				Debug.WriteLine($"player {source.Name} was already in alive list");
+				if (!DeadPlayers.Contains(p.Identifiers["license"]))
+				{
+					alivePlayerCount += 1;
+				}
 			}
-			else
-			{
-				AlivePlayers.Add(source);
-			}
-			CheckAlivePlayers();
+			Debug.WriteLine("alive players" + alivePlayerCount.ToString());
 
-		}
-
-		void SyncJustDead([FromSource] Player source)
-		{
-			TriggerClientEvent("sthv:updateAlive", source.Handle, false);
-			Debug.WriteLine($"^4player {source.Name} just dead^7");
-			DeadPlayers.Add(source);
-			if(AlivePlayers.Contains(source))
-			{
-				AlivePlayers.Remove(source);
-			}
-			else
-			{
-				Debug.WriteLine($"player {source.Name} wasnt in alivelist :(");
-			}
-			CheckAlivePlayers();
-		}
-		private void CheckAlivePlayers()
-		{
-			Debug.WriteLine($"{AlivePlayers.Count} alive players remaining");
-
-			if(AlivePlayers.Count < 2 && server.hasHuntStarted)
+			if(alivePlayerCount < 2 && server.hasHuntStarted)
 			{
 				server.isHuntOver = true;
 				server.SendChatMessage("^4Hunt", "All hunters dead, hunt over.");
 			}
-
 		}
 	}
 }

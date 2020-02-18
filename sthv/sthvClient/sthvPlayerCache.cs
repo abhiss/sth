@@ -16,19 +16,27 @@ namespace sthv
 		public int ServerId { get; set; }
 		static public bool isHuntActive { get; set; }
 		static public int playerid = Game.Player.Handle;
-		static public int playerpedid = Game.Player.Character.Handle;
+		static public int playerpedid = Game.PlayerPed.Handle;
 		static public Player runnerPlayer { get; set; } = null;
-
 		Dictionary<string, int> playersPing = new Dictionary<string, int>();//key is serverid
-
+		public int[] playersInHeliServerId { get; set; } = { -1 };
+		bool isInHeli = false;
 		public sthvPlayerCache()
 		{
 			Debug.WriteLine($"isAlreadyDead: {isAlreadyDead}");
-			Tick += CheckIfDead;
 			Tick += ScoreboardUpdater;
+			Tick += CheckHeliStatus;
 			ServerId = Game.Player.ServerId;
+			
 
-			EventHandlers["sthv:refreshsb"] += new Action(async () => { await ScoreboardUpdater(); Debug.WriteLine("^5updated sb"); });
+			EventHandlers["sthv:refreshsb"] += new Action<string>(async (string playersinheliserverid) =>
+			{
+				
+				playersInHeliServerId = JsonConvert.DeserializeObject<int[]>(playersinheliserverid);
+				await ScoreboardUpdater();
+				Debug.WriteLine("^5updated sb");
+				Debug.WriteLine(this.playersInHeliServerId.ToString());
+			});
 
 		}
 
@@ -42,8 +50,9 @@ namespace sthv
 					{
 						alive = p.IsAlive,
 						name = p.Name,
-						runner = (sthv.client.RunnerHandle == p.ServerId),
-						serverid = p.ServerId
+						runner = (sthv.client.RunnerServerId == p.ServerId),
+						serverid = p.ServerId,
+						isinheli = (playersInHeliServerId.Contains(p.ServerId))
 					}
 				);
 			}
@@ -52,30 +61,22 @@ namespace sthv
 				EventName = "sthv:updatesb",
 				EventData = playerInfoList
 			}));
-
 			await Delay(10000);
 		}
-		async Task CheckIfDead()
+		async Task CheckHeliStatus()
 		{
-
-			if (Game.PlayerPed.IsDead && !isAlreadyDead)
+			if(!isInHeli && Game.PlayerPed.IsInFlyingVehicle)
 			{
-
-				Debug.WriteLine("you just dead! ;D");
-				TriggerServerEvent("sthv:playerJustDead");
-				TriggerEvent("sthv:updateAlive", ServerId, false);
-				isAlreadyDead = true;
+				TriggerServerEvent("sthv:isinheli", true);
+				isInHeli = true;
 			}
-			else if (Game.PlayerPed.IsAlive && isAlreadyDead) //is alive was dead
+			if(isInHeli && !Game.PlayerPed.IsInFlyingVehicle)
 			{
-				TriggerServerEvent("sthv:playerJustAlive");
-				TriggerEvent("sthv:updateAlive", ServerId, true);
-
-				isAlreadyDead = false;
+				TriggerServerEvent("sthv:isinheli", false);
+				isInHeli = false;
 			}
-
-			await Delay(100);
-
+			await Delay(1000);
 		}
+		
 	}
 }

@@ -34,6 +34,7 @@ namespace sthv.NuiModels
 		public int score { get; set; }
 		public bool alive { get; set; }
 		public bool spectating { get; set; }
+		public bool isinheli { get; set; }
 
 	}
 	public class NuiMessageModel

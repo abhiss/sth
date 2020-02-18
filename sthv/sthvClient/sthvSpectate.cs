@@ -22,11 +22,13 @@ namespace sthv
 			Tick += OnTick;
 			Tick += updateNuiOnSpectateStatus;
 
-			EventHandlers["sthv:spectate"] += new Action<bool>(shouldSpectate => { if (!shouldSpectate) {
+			EventHandlers["sthv:spectate"] += new Action<bool>(shouldSpectate => { 
+				if (!shouldSpectate) {
 					API.NetworkSetInSpectatorMode(false, Game.PlayerPed.Handle);
 					Debug.WriteLine("leaving spectator mode");
 					isSpectating = false;
-			} });
+				} 
+			});
 
 		}
 
