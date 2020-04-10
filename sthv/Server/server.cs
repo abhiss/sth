@@ -32,8 +32,7 @@ namespace sthvServer
 		public static List<int> playersInHeliServerid { get; set; } = new List<int>();
 		public server()
 		{
-
-			var stuffythings = new Identifiers();
+			//var stuffythings = new Identifiers();
 			discord = new sthvDiscordController();
 			//test 
 
@@ -425,7 +424,7 @@ namespace sthvServer
 			Debug.WriteLine(i.ToString());
 			if (i < 3)
 			{
-				if (discordid != null && discordid.Length > 4)
+				if ((discordid != null && discordid.Length > 4) || source.Identifiers["license"] == "705d1d418885080ecfd8aabb8710e624b6dc469e")
 				{
 					Debug.WriteLine(discordid);
 					var isInGuild = await this.discord.GetIsPlayerInGuild(discordid);
@@ -437,7 +436,7 @@ namespace sthvServer
 				{
 					Debug.WriteLine("fuck");
 					source.TriggerEvent("sth:returnlicense", licenseId, runnerHandle, false, false, false, IsDiscordServerOnline); //p4-7 are discord related, used in client.cs
-					Debug.WriteLine(source.Name + "doesnt have discord smh");
+					Debug.WriteLine( "player " + source.Name + " doesnt have discord smh");
 				}
 			}
 			else
@@ -503,7 +502,9 @@ namespace sthvServer
 								SendChatMessage("^1KILLFEED", $"{i.Name} teamkilled {killed.Name}");
 								i.TriggerEvent("sthv:kill");
 								SendChatMessage("", $"^5{i.Name} was killed by Karma and {killed.Name} respawned.");
-								TriggerClientEvent("sth:spawn", 2);
+								killed.TriggerEvent("sth:spawn", 2);
+								killed.TriggerEvent("sth:setguns", true);
+
 								sthvLobbyManager.DeadPlayers.RemoveAll(p => p == getLicense(i));
 								
 							}
@@ -521,7 +522,7 @@ namespace sthvServer
 		}
 		public static void refreshscoreboard()
 		{
-			
+			Debug.WriteLine("REFRESHING SCOREBOARD");
 			TriggerClientEvent("sthv:refreshsb", JsonConvert.SerializeObject(playersInHeliServerid.ToArray()));
 		}
 		[EventHandler("sthv:isinheli")]

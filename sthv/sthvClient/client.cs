@@ -28,10 +28,13 @@ namespace sthv
 			{
 				//TriggerServerEvent("sth:sendServerDebug", $"{Game.PlayerPed.CurrentVehicle.Position.X.ToString()}f, {Game.PlayerPed.CurrentVehicle.Position.Y.ToString()}f, {Game.PlayerPed.CurrentVehicle.Position.Z.ToString()}f");
 				Debug.WriteLine($"{Game.PlayerPed.Position}");
+
 			}), false);
 			API.RegisterCommand("test", new Action<int, List<object>, string>((src, args, raw) =>
 			{
-
+				Debug.WriteLine("THIS WORKS");
+				TriggerServerEvent("sth:NeedLicense");  //asks server for serverid, runnerid, and discord validation.
+				API.SetNuiFocus(true, true);
 			}), false);
 
 			_thisPed = Game.PlayerPed;
@@ -54,18 +57,16 @@ namespace sthv
 				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "hunttimer", EventData = new sthv.NuiModels.NuiMessageModel { Message = "", Seconds = timeInSecs } }));
 			});
 			
-			
-			
+		
 			//EventHandlers["sthv:nuifocus"] += new Action<bool>((bool focus) => { API.SetNuiFocus(focus, focus); }); //used as freeze
 			//wtf 
 
-
+			
 			EventHandlers["sthv:spawnhuntercars"] += new Action(() => sthv.sthvHuntStart.HunterVehicles());
 			EventHandlers["sthv:sendChosenMap"] += new Action<int>(i => sthvHuntStart.SetMap(i));
 
 			TriggerServerEvent("NumberOfAvailableMaps", sthvMaps.Maps.Length);
 			
-			EventHandlers["onClientMapStart"] += new Action<string>(OnPlayerLoaded); // event from mapmanager_cliend.lua line 47
 			EventHandlers["sth:spawnall"] += new Action(DefaultSpawn);
 			EventHandlers["sth:returnlicense"] += new Action<int, int, bool, bool, bool, bool>(ReceivedLicense); //gets myserverid, runnerserverid, hasdiscord, isinguild, in pc-voice 
 
@@ -206,9 +207,11 @@ namespace sthv
 			await BaseScript.Delay(10000);
 		}
 
-
-		void OnPlayerLoaded(string res) // res from mapmanager_cliend.lua line 47, stores name of map resource
+		[Tick]
+		async Task FirstTick() // res from mapmanager_cliend.lua line 47, stores name of map resource
 		{
+			Tick -= FirstTick;
+			Debug.WriteLine("^1ONPLAYERLOADEKKKKKKKKKKKKKKKKKKKKKKKKKD");
 			TriggerServerEvent("sth:NeedLicense");  //asks server for serverid, runnerid, and discord validation.
 			API.SetNuiFocus(true, true);
 		}

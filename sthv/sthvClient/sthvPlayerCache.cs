@@ -28,10 +28,10 @@ namespace sthv
 			Tick += CheckHeliStatus;
 			ServerId = Game.Player.ServerId;
 			
-
+			
 			EventHandlers["sthv:refreshsb"] += new Action<string>(async (string playersinheliserverid) =>
 			{
-				
+				Debug.WriteLine("RECEVED REFRESH SCOREBOARD EVENT");
 				playersInHeliServerId = JsonConvert.DeserializeObject<int[]>(playersinheliserverid);
 				await ScoreboardUpdater();
 				Debug.WriteLine("^5updated sb");

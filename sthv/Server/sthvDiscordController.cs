@@ -12,15 +12,32 @@ namespace sthvServer
 	class sthvDiscordController : BaseScript
 	{
 		static readonly Dictionary<int, PendingRequest> _pendingRequests = new Dictionary<int, PendingRequest>();
-		static readonly string _discordUrl = "http://localhost:3000";
+		static string _discordUrl = "http://69.1.155.132:00"; //"http://localhost:3000";
 		public sthvDiscordController()
 		{
-			//test
-			//API.RegisterCommand("test", new Action<int, List<object>, string>((src, args, raw) =>{
-			//	MovePlayerToVc("661327633602314290", fivemDead);		
-			//}), true);
+			API.GetConvar("asd", "asd");
+			_discordUrl = API.GetConvar("sthvDiscordAddress", "");
+			if (_discordUrl.Length < 1) {
+				Debug.WriteLine("failed to get sthvBot address, trying again...");
+				secondChanceForConvar();
+			}
+
 			EventHandlers["__cfx_internal:httpResponse"] += new Action<int, int, string, object>(OnHttpResponse);
 		}
+		async void secondChanceForConvar()
+		{
+			await Delay(500);
+			_discordUrl = API.GetConvar("sthvDiscordAddress", "");
+			if(_discordUrl.Length < 0) Debug.WriteLine("^1 failed to get sthvBot address on last try :( ^7" );
+		}
+		/*		[Tick]
+				async Task firsttick()
+				{
+					Tick -= firsttick;
+					_discordUrl = API.GetConvar("sthvDiscordAddress", _discordUrl);
+					Debug.WriteLine(_discordUrl);
+
+				}*/
 		private void OnHttpResponse(int token, int statusCode, string body, dynamic headers)
 		{
 			if (!_pendingRequests.TryGetValue(token, out var req)) return;
