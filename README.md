@@ -20,3 +20,4 @@ discord.gg/HygTs4s
 `endhunt` ends a hunt\
 `remveh` removes all vehicles
 
+
