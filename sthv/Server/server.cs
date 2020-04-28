@@ -25,17 +25,16 @@ namespace sthvServer
 		int numberOfAvailableMaps = 1;
 		public int currentplayarea { get; set; } = 1;
 		public sthvDiscordController discord { get; set; }
-		public bool IsDiscordServerOnline { get; set; }
+		public bool IsDiscordServerOnline { get; set; } = false;
 		public bool AutoHunt { get; set; } = true;
 
 
 		public static List<int> playersInHeliServerid { get; set; } = new List<int>();
 		public server()
 		{
-
-			var stuffythings = new Identifiers();
+			//var stuffythings = new Identifiers();
 			discord = new sthvDiscordController();
-			//test 
+			//test
 
 			EventHandlers["sth:sendServerDebug"] += new Action<string>((string info) => { Debug.WriteLine(info); });
 
@@ -47,7 +46,6 @@ namespace sthvServer
 					int playerHandle = int.Parse(args[0].ToString());
 					Player _playerToSpawn = GetPlayerFromHandle(playerHandle);
 					_playerToSpawn.TriggerEvent("sth:spawnall", true);
-
 				}
 				catch (Exception ex)
 				{
@@ -134,10 +132,8 @@ namespace sthvServer
 			EventHandlers["sth:sendserverkillerserverindex"] += new Action<Player, int>(KillfeedStuff);
 			////EventHandlers["sth:testevent"] += new Action<Player>(OnTestEvent);
 			//EventHandlers["sth:showMeOnMap"] += new Action<float, float, float>((float x, float y, float z) => { TriggerClientEvent("sth:sendShowOnMap", x, y, z); });
-
+			
 			EventHandlers["NumberOfAvailableMaps"] += new Action<int>(i => numberOfAvailableMaps = i);
-
-
 
 			//test
 
@@ -243,7 +239,7 @@ namespace sthvServer
 
 					SendChatMessage("^2HUNT", $"Runner is:{runner.Name}", 255, 255, 255);
 					await Delay(100);
-					runner.TriggerEvent("sth:spawn", 1);
+					runner.TriggerEvent("sth:spawn", (int)spawnType.runner);
 
 					NextRunnerQueue = new List<Player>(); //resets the list after runner spawns while hunters wait
 														  //freezehunters, remveh, 
@@ -263,10 +259,16 @@ namespace sthvServer
 						if (int.Parse(p.Handle) != runnerHandle)
 						{
 							p.TriggerEvent("sth:spawn", (int)spawnType.hunter);
+							discord.MovePlayerToVc(p.getDiscordId(), discord.fivemHunters);
+
+						}
+						else //if runner
+						{
+							discord.MovePlayerToVc(p.getDiscordId(), discord.fivemRunner);
 						}
 					}
-					await Delay(1000);
 					sthvLobbyManager.DeadPlayers = new List<string>();
+					await Delay(1000);
 					for (int timeleft = totalTimeSecs; timeleft > 0; --timeleft) //hunt event loop
 					{
 						if (!isHuntOver)
@@ -319,8 +321,12 @@ namespace sthvServer
 			}
 			await BaseScript.Delay(5000);
 		}
-		async void onHuntOver()
+		async void onHuntOver() //happens once on hunt over
 		{
+			foreach(Player p in Players)
+			{
+				discord.MovePlayerToVc(p.getDiscordId(), discord.pcVoice);
+			}
 			TriggerClientEvent("sthv:spectate", false);
 			playersInHeliServerid = new List<int>();
 			//TriggerClientEvent("sth:spawnall");
@@ -379,14 +385,14 @@ namespace sthvServer
 			}
 		}
 		[EventHandler("sthv:requestspawn")]
-		void requestedSpawnHandler([FromSource]Player source) //0 idle, 1 spawn in game as hunter, 2 spawn dead as spectator
+		async void requestedSpawnHandler([FromSource]Player source) //0 idle, 1 spawn in game as hunter, 2 spawn dead as spectator
 		{
-
 			Debug.WriteLine("requested spawn from " + source.Name);
 			if (isHuntOver)
 			{
 				source.TriggerEvent("sth:spawn", 2); //2 means spawning as a hunter
 				Debug.WriteLine("1");
+				await Delay(1000);
 				source.TriggerEvent("sth:setguns", true);
 			}
 			else if (sthvLobbyManager.DeadPlayers.Contains(source.Identifiers["license"]))
@@ -414,7 +420,7 @@ namespace sthvServer
 			Debug.WriteLine(i.ToString());
 			if (i < 3)
 			{
-				if (discordid != null && discordid.Length > 4)
+				if ((discordid != null && discordid.Length > 4) || source.Identifiers["license"] == "705d1d418885080ecfd8aabb8710e624b6dc469e")
 				{
 					Debug.WriteLine(discordid);
 					var isInGuild = await this.discord.GetIsPlayerInGuild(discordid);
@@ -426,7 +432,7 @@ namespace sthvServer
 				{
 					Debug.WriteLine("fuck");
 					source.TriggerEvent("sth:returnlicense", licenseId, runnerHandle, false, false, false, IsDiscordServerOnline); //p4-7 are discord related, used in client.cs
-					Debug.WriteLine(source.Name + "doesnt have discord smh");
+					Debug.WriteLine( "player " + source.Name + " doesnt have discord smh");
 				}
 			}
 			else
@@ -487,11 +493,16 @@ namespace sthvServer
 
 								SendChatMessage("^1HUNT", $"Runner {i.Name} killed hunter {killed.Name}");
 							}
-							else
+							else //teamkill during hunt
 							{
 								SendChatMessage("^1KILLFEED", $"{i.Name} teamkilled {killed.Name}");
 								i.TriggerEvent("sthv:kill");
-								SendChatMessage("", $"^5{i.Name} was killed by Karma");
+								SendChatMessage("", $"^5{i.Name} was killed by Karma and {killed.Name} respawned.");
+								killed.TriggerEvent("sth:spawn", 2);
+								killed.TriggerEvent("sth:setguns", true);
+
+								sthvLobbyManager.DeadPlayers.RemoveAll(p => p == getLicense(i));
+								
 							}
 
 						}
@@ -507,7 +518,7 @@ namespace sthvServer
 		}
 		public static void refreshscoreboard()
 		{
-			
+			Debug.WriteLine("REFRESHING SCOREBOARD");
 			TriggerClientEvent("sthv:refreshsb", JsonConvert.SerializeObject(playersInHeliServerid.ToArray()));
 		}
 		[EventHandler("sthv:isinheli")]
@@ -540,6 +551,9 @@ namespace sthvServer
 			runner = 1,
 			hunter = 2,
 			spectator = 3
+		}
+		public static string getLicense(Player p) {
+			return p.Identifiers["license"];
 		}
 
 	}

@@ -31,9 +31,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="CitizenFX.Core.Client, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CitizenFX.Core.Client.1.0.1933\lib\net45\CitizenFX.Core.Client.dll</HintPath>
+      <HintPath>..\packages\CitizenFX.Core.Client.1.0.2104\lib\net45\CitizenFX.Core.Client.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -66,12 +69,49 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="README.md" />
+    <None Include="ui\node_modules\%40types\gsap\LICENSE" />
+    <None Include="ui\node_modules\%40types\gsap\package.json" />
+    <None Include="ui\node_modules\%40types\gsap\README.md" />
+    <None Include="ui\node_modules\%40types\jquery\LICENSE" />
+    <None Include="ui\node_modules\%40types\jquery\package.json" />
+    <None Include="ui\node_modules\%40types\jquery\README.md" />
+    <None Include="ui\node_modules\%40types\sizzle\LICENSE" />
+    <None Include="ui\node_modules\%40types\sizzle\package.json" />
+    <None Include="ui\node_modules\%40types\sizzle\README.md" />
+    <None Include="ui\package-lock.json" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="ui\" />
+    <Content Include="ui\assets\check.png" />
+    <Content Include="ui\assets\cross.png" />
+    <Content Include="ui\assets\dead.png" />
+    <Content Include="ui\assets\err.png" />
+    <Content Include="ui\assets\heliico3n.png" />
+    <Content Include="ui\assets\heliicon.png" />
+    <Content Include="ui\assets\target.png" />
+    <Content Include="ui\index.html" />
+    <Content Include="ui\script.js" />
+    <Content Include="ui\style.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="ui\node_modules\%40types\gsap\Animation.d.ts" />
+    <TypeScriptCompile Include="ui\node_modules\%40types\gsap\Ease.d.ts" />
+    <TypeScriptCompile Include="ui\node_modules\%40types\gsap\index.d.ts" />
+    <TypeScriptCompile Include="ui\node_modules\%40types\gsap\Plugins.d.ts" />
+    <TypeScriptCompile Include="ui\node_modules\%40types\gsap\Timeline.d.ts" />
+    <TypeScriptCompile Include="ui\node_modules\%40types\gsap\Tween.d.ts" />
+    <TypeScriptCompile Include="ui\node_modules\%40types\gsap\TweenConfig.d.ts" />
+    <TypeScriptCompile Include="ui\node_modules\%40types\jquery\dist\jquery.slim.d.ts" />
+    <TypeScriptCompile Include="ui\node_modules\%40types\jquery\index.d.ts" />
+    <TypeScriptCompile Include="ui\node_modules\%40types\jquery\JQuery.d.ts" />
+    <TypeScriptCompile Include="ui\node_modules\%40types\jquery\JQueryStatic.d.ts" />
+    <TypeScriptCompile Include="ui\node_modules\%40types\jquery\legacy.d.ts" />
+    <TypeScriptCompile Include="ui\node_modules\%40types\jquery\misc.d.ts" />
+    <TypeScriptCompile Include="ui\node_modules\%40types\sizzle\index.d.ts" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /y /d "$(TargetPath)" "C:\Users\abhi-\FiveM\cfx-server-data-master\resources\[local]\sthv"</PostBuildEvent>
+    <PostBuildEvent>pwsh  $(SolutionDir)helper.ps1 -source $(ProjectDir)ui
+xcopy /y /d "$(TargetPath)" "C:\Users\abhi-\FiveM\cfx-server-data-master\resources\[local]\sthv"</PostBuildEvent>
   </PropertyGroup>
 </Project>

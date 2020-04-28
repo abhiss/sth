@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net.Http;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
 using Newtonsoft.Json;
@@ -12,15 +11,32 @@ namespace sthvServer
 	class sthvDiscordController : BaseScript
 	{
 		static readonly Dictionary<int, PendingRequest> _pendingRequests = new Dictionary<int, PendingRequest>();
-		static readonly string _discordUrl = "http://localhost:3000";
+		static string _discordUrl = "http://69.1.155.132:3000"; //"http://localhost:3000";
 		public sthvDiscordController()
 		{
-			//test
-			//API.RegisterCommand("test", new Action<int, List<object>, string>((src, args, raw) =>{
-			//	MovePlayerToVc("661327633602314290", fivemDead);		
-			//}), true);
+			API.GetConvar("asd", "asd");
+			_discordUrl = API.GetConvar("sthvDiscordAddress", "");
+			if (_discordUrl.Length < 1) {
+				Debug.WriteLine("failed to get sthvBot address, trying again...");
+				secondChanceForConvar();
+			}
+
 			EventHandlers["__cfx_internal:httpResponse"] += new Action<int, int, string, object>(OnHttpResponse);
 		}
+		async void secondChanceForConvar()
+		{
+			await Delay(500);
+			_discordUrl = API.GetConvar("sthvDiscordAddress", "");
+			if(_discordUrl.Length < 0) Debug.WriteLine("^1 failed to get sthvBot address on last try :( ^7" );
+		}
+		/*		[Tick]
+				async Task firsttick()
+				{
+					Tick -= firsttick;
+					_discordUrl = API.GetConvar("sthvDiscordAddress", _discordUrl);
+					Debug.WriteLine(_discordUrl);
+
+				}*/
 		private void OnHttpResponse(int token, int statusCode, string body, dynamic headers)
 		{
 			if (!_pendingRequests.TryGetValue(token, out var req)) return;
@@ -31,7 +47,7 @@ namespace sthvServer
 			}
 			else if (statusCode == 0)
 			{
-				Debug.WriteLine("^2DISCORD SERVER RETURNED STATUS CODE 0! (OFFLINE)");
+				Debug.WriteLine("^2DISCORD SERVER RETURNED STATUS CODE 0! (OFFLINE) | ");
 			}
 			else
 				req.SetException(new Exception("Server returned status code: " + statusCode));
@@ -42,14 +58,14 @@ namespace sthvServer
 		public string fivemHunters = "fivem-hunters";
 		public string fivemRunner = "fivem-runner";
 		public string fivemDead = "fivem-dead";
-		
+
 		/// <summary>returns list of discordId's of members in channel. Empty list if channel is empty.</summary>
 		public async Task<string[]> GetPlayersInChannel(string channelName)
 		{
-			var requestBody = new{
+			var requestBody = new {
 				name = "GetPlayersInChannel",
 				data = new {
-					channel = channelName 
+					channel = channelName
 				}
 			};
 			var response = await UploadString(_discordUrl, JsonConvert.SerializeObject(requestBody));
@@ -57,7 +73,7 @@ namespace sthvServer
 			var output = JsonConvert.DeserializeObject<string[]>(response);
 			return output;
 		}
-		public async Task<bool> GetIsPlayerInGuild (string discordid)
+		public async Task<bool> GetIsPlayerInGuild(string discordid)
 		{
 			var requestBody = new
 			{
@@ -92,6 +108,10 @@ namespace sthvServer
 			var output = JsonConvert.DeserializeObject<bool>(response);
 			Debug.WriteLine(output.ToString());
 			return output;
+		}
+		public string getDiscordId(Player player)
+		{
+			return player.Identifiers["discord"];
 		}
 		private async Task<string> DownloadString(string url)
 		{

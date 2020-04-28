@@ -31,18 +31,20 @@ namespace sthv
 			}), false);
 			API.RegisterCommand("test", new Action<int, List<object>, string>((src, args, raw) =>
 			{
-
+				Debug.WriteLine("requesting license");
+				TriggerServerEvent("sth:NeedLicense");  //asks server for serverid, runnerid, and discord validation.
+				API.SetNuiFocus(true, true);
 			}), false);
 
 			_thisPed = Game.PlayerPed;
 			var playArea = new sthv.sthvPlayArea();
 			var rules = new sthv.sthvRules();
-
+			
 			Tick += rules.AutoBrakeLight;
 			Tick += playArea.OnTickPlayArea;
 			Tick += rules.isKeyPressed; //for big map toggle
 			Tick += OnTick;
-
+			
 			EventHandlers["removeveh"] += new Action(async () => { await sthv.sthvHuntStart.RemoveAllVehicles(true); });
 
 			//Killfeed stuff:
@@ -55,17 +57,15 @@ namespace sthv
 			});
 			
 			
-			
 			//EventHandlers["sthv:nuifocus"] += new Action<bool>((bool focus) => { API.SetNuiFocus(focus, focus); }); //used as freeze
 			//wtf 
 
-
+			
 			EventHandlers["sthv:spawnhuntercars"] += new Action(() => sthv.sthvHuntStart.HunterVehicles());
 			EventHandlers["sthv:sendChosenMap"] += new Action<int>(i => sthvHuntStart.SetMap(i));
 
 			TriggerServerEvent("NumberOfAvailableMaps", sthvMaps.Maps.Length);
 			
-			EventHandlers["onClientMapStart"] += new Action<string>(OnPlayerLoaded); // event from mapmanager_cliend.lua line 47
 			EventHandlers["sth:spawnall"] += new Action(DefaultSpawn);
 			EventHandlers["sth:returnlicense"] += new Action<int, int, bool, bool, bool, bool>(ReceivedLicense); //gets myserverid, runnerserverid, hasdiscord, isinguild, in pc-voice 
 
@@ -124,7 +124,6 @@ namespace sthv
 			{
 				API.SetNuiFocus(false, false);
 			}), false);
-
 
 			//API.RegisterCommand("starttimer", new Action<int, List<object>, string>((src, args, raw) =>
 			//{
@@ -206,9 +205,11 @@ namespace sthv
 			await BaseScript.Delay(10000);
 		}
 
-
-		void OnPlayerLoaded(string res) // res from mapmanager_cliend.lua line 47, stores name of map resource
+		[Tick]
+		async Task FirstTick() // res from mapmanager_cliend.lua line 47, stores name of map resource
 		{
+			Tick -= FirstTick;
+			Debug.WriteLine("^1ONPLAYERLOADEKKKKKKKKKKKKKKKKKKKKKKKKKD");
 			TriggerServerEvent("sth:NeedLicense");  //asks server for serverid, runnerid, and discord validation.
 			API.SetNuiFocus(true, true);
 		}

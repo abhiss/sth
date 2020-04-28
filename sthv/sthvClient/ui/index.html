@@ -1,45 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.0.4/gsap.min.js"></script>
+    <!-- <script src="gsap.js"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="script.js"></script>
+
 </head>
- 
+
 <body>
-        <div class="scoreboard">
-            <span class= "tabletitle">Abhi's Survive the Hunt</span>
-            <table class = "scoreboardtable">
-                <tr class= "sbtableheader">
-                    <th>ServerId</th>
-                    <th>Name</th>
-                    <th>Alive</th>
-                    <th>Ping</th>
-                    <th>Runner</th>
-                </tr>
-            </table>
+    <div class="intro">
+        <div class="intro-mid">
+            <h5 class="hide">DISCORD.GG/hBKcxju</h5>
+            <p class="hide">
+                You must be in the Survive the Hunt Discord server and have Discord installed to play on this server.
+                <br>
+                If you're not in the STHV Beta Discord, join at https://discord.gg/hBKcxju
+            </p>
+            <div class="discordverifications">
+                <ul>
+                    <li id="hasdiscord">Discord Detected </li>
+                    <li id="insth">In Survive the Hunt Discord </li> 
+                    <li id="invc">In PC-Voice Channel </li>
+                </ul>
+
+            </div>
+            <p id="validatingWithDiscord">Awaiting Discord validation...</p>
+        </div>
+        <div class="intro-g2">
+            <p id="playbtn" class="intro-selectable">Play</p>
+            <p id="discordbtn">Discord</p class="discordbtn">
+            <p id="rulesbtn">Rules</p>
+            <p id="settingsbtn">Settings</p>
+        </div>
+    </div>
+    <div class="scoreboard">
+        <div class="boardheaderwrapper">
+            <span class="tabletitle">Abhi's Survive the Hunt</span>
+            <span class="timer" id="countdown">
+                00:00
+            </span>
+        </div>
+        <table class="scoreboardtable">
+            <tr class="sbtableheader">
+                <th>ServerId</th>
+                <th id="asijd">Name</th>
+            </tr>
+        </table>
+        <div class="spectatingplayer">
+
+        </div>
         <div>
-
         </div>
     </div>
-    <div class= "timercontainer">
-        <div class= "timer" id= "countdown">
-            00:00
-        </div>
-        <!-- <div id= "role">
-            Hunter
-        </div> -->
 
-    </div>
-    <div class = "startscreen">
+    <div class="startscreen">
         <div>
             <ul>
-                <li id= "optin">opt in for runner</li>
-                <li id= "optout">opt out for runner</li>
+                <li id="optin">press 9 to be runner</li>
+                <li id="optout">press 8 to be hunter</li>
             </ul>
         </div>
     </div>
@@ -62,4 +87,5 @@
         </div>
     </div> -->
 </body>
+
 </html>
