@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net.Http;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
 using Newtonsoft.Json;
@@ -12,7 +11,7 @@ namespace sthvServer
 	class sthvDiscordController : BaseScript
 	{
 		static readonly Dictionary<int, PendingRequest> _pendingRequests = new Dictionary<int, PendingRequest>();
-		static string _discordUrl = "http://69.1.155.132:00"; //"http://localhost:3000";
+		static string _discordUrl = "http://69.1.155.132:3000"; //"http://localhost:3000";
 		public sthvDiscordController()
 		{
 			API.GetConvar("asd", "asd");
@@ -48,7 +47,7 @@ namespace sthvServer
 			}
 			else if (statusCode == 0)
 			{
-				Debug.WriteLine("^2DISCORD SERVER RETURNED STATUS CODE 0! (OFFLINE)");
+				Debug.WriteLine("^2DISCORD SERVER RETURNED STATUS CODE 0! (OFFLINE) | ");
 			}
 			else
 				req.SetException(new Exception("Server returned status code: " + statusCode));

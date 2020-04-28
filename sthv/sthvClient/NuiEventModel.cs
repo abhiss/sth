@@ -9,7 +9,7 @@ namespace sthv.NuiModels
 	public class NuiEventModel
 	{
 		public string EventName { get; set; }
-		public object EventData { get; set; }
+		public object EventData { get; set; } 
 	}
 	public class dataBool
 	{

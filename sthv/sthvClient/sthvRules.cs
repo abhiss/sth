@@ -34,9 +34,9 @@ namespace sthv
 			Tick += CheckPedMission;
 			//Tick += ShowRunnerOnMap;
 
-			EventHandlers["sthv:setnewpedmission"] += new Action(SetNewMission); 
+			EventHandlers["sthv:setnewpedmission"] += new Action(SetNewMission);
 
-
+			
 			_ped = API.PlayerPedId();
 			_pid = API.PlayerId();
 			API.StatSetInt((uint)Game.GenerateHash("MP0_STAMINA"), 100, true);
@@ -192,10 +192,19 @@ namespace sthv
 			{
 				await BaseScript.Delay(200);
 			}
-
-
 		}
 
+
+		[Command("logped")]
+		async void logpedcmd()
+		{
+			Debug.WriteLine(missionPedNetID.ToString());
+		}
+		[Command("requestmpedcontrol")]
+		async void RequestControl()
+		{
+			API.NetworkRequestControlOfNetworkId(missionPedNetID);
+		}
 		async void SetNewMission()
 		{
 			if (!ismissionactive)
@@ -225,18 +234,12 @@ namespace sthv
 			if (missionPedNetID != 0 && API.NetworkDoesNetworkIdExist(missionPedNetID))
 			{
 
-				
-				
 				int _mped = API.NetToPed(missionPedNetID);
 				Ped mped = new Ped(_ped);
 				if (API.DoesEntityExist(_mped))
 				{
-					Debug.WriteLine("mped exists");
-				
-						
+					Debug.WriteLine("mped exists");		
 					TriggerServerEvent("missionpedstatus", API.GetEntityHealth(_mped), API.GetEntityCoords(_mped, true));
-
-					
 				}
 				else
 				{

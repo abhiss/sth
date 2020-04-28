@@ -34,7 +34,7 @@ namespace sthvServer
 		{
 			//var stuffythings = new Identifiers();
 			discord = new sthvDiscordController();
-			//test 
+			//test
 
 			EventHandlers["sth:sendServerDebug"] += new Action<string>((string info) => { Debug.WriteLine(info); });
 
@@ -46,7 +46,6 @@ namespace sthvServer
 					int playerHandle = int.Parse(args[0].ToString());
 					Player _playerToSpawn = GetPlayerFromHandle(playerHandle);
 					_playerToSpawn.TriggerEvent("sth:spawnall", true);
-
 				}
 				catch (Exception ex)
 				{
@@ -133,10 +132,8 @@ namespace sthvServer
 			EventHandlers["sth:sendserverkillerserverindex"] += new Action<Player, int>(KillfeedStuff);
 			////EventHandlers["sth:testevent"] += new Action<Player>(OnTestEvent);
 			//EventHandlers["sth:showMeOnMap"] += new Action<float, float, float>((float x, float y, float z) => { TriggerClientEvent("sth:sendShowOnMap", x, y, z); });
-
+			
 			EventHandlers["NumberOfAvailableMaps"] += new Action<int>(i => numberOfAvailableMaps = i);
-
-
 
 			//test
 
@@ -198,7 +195,6 @@ namespace sthvServer
 							{
 								p.TriggerEvent("AskRunnerOpt");
 							}
-
 						}
 						await Delay(8000);
 						foreach (Player p in NextRunnerQueue)
@@ -243,7 +239,7 @@ namespace sthvServer
 
 					SendChatMessage("^2HUNT", $"Runner is:{runner.Name}", 255, 255, 255);
 					await Delay(100);
-					runner.TriggerEvent("sth:spawn", 1);
+					runner.TriggerEvent("sth:spawn", (int)spawnType.runner);
 
 					NextRunnerQueue = new List<Player>(); //resets the list after runner spawns while hunters wait
 														  //freezehunters, remveh, 
@@ -389,14 +385,14 @@ namespace sthvServer
 			}
 		}
 		[EventHandler("sthv:requestspawn")]
-		void requestedSpawnHandler([FromSource]Player source) //0 idle, 1 spawn in game as hunter, 2 spawn dead as spectator
+		async void requestedSpawnHandler([FromSource]Player source) //0 idle, 1 spawn in game as hunter, 2 spawn dead as spectator
 		{
-
 			Debug.WriteLine("requested spawn from " + source.Name);
 			if (isHuntOver)
 			{
 				source.TriggerEvent("sth:spawn", 2); //2 means spawning as a hunter
 				Debug.WriteLine("1");
+				await Delay(1000);
 				source.TriggerEvent("sth:setguns", true);
 			}
 			else if (sthvLobbyManager.DeadPlayers.Contains(source.Identifiers["license"]))

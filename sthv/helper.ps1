@@ -2,15 +2,15 @@
 [CmdletBinding()]
 param (
     [Parameter()]
-    [string] $source,
-    [string] $OutputSubfolder
+    [string] $source
 )
-$OutputPath = "C:\Users\abhi-\FiveM\cfx-server-data-master\resources\[local]\sthv"
-echo ($OutputPath +  $OutputSubfolder)
-Copy-Item -Path $source -Destination ($OutputPath +  "\\" + $OutputSubfolder) -Recurse -Force
+###Change this
+$OutputPath = "C:\Users\abhi-\FiveM\cfx-server-data-master\resources\[local]\sthv\"
+Write-Output ($OutputPath +  $OutputSubfolder)
 
-Write-Output "helper ran successfully"
+Copy-Item -Path $source -Destination ($OutputPath) -Recurse -Force
 
-# -source $(ProjectDir)ui -OutputSubfolder "ui"
-
+###Usage
+# -source $(ProjectDir)ui
+###Done in post event commands.
 # xcopy /y /d "$(TargetPath)" "C:\Users\abhi-\FiveM\cfx-server-data-master\resources\[local]\sthv"

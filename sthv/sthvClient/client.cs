@@ -28,11 +28,10 @@ namespace sthv
 			{
 				//TriggerServerEvent("sth:sendServerDebug", $"{Game.PlayerPed.CurrentVehicle.Position.X.ToString()}f, {Game.PlayerPed.CurrentVehicle.Position.Y.ToString()}f, {Game.PlayerPed.CurrentVehicle.Position.Z.ToString()}f");
 				Debug.WriteLine($"{Game.PlayerPed.Position}");
-
 			}), false);
 			API.RegisterCommand("test", new Action<int, List<object>, string>((src, args, raw) =>
 			{
-				Debug.WriteLine("THIS WORKS");
+				Debug.WriteLine("requesting license");
 				TriggerServerEvent("sth:NeedLicense");  //asks server for serverid, runnerid, and discord validation.
 				API.SetNuiFocus(true, true);
 			}), false);
@@ -40,12 +39,12 @@ namespace sthv
 			_thisPed = Game.PlayerPed;
 			var playArea = new sthv.sthvPlayArea();
 			var rules = new sthv.sthvRules();
-
+			
 			Tick += rules.AutoBrakeLight;
 			Tick += playArea.OnTickPlayArea;
 			Tick += rules.isKeyPressed; //for big map toggle
 			Tick += OnTick;
-
+			
 			EventHandlers["removeveh"] += new Action(async () => { await sthv.sthvHuntStart.RemoveAllVehicles(true); });
 
 			//Killfeed stuff:
@@ -57,7 +56,7 @@ namespace sthv
 				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "hunttimer", EventData = new sthv.NuiModels.NuiMessageModel { Message = "", Seconds = timeInSecs } }));
 			});
 			
-		
+			
 			//EventHandlers["sthv:nuifocus"] += new Action<bool>((bool focus) => { API.SetNuiFocus(focus, focus); }); //used as freeze
 			//wtf 
 
@@ -125,7 +124,6 @@ namespace sthv
 			{
 				API.SetNuiFocus(false, false);
 			}), false);
-
 
 			//API.RegisterCommand("starttimer", new Action<int, List<object>, string>((src, args, raw) =>
 			//{

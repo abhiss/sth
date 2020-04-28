@@ -13,7 +13,7 @@ namespace sthvServer
 		}
 		public static string getLicense(this Player player)
 		{
-			return player.Identifiers["license"];
+			return player.Identifiers["license"]; 
 		}
 	}
 }

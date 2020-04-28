@@ -31,6 +31,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="CitizenFX.Core.Client, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\CitizenFX.Core.Client.1.0.2104\lib\net45\CitizenFX.Core.Client.dll</HintPath>
@@ -66,6 +69,7 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="README.md" />
     <None Include="ui\node_modules\%40types\gsap\LICENSE" />
     <None Include="ui\node_modules\%40types\gsap\package.json" />
     <None Include="ui\node_modules\%40types\gsap\README.md" />
@@ -107,8 +111,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>powershell -ExecutionPolicy Unrestricted C:\Users\abhi-\Source\Repos\Abbbbbbbbbbbhi\sth\sthv\helper.ps1 -source $(ProjectDir)ui -OutputSubfolder "ui"
-
+    <PostBuildEvent>pwsh  $(SolutionDir)helper.ps1 -source $(ProjectDir)ui
 xcopy /y /d "$(TargetPath)" "C:\Users\abhi-\FiveM\cfx-server-data-master\resources\[local]\sthv"</PostBuildEvent>
   </PropertyGroup>
 </Project>

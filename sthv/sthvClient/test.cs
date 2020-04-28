@@ -24,7 +24,7 @@
 //			//missionBlip.Color = BlipColor.TrevorOrange;
 //			//missionBlip.Alpha = 0;
 
-
+		
 //			API.RegisterCommand("log", new Action<int, List<object>, string>((src, args, raw) =>
 //			{
 //				Vector4[] sendarray = listofcoords.ToArray();
@@ -40,7 +40,7 @@
 //				if (!ismissionactive)
 //				{
 //					//Debug.WriteLine(Game.Player.LastVehicle.DisplayName);
-//					MissionPed = await World.CreatePed(new Model(PedHash.Autoshop01SMM), Game.PlayerPed.Position);
+//					MissionPed = await World.CreatePed(new Model(PedHash.Autoshop01SMM), new Vector3(504, 5597, 796));
 //					log("spawned ped");
 //					mpednetid = MissionPed.NetworkId;
 //					log(MissionPed.NetworkId.ToString());
@@ -53,7 +53,6 @@
 //					API.SetBlockingOfNonTemporaryEvents(MissionPed.Handle, true);
 //					API.TaskSetBlockingOfNonTemporaryEvents(MissionPed.Handle, true);
 //					ismissionactive = true;
-
 
 //					//
 //					API.SetNetworkIdCanMigrate(MissionPed.NetworkId, false);
@@ -98,7 +97,6 @@
 //				{
 //					Debug.WriteLine("entity not found");
 //				}
-
 //			});
 
 //		}
@@ -107,7 +105,7 @@
 //			Debug.WriteLine("test: " + input);
 
 //		}
-//		async Task checkrunner2()
+//		async Task checkrunner2() //copied to sthvRules.cs, unused here
 //		{
 //			if (mpednetid != 0)
 //			{
@@ -139,7 +137,7 @@
 //			}
 //			await Delay(1000);
 //		}
-//		async Task checkmissionstuff()
+//		async Task checkmissionstuff() //copied to sthvRules.cs, unused here
 //		{
 //			if (ismissionactive && MissionPed.IsDead)
 //			{
@@ -181,7 +179,6 @@
 //				Debug.WriteLine("missionped died");
 //				ismissionactive = false;
 //			}
-
 
 //			await Delay(500);
 //		}

@@ -12,7 +12,7 @@ namespace sthvServer
 		static public bool isMissionPedActive { get; set; }
 		public Vector3 pedmissionpos { get; set; }
 		int pedmissionhealth { get;set; }
-
+		public int currentMpedNetId { get; set; } = 0; //netid of 0 means mission is over
 		public sthvSyncClients()
 		{
 			API.RegisterCommand("mped", new Action<int, List<object>, string>((src, args, raw) =>
@@ -60,7 +60,7 @@ namespace sthvServer
 		{
 			Console.WriteLine("netid: " + netid);
 			TriggerClientEvent("sthv:updatepednetid", netid);
-
+			currentMpedNetId = netid;
 		}
 	}
 }
