@@ -10,7 +10,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.0.4/gsap.min.js"></script>
     <!-- <script src="gsap.js"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="script.js"></script>
+
+    
+    <script type="module" src="script.js"></script>
 
 </head>
 
@@ -26,7 +28,7 @@
             <div class="discordverifications">
                 <ul>
                     <li id="hasdiscord">Discord Detected </li>
-                    <li id="insth">In Survive the Hunt Discord </li> 
+                    <li id="insth">In Survive the Hunt Discord </li>
                     <li id="invc">In PC-Voice Channel </li>
                 </ul>
 
@@ -86,6 +88,41 @@
 
         </div>
     </div> -->
+    <div id="toast_message_wrapper">
+        <div id="toast_message">
+            <div id="toast_message_text">This is a long long long long long long long long long long long long long long
+                long
+                long long long long long long long long long long long long long long long message</div>
+        </div>
+    </div>
 </body>
 
 </html>
+<style>
+    /* body {} */
+    #toast_message_text{
+        opacity: 0;        
+    }
+    #toast_message_wrapper {
+        opacity: 1;
+        width: 400px;
+        height: 300px;
+        position: absolute;
+        left: 50%;
+        top: 0px;
+        margin-left: -200px;
+        /* margin-top: -150px; */
+        /* animation: fade 3s linear; */
+
+    }
+    #toast_message {
+        font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        font-weight: 100;
+        background-color: black;
+        color: white;
+        text-align: center;
+        padding: 1vh;
+        min-height: 1vh;
+    }
+
+</style>

@@ -24,54 +24,65 @@ namespace sthv
 			TriggerServerEvent("sth:NeedLicense");//so player gets license on resource restarting
 			int _ped = Game.Player.Character.Handle;
 			//test 		
-			API.RegisterCommand("sendpos", new Action<int, List<object>, string>((src, args, raw) =>
+			API.RegisterCommand("sendpos", new Action<int, List<object>, string>(async (src, args, raw) =>
 			{
 				//TriggerServerEvent("sth:sendServerDebug", $"{Game.PlayerPed.CurrentVehicle.Position.X.ToString()}f, {Game.PlayerPed.CurrentVehicle.Position.Y.ToString()}f, {Game.PlayerPed.CurrentVehicle.Position.Z.ToString()}f");
-				Debug.WriteLine($"{Game.PlayerPed.Position}");
+				await sthv.Spawn.SpawnPlayer("s_m_y_swat_01", CurrentMap.HunterSpawn.X, CurrentMap.HunterSpawn.Y, CurrentMap.HunterSpawn.Z, CurrentMap.HunterSpawn.W);
+				API.SetNuiFocus(false, false);
+
 			}), false);
 			API.RegisterCommand("test", new Action<int, List<object>, string>((src, args, raw) =>
 			{
-				Debug.WriteLine("requesting license");
-				TriggerServerEvent("sth:NeedLicense");  //asks server for serverid, runnerid, and discord validation.
-				API.SetNuiFocus(true, true);
+				TriggerNuiEvent("sthv:showToastNotification", new { message = "VV", display_time = 4000 });
+
+				//Debug.WriteLine("requesting license");
+				//TriggerServerEvent("sth:NeedLicense");  //asks server for serverid, runnerid, and discord validation.
 			}), false);
 
 			_thisPed = Game.PlayerPed;
 			var playArea = new sthv.sthvPlayArea();
 			var rules = new sthv.sthvRules();
-			
+
+
+			Debug.WriteLine("Send toast notif");
+
 			Tick += rules.AutoBrakeLight;
 			Tick += playArea.OnTickPlayArea;
 			Tick += rules.isKeyPressed; //for big map toggle
 			Tick += OnTick;
-			
+
 			EventHandlers["removeveh"] += new Action(async () => { await sthv.sthvHuntStart.RemoveAllVehicles(true); });
 
 			//Killfeed stuff:
 			EventHandlers["baseevents:onPlayerKilled"] += new Action<int, ExpandoObject>(OnPlayerKilled);
-			
+
 			EventHandlers["sthv:kill"] += new Action(() => { Game.PlayerPed.ApplyDamage(900); });
 			//timer
-			EventHandlers["sth:starttimer"] += new Action<int>((timeInSecs) => {
-				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "hunttimer", EventData = new sthv.NuiModels.NuiMessageModel { Message = "", Seconds = timeInSecs } }));
+			EventHandlers["sth:starttimer"] += new Action<int>((timeInSecs) =>
+			{
+				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "hunttimer", 
+					EventData = new sthv.NuiModels.NuiTimerMessageModel { Message = "", Seconds = timeInSecs } }));
 			});
-			
-			
-			//EventHandlers["sthv:nuifocus"] += new Action<bool>((bool focus) => { API.SetNuiFocus(focus, focus); }); //used as freeze
-			//wtf 
 
-			
+
+
+			EventHandlers["sthv:showToastNotification"] += new Action<string, int>((message, timeInSeconds) => //time_delay in ms
+			{
+				TriggerNuiEvent("sthv:showToastNotification", new { message = message, display_time = timeInSeconds });
+
+			});
 			EventHandlers["sthv:spawnhuntercars"] += new Action(() => sthv.sthvHuntStart.HunterVehicles());
 			EventHandlers["sthv:sendChosenMap"] += new Action<int>(i => sthvHuntStart.SetMap(i));
 
 			TriggerServerEvent("NumberOfAvailableMaps", sthvMaps.Maps.Length);
-			
+
 			EventHandlers["sth:spawnall"] += new Action(DefaultSpawn);
 			EventHandlers["sth:returnlicense"] += new Action<int, int, bool, bool, bool, bool>(ReceivedLicense); //gets myserverid, runnerserverid, hasdiscord, isinguild, in pc-voice 
 
-																						 //EventHandlers["playerSpawned"] += new Action(onPlayerSpawned); //called from client
+			//EventHandlers["playerSpawned"] += new Action(onPlayerSpawned); //called from client
 			EventHandlers["sth:updateRunnerHandle"] += new Action<int>(RunnerHandleUpdate);
-			EventHandlers["sth:spawn"] += new Action<int>(async(int i) => {
+			EventHandlers["sth:spawn"] += new Action<int>(async (int i) =>
+			{
 				if (spawnnuicontroller.isSpawnAllowed)
 				{
 					Debug.WriteLine("spawn event " + i.ToString());
@@ -120,10 +131,10 @@ namespace sthv
 				}
 			});
 			#region commands
-			API.RegisterCommand("test2", new Action<int, List<object>, string>( async (src, args, raw) =>
-			{
-				API.SetNuiFocus(false, false);
-			}), false);
+			API.RegisterCommand("test2", new Action<int, List<object>, string>(async (src, args, raw) =>
+		   {
+			   API.SetNuiFocus(true, true);
+		   }), false);
 
 			//API.RegisterCommand("starttimer", new Action<int, List<object>, string>((src, args, raw) =>
 			//{
@@ -179,8 +190,8 @@ namespace sthv
 			Debug.WriteLine("^2 isrunner: " + IsRunner);
 			if (IsRunner)
 			{
-				Debug.WriteLine("is runner" );
-				if ( Game.PlayerPed.IsInSub || Game.PlayerPed.IsInFlyingVehicle)
+				Debug.WriteLine("is runner");
+				if (Game.PlayerPed.IsInSub || Game.PlayerPed.IsInFlyingVehicle)
 				{
 					World.AddExplosion(Game.PlayerPed.Position, ExplosionType.Rocket, 5f, 2f);
 				}
@@ -209,12 +220,15 @@ namespace sthv
 		async Task FirstTick() // res from mapmanager_cliend.lua line 47, stores name of map resource
 		{
 			Tick -= FirstTick;
-			Debug.WriteLine("^1ONPLAYERLOADEKKKKKKKKKKKKKKKKKKKKKKKKKD");
+			API.SetManualShutdownLoadingScreenNui(true);
+			Debug.WriteLine("^1ONPLAYERLOADEKKKD");
 			TriggerServerEvent("sth:NeedLicense");  //asks server for serverid, runnerid, and discord validation.
 			API.SetNuiFocus(true, true);
+
+
 		}
 
-		void ReceivedLicense(int myServerId,int runnerHandle, bool hasDiscord, bool isInSTH, bool isInVc, bool isDiscordServerOnline)	//gets license from server
+		void ReceivedLicense(int myServerId, int runnerHandle, bool hasDiscord, bool isInSTH, bool isInVc, bool isDiscordServerOnline)  //gets license from server
 		{
 			MyServerId = myServerId;
 			RunnerServerId = runnerHandle;
@@ -223,26 +237,27 @@ namespace sthv
 				spawnnuicontroller.isSpawnAllowed = true;
 			}
 			Debug.WriteLine($"^2 serverid recieved, mine: {myServerId} runner: {RunnerServerId}^7");
-			
-			TriggerNuiEvent("sthv:discordVerification", new { has_discord = hasDiscord, is_in_sth = isInSTH, is_in_vc = isInVc, is_discord_online = isDiscordServerOnline});
+
+			TriggerNuiEvent("sthv:discordVerification", new { has_discord = hasDiscord, is_in_sth = isInSTH, is_in_vc = isInVc, is_discord_online = isDiscordServerOnline });
 			SendChatMessage("test", isDiscordServerOnline.ToString());
-			if(!isDiscordServerOnline)
+			if (!isDiscordServerOnline)
 			{
-				SendChatMessage("sthv", "Discord verification failed for technical reasons. Anyone can play.");
+				Debug.WriteLine("Discord server not online");
+				//SendChatMessage("sthv", "Discord verification failed for technical reasons. Anyone can play.");
 			}
 			API.SetNuiFocus(true, true);
 		}
-		void OnPlayerKilled(int killerServerIndex, ExpandoObject info) 
+		void OnPlayerKilled(int killerServerIndex, ExpandoObject info)
 		{
 			Debug.WriteLine($"killer: {killerServerIndex}");
 			TriggerServerEvent("sth:sendserverkillerserverindex", killerServerIndex);
 		}
 		void RunnerHandleUpdate(int newRunnerHandle)
-		{	
+		{
 			RunnerServerId = newRunnerHandle;
 			Debug.WriteLine($"^5updated runner handle{RunnerServerId}, my handle {MyServerId}");
-			sthv.sthvPlayerCache.runnerPlayer =  GetPlayerFromServerId(RunnerServerId, Players);
-			if( newRunnerHandle < 0)
+			sthv.sthvPlayerCache.runnerPlayer = GetPlayerFromServerId(RunnerServerId, Players);
+			if (newRunnerHandle < 0)
 			{
 				sthv.sthvPlayerCache.isHuntActive = false;//means hunts over
 				IsRunner = false;
@@ -254,6 +269,10 @@ namespace sthv
 			if (MyServerId == RunnerServerId) //forced spawn to update runner weapon/ outfit
 			{
 				IsRunner = true;
+				if (Game.PlayerPed.Model == new Model(PedHash.Swat01SMY))
+				{
+					API.SetPedRandomComponentVariation(Game.Player.Character.Handle, false);
+				}
 			}
 			else if (MyServerId != RunnerServerId)
 			{
@@ -262,6 +281,7 @@ namespace sthv
 		}
 		async void DefaultSpawn() //only used for /spawnall i think
 		{
+			API.SetNuiFocus(false, false);
 			if (CurrentMap != null)
 			{
 				await sthv.Spawn.SpawnPlayer("s_m_y_swat_01", CurrentMap.HunterSpawn.X, CurrentMap.HunterSpawn.Y, CurrentMap.HunterSpawn.Z, CurrentMap.HunterSpawn.W);
@@ -278,7 +298,7 @@ namespace sthv
 		{
 			EventHandlers[eventName] += action;
 		}
-		public static void SendChatMessage(string title , string message, int r = 0, int g = 0, int b = 0)
+		public static void SendChatMessage(string title, string message, int r = 0, int g = 0, int b = 0)
 		{
 			var msg = new Dictionary<string, object>
 			{
@@ -287,7 +307,7 @@ namespace sthv
 			};
 			TriggerEvent("chat:addMessage", msg);
 		}
-	
+
 
 		public void TriggerNuiEvent(string eventName, dynamic data = null)
 		{
@@ -305,7 +325,7 @@ namespace sthv
 			{
 				foreach (Player p in players)
 				{
-					if (p.ServerId == playerId) 
+					if (p.ServerId == playerId)
 					{
 						return p;
 					}

@@ -13,7 +13,7 @@ namespace sthvServer
 		public Vector3 pedmissionpos { get; set; }
 		int pedmissionhealth { get;set; }
 		public int currentMpedNetId { get; set; } = 0; //netid of 0 means mission is over
-		public sthvSyncClients()
+		internal sthvSyncClients()
 		{
 			API.RegisterCommand("mped", new Action<int, List<object>, string>((src, args, raw) =>
 			{

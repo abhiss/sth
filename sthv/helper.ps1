@@ -5,7 +5,7 @@ param (
     [string] $source
 )
 ###Change this
-$OutputPath = "C:\Users\abhi-\FiveM\cfx-server-data-master\resources\[local]\sthv\"
+$OutputPath = "C:\Servers\volumes\fivem_sthv_dev\resources\[local]\sthv\"
 Write-Output ($OutputPath +  $OutputSubfolder)
 
 Copy-Item -Path $source -Destination ($OutputPath) -Recurse -Force

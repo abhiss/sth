@@ -43,6 +43,7 @@ namespace sthv
 		}
 		public static async Task SpawnPlayer(string skin, float x, float y, float z, float heading)
 		{
+			Debug.WriteLine("SPAWNING PLAYER");
 			if (_spawnLock)
 				return;
 

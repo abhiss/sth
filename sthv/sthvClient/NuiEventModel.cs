@@ -21,7 +21,12 @@ namespace sthv.NuiModels
 		public bool isalive { get; set; }
 		
 	}
+	public class addToastNotificationModel
+	{
+		public string message { get; set; }
+		public int display_time { get; set; }
 
+	}
 	public class NuiScoreboardModel
 	{
 
@@ -37,7 +42,7 @@ namespace sthv.NuiModels
 		public bool isinheli { get; set; }
 
 	}
-	public class NuiMessageModel
+	public class NuiTimerMessageModel
 	{
 		public string Message { get; set; }
 		public int Seconds { get; set; }

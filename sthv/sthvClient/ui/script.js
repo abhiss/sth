@@ -1,14 +1,24 @@
+import {ModuleLoadTest, addToastNotification} from "./modules/toastNotify.js";
+console.log(ModuleLoadTest);
+
+
 var timer = 0;
 var letPlay = false;
+
 $(document).ready(function () {
 	var time = 20;
 	let spectatedPlayerNameBeingShown = "error"
 	//document.querySelector(".scoreboard").style.display = 'none';//
-	
+
 	//gsap stuff
 	let dur1 = 1
 	gsap.from('.intro-g2', { duration: dur1, opacity: 0, ease: 'back.out(.5)' })
 	gsap.from('.intro-mid', { duration: dur1, opacity: 0, ease: 'back.out(.5)' })
+	addToastNotification("Welcome to Survive the Hunt.", 2000);
+	// var tl = gsap.timeline({onComplete: ()=> {t1.reverse()}});
+	// tl.to("#toast_message_wrapper", {opacity: 100, duration: 1000}, '+=1');
+	
+	//t1.play();
 
 	window.setInterval(function () {
 		var countdown = $('#countdown');
@@ -34,6 +44,11 @@ $(document).ready(function () {
 			startCountdown(item["Message"], item["Seconds"]);
 			return;
 		}
+		if(event.EventName == "sthv:showToastNotification"){
+			console.log("GOT MESSAGE FOR TOASTNOTIF ")
+			if(item.display_time) addToastNotification(item.message, item.display_time)
+			else addToastNotification(item.message);
+		}
 		if (event.EventName === "sthv:runneropt") {
 			console.log("show: " + item)
 			if (item) {
@@ -43,7 +58,7 @@ $(document).ready(function () {
 					$(".startscreen").hide();
 				}, 10000);
 			}
-			else{
+			else {
 				$(".startscreen").hide();
 			}
 		}
@@ -240,7 +255,7 @@ function startCountdown(msg, time) {
 	$('.countdown').show(); //should be .timer but i dont want to hide it anyways
 };
 function sendNuiEvent(name, data = {}) {
-	$.post("http://sthv/" + name, JSON.stringify(data));
+	$.post("https://sthv/" + name, JSON.stringify(data));
 };
 
 function addPosPercentToTween(originalTween, addend, isX) {
