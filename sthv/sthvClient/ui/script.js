@@ -131,8 +131,12 @@ $(document).ready(function () {
 				}
 				else document.getElementById("insth").innerHTML += '<img src="assets/check.png" alt="true">';
 
-				document.getElementById('playbtn').classList.add('intro-selectable');
+				const playbtn_elm = document.getElementById('playbtn')
+				playbtn_elm.classList.add('intro-selectable');
+				playbtn_elm.click();
+				
 				letPlay = true;
+
 			}
 			else if (!inSth && isDiscordOnline) { //discord works but person isnt in the discord server.
 				document.getElementById("insth").innerHTML += '<img src="assets/cross.png" alt="true">';
@@ -167,7 +171,7 @@ $(document).ready(function () {
 		$(".startscreen").hide();
 	});
 
-	document.querySelector("#playbtn").addEventListener('click', function () {
+	document.getElementById("playbtn").addEventListener('click', function () {
 		if (letPlay) {
 			gsap.to(".intro-g2", { duration: 1, opacity: 0, ease: 'power2' })
 			gsap.to(".intro-mid", { duration: 1, opacity: 0, ease: 'power2' })

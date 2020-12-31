@@ -16,7 +16,7 @@ html, body {
     user-select: none;
     top: 40%;
     left: calc(50% - 100px);
-    /* display: none; */
+    display: none;
 }
 
 .startscreen ul {
@@ -38,11 +38,11 @@ html, body {
     padding: 35px 20px 10px 20px;
     transition:200ms background-color;
 }
-
 .startscreen li:first-child {
     margin-bottom: 5px;
 }
 
+/* Theres no hovering, player selects via keyboard. */
 .startscreen li:hover {
     /* font-style: oblique; */
     background-color: rgba(0, 174, 255, 0.198);

@@ -20,7 +20,10 @@ namespace sthv
 		public Ped _thisPed { get; set; }
 		private SpawnNuiController spawnnuicontroller { get; set; } = new SpawnNuiController();
 		public client()
-		{
+		{   
+			//set props
+
+
 			TriggerServerEvent("sth:NeedLicense");//so player gets license on resource restarting
 			int _ped = Game.Player.Character.Handle;
 			//test 		
@@ -235,6 +238,9 @@ namespace sthv
 			if (isInSTH || !isDiscordServerOnline)
 			{
 				spawnnuicontroller.isSpawnAllowed = true;
+			}else
+			{
+				spawnnuicontroller.isSpawnAllowed = false;
 			}
 			Debug.WriteLine($"^2 serverid recieved, mine: {myServerId} runner: {RunnerServerId}^7");
 
@@ -282,6 +288,8 @@ namespace sthv
 		async void DefaultSpawn() //only used for /spawnall i think
 		{
 			API.SetNuiFocus(false, false);
+			TriggerNuiEvent("sthv:discordVerification", new { has_discord = false, is_in_sth = false, is_in_vc = false, is_discord_online = false });
+
 			if (CurrentMap != null)
 			{
 				await sthv.Spawn.SpawnPlayer("s_m_y_swat_01", CurrentMap.HunterSpawn.X, CurrentMap.HunterSpawn.Y, CurrentMap.HunterSpawn.Z, CurrentMap.HunterSpawn.W);

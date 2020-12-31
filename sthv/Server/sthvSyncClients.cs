@@ -53,7 +53,7 @@ namespace sthvServer
 		}
 		static void ActivateMissionPed()
 		{
-			server.runner.TriggerEvent("sthv:setnewpedmission");
+			Server.runner.TriggerEvent("sthv:setnewpedmission");
 			isMissionPedActive = true;
 		}
 		void onNewMissionPed(int netid)

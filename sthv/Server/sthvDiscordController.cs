@@ -45,9 +45,9 @@ namespace sthvServer
 			{
 				req.SetResult(body);
 			}
-			else if (statusCode == 0)
+			else if (statusCode == 0 || statusCode == 404)
 			{
-				Debug.WriteLine("^2DISCORD SERVER RETURNED STATUS CODE 0! (OFFLINE) | ");
+				Debug.WriteLine("^2DISCORD SERVER RETURNED STATUS CODE 0 or 404 - ( DISCORD_OFFLINE)^7");
 			}
 			else
 				req.SetException(new Exception("Server returned status code: " + statusCode));

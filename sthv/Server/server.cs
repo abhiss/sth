@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 namespace sthvServer
 {
 
-	class server : BaseScript
+	class Server : BaseScript
 	{
 		int runnerHandle = -1;
 		bool isRunnerKilled = false;
@@ -24,13 +24,14 @@ namespace sthvServer
 		public bool TestMode { get; set; } = false;
 		int numberOfAvailableMaps = 1;
 		public int currentplayarea { get; set; } = 1;
-		public sthvDiscordController discord { get; set; }
-		public bool IsDiscordServerOnline { get; set; } = false;
+		public sthvDiscordController discord { get; }
+		public static bool IsDiscordServerOnline { get; set; } = false;
 		public bool AutoHunt { get; set; } = true;
+		public static bool isInDevmode { get; } = (API.GetConvarInt("sthv_devmode", 0) != 0);
 
 
 		public static List<int> playersInHeliServerid { get; set; } = new List<int>();
-		public server()
+		public Server()
 		{
 			discord = new sthvDiscordController();
 			//test
@@ -347,9 +348,12 @@ namespace sthvServer
 		}
 		async void onHuntOver() //happens once on hunt over
 		{
-			foreach(Player p in Players)
+			if (IsDiscordServerOnline)
 			{
-				discord.MovePlayerToVc(p.getDiscordId(), discord.pcVoice);
+				foreach (Player p in Players)
+				{
+					discord.MovePlayerToVc(p.getDiscordId(), discord.pcVoice);
+				}
 			}
 			TriggerClientEvent("sthv:spectate", false);
 			playersInHeliServerid = new List<int>();
@@ -433,6 +437,12 @@ namespace sthvServer
 		async void OnRequestedLicense([FromSource] Player source)        //send client their license 
 		{
 			var i = 1; //waits up to 3x2 seconds. Waits for firstick to check if discord server is online. 
+			if (isInDevmode)
+			{
+				i = 3;
+			}
+
+			//retry loop incase of connection issues
 			while (!IsDiscordServerOnline && i < 3) {
 				Debug.WriteLine(IsDiscordServerOnline.ToString());
 				await Delay(2000);

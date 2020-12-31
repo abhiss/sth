@@ -17,7 +17,7 @@ namespace sthv
 		private static bool optionOpen;
 
 		public static bool GetInput { get { return optionOpen; } }
-		public bool isSpawnAllowed { get; set; }
+		public bool isSpawnAllowed { get; set; } = false;
 
 		public SpawnNuiController()
 		{

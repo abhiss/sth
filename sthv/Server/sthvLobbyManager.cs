@@ -62,10 +62,10 @@ namespace sthvServer
 				{
 					Debug.WriteLine($"player {source.Name} not in alive list anyways :(");
 				}
-				if (server.hasHuntStarted && _leftHandle == server.runner.Handle)
+				if (Server.hasHuntStarted && _leftHandle == Server.runner.Handle)
 				{
 					Debug.WriteLine("^1Runner left :( ^7");
-					server.isHuntOver = true;
+					Server.isHuntOver = true;
 				}
 			}
 			else
@@ -74,7 +74,7 @@ namespace sthvServer
 			}
 			Debug.WriteLine($"dropped {source.Name}");
 			CheckAlivePlayers();
-			server.refreshscoreboard();
+			Server.refreshscoreboard();
 		}
 		[EventHandler("sthv:checkaliveplayers")]
 		public void CheckAlivePlayers()
@@ -89,10 +89,10 @@ namespace sthvServer
 			}
 			Debug.WriteLine("alive players" + alivePlayerCount.ToString());
 
-			if(alivePlayerCount < 2 && server.hasHuntStarted)
+			if(alivePlayerCount < 2 && Server.hasHuntStarted)
 			{
-				server.isHuntOver = true;
-				server.SendChatMessage("^4Hunt", "All hunters dead, hunt over.");
+				Server.isHuntOver = true;
+				Server.SendChatMessage("^4Hunt", "All hunters dead, hunt over.");
 			}
 		}
 	}
