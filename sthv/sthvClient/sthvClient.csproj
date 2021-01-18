@@ -51,9 +51,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Server\shared\gamerules.cs">
+      <Link>shared\gamerules.cs</Link>
+    </Compile>
     <Compile Include="client.cs" />
+    <Compile Include="GamemodeUtilities.cs" />
     <Compile Include="NuiEventModel.cs" />
     <Compile Include="Spawn\SpawnNuiController.cs" />
+    <Compile Include="fetch\sthvFetch.cs" />
+    <Compile Include="sthvGameoverHandler.cs" />
     <Compile Include="sthvHuntStart.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Spawn\Spawn.cs" />
@@ -109,6 +115,7 @@
     <TypeScriptCompile Include="ui\node_modules\%40types\jquery\misc.d.ts" />
     <TypeScriptCompile Include="ui\node_modules\%40types\sizzle\index.d.ts" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>pwsh  $(SolutionDir)helper.ps1 -source $(ProjectDir)ui

@@ -29,9 +29,6 @@ namespace sthv
 					isalive = isAlive
 				}
 			}));
-			                                                
-
 		}
-
 	}
 }

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using CitizenFX.Core;
 using static CitizenFX.Core.Native.API;
 
@@ -6,7 +7,7 @@ namespace sthv
 {
 	public class Spawn : BaseScript
 	{
-		
+
 		private static bool _spawnLock = false;
 
 		public static void FreezePlayer(int playerId, bool freeze)
@@ -41,9 +42,9 @@ namespace sthv
 					ClearPedTasksImmediately(ped);
 			}
 		}
+		///<exception cref="Exception">Throws when <paramref name="skin"/> is invalid.</exception>
 		public static async Task SpawnPlayer(string skin, float x, float y, float z, float heading)
 		{
-			Debug.WriteLine("SPAWNING PLAYER");
 			if (_spawnLock)
 				return;
 
@@ -51,16 +52,23 @@ namespace sthv
 
 			DoScreenFadeOut(500);
 
-			while (IsScreenFadingOut() && HasModelLoaded((uint)GetHashKey(skin)))
+			//model loaded to be indirectly used by Game.Player.ChangeModel
+			RequestModel((uint)GetHashKey(skin));
+			RequestCollisionAtCoord(x, y, z);
+
+			while (IsScreenFadingOut())
 			{
 				await Delay(1);
-				
 			}
 
-			NetworkSetInSpectatorMode(false, 0); //changed to take out of spectator mode
-
 			FreezePlayer(PlayerId(), true);
-			await Game.Player.ChangeModel(GetHashKey(skin));
+			//ChangeModel times out and returns false if model fails to load in 1000ms
+			var retries = 0;
+			while (!await Game.Player.ChangeModel(GetHashKey(skin)))
+			{
+				if (retries > 3) throw new Exception("SpawnPlayer failed because skin was invalid");
+				++retries;
+			}
 			SetPedDefaultComponentVariation(GetPlayerPed(-1));
 			RequestCollisionAtCoord(x, y, z);
 
@@ -71,16 +79,14 @@ namespace sthv
 			ClearPedTasksImmediately(ped);
 			RemoveAllPedWeapons(ped, false);
 			ClearPlayerWantedLevel(PlayerId());
+			NetworkSetInSpectatorMode(false, 0);
 
 			while (!HasCollisionLoadedAroundEntity(ped))
 			{
 				await Delay(1);
-				Debug.WriteLine($"{HasCollisionLoadedAroundEntity(ped)}");
 			}
 
 			ShutdownLoadingScreen();
-
-
 			DoScreenFadeIn(500);
 
 			while (IsScreenFadingIn())
@@ -90,7 +96,7 @@ namespace sthv
 
 			FreezePlayer(PlayerId(), false);
 
-			TriggerEvent("playerSpawned", PlayerId());
+			//TriggerEvent("playerSpawned", PlayerId());
 
 			_spawnLock = false;
 		}

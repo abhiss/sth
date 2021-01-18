@@ -20,7 +20,7 @@ namespace sthv
 		public Ped _thisPed { get; set; }
 		private SpawnNuiController spawnnuicontroller { get; set; } = new SpawnNuiController();
 		public client()
-		{   
+		{
 			//set props
 
 
@@ -32,15 +32,16 @@ namespace sthv
 				//TriggerServerEvent("sth:sendServerDebug", $"{Game.PlayerPed.CurrentVehicle.Position.X.ToString()}f, {Game.PlayerPed.CurrentVehicle.Position.Y.ToString()}f, {Game.PlayerPed.CurrentVehicle.Position.Z.ToString()}f");
 				await sthv.Spawn.SpawnPlayer("s_m_y_swat_01", CurrentMap.HunterSpawn.X, CurrentMap.HunterSpawn.Y, CurrentMap.HunterSpawn.Z, CurrentMap.HunterSpawn.W);
 				API.SetNuiFocus(false, false);
-
 			}), false);
-			API.RegisterCommand("test", new Action<int, List<object>, string>((src, args, raw) =>
-			{
-				TriggerNuiEvent("sthv:showToastNotification", new { message = "VV", display_time = 4000 });
 
-				//Debug.WriteLine("requesting license");
-				//TriggerServerEvent("sth:NeedLicense");  //asks server for serverid, runnerid, and discord validation.
-			}), false);
+			API.RegisterCommand("test", new Action<int, List<object>, string>(async (src, args, raw) =>
+		    {
+			    //TriggerNuiEvent("sthv:showToastNotification", new { message = "VV", display_time = 4000 });
+			    var i = await sthvFetch.DownloadString("ping");
+			    Debug.WriteLine(i);
+			    //Debug.WriteLine("requesting license");
+		 	    //TriggerServerEvent("sth:NeedLicense");  //asks server for serverid, runnerid, and discord validation. 
+		    }), false);
 
 			_thisPed = Game.PlayerPed;
 			var playArea = new sthv.sthvPlayArea();
@@ -51,7 +52,7 @@ namespace sthv
 
 			Tick += rules.AutoBrakeLight;
 			Tick += playArea.OnTickPlayArea;
-			Tick += rules.isKeyPressed; //for big map toggle
+			Tick += rules.onTick; //for big map toggle
 			Tick += OnTick;
 
 			EventHandlers["removeveh"] += new Action(async () => { await sthv.sthvHuntStart.RemoveAllVehicles(true); });
@@ -63,8 +64,11 @@ namespace sthv
 			//timer
 			EventHandlers["sth:starttimer"] += new Action<int>((timeInSecs) =>
 			{
-				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "hunttimer", 
-					EventData = new sthv.NuiModels.NuiTimerMessageModel { Message = "", Seconds = timeInSecs } }));
+				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel
+				{
+					EventName = "hunttimer",
+					EventData = new sthv.NuiModels.NuiTimerMessageModel { Message = "", Seconds = timeInSecs }
+				}));
 			});
 
 
@@ -238,7 +242,8 @@ namespace sthv
 			if (isInSTH || !isDiscordServerOnline)
 			{
 				spawnnuicontroller.isSpawnAllowed = true;
-			}else
+			}
+			else
 			{
 				spawnnuicontroller.isSpawnAllowed = false;
 			}
@@ -251,7 +256,7 @@ namespace sthv
 				Debug.WriteLine("Discord server not online");
 				//SendChatMessage("sthv", "Discord verification failed for technical reasons. Anyone can play.");
 			}
-			API.SetNuiFocus(true, true);
+			//API.SetNuiFocus(true, true);
 		}
 		void OnPlayerKilled(int killerServerIndex, ExpandoObject info)
 		{
@@ -301,10 +306,13 @@ namespace sthv
 			}
 		}
 
-
 		public void RegisterEventHandler(string eventName, Delegate action)
 		{
 			EventHandlers[eventName] += action;
+		}
+		public void UnregisterEventHandler(string eventName, Delegate action)
+		{
+			EventHandlers[eventName] -= action;
 		}
 		public static void SendChatMessage(string title, string message, int r = 0, int g = 0, int b = 0)
 		{
@@ -324,7 +332,7 @@ namespace sthv
 				EventName = eventName,
 				EventData = data ?? new object()
 			}));
-			API.SetCursorLocation(0.5f, 0.5f);
+			//API.SetCursorLocation(0.5f, 0.5f);
 		}
 
 		public static Player GetPlayerFromServerId(int playerId, PlayerList players)

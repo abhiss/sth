@@ -17,52 +17,69 @@ namespace sthvServer
 		/// <summary>
 		/// reset and used in server.cs to check if joining player had died before so people cant rejoin and get a second life.
 		/// </summary>
-		public static List<string> DeadPlayers = new List<string>();
-		//public PlayerList PlayersHunters { get; set; }
-		//public PlayerList PlayersRunners { get; set; }
-		Dictionary<string, bool> PlayerPing = new Dictionary<string, bool >();
-		List<Player> AlivePlayers = new List<Player>();
+		//public static List<string> DeadPlayers = new List<string>();
+
+		//List<Player> AlivePlayers = new List<Player>();
+
+		//public static List<sthvPlayer> sthvPlayers = new List<sthvPlayer>(); //replaced by playersinfo
+		private static Dictionary<string, SthvPlayer> PlayerData = new Dictionary<string, SthvPlayer>();
+
 		public sthvLobbyManager()
 		{
-			EventHandlers["playerDropped"] += new Action<Player, string>(OnPlayerDropped);
-			EventHandlers["playerConnecting"] += new Action(() =>
+			//add all current players to sthvPlayers
+			foreach (var p in Players)
 			{
-			});
-
+				PlayerData.Add(p.getLicense(), new SthvPlayer(p));
+			}
 
 			API.RegisterCommand("checkaliveplayers", new Action<int, List<object>, string>((src, args, raw) =>
 			{
-				foreach(Player p in Players)
-				{
-					if(DeadPlayers.Contains(p.Identifiers["license"])){
-						Debug.WriteLine($"player {p.Name} is dead, ping is {p.Ping}");
-					}
-					else
-					{
-						Debug.WriteLine($"player {p.Name} is alive, ping is {p.Ping}");
-					}
-				}
+				Debug.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(PlayerData));
+
+				var aliveHunterCount = PlayerData.Where(p => (p.Value.State == SthvPlayer.stateEnum.alive && p.Value.teamname != "runner")).Count();
+				var aliveRunnerCount = PlayerData.Where(p => (p.Value.State == SthvPlayer.stateEnum.alive && p.Value.teamname == "runner")).Count();
+
+				Debug.WriteLine($"{aliveHunterCount} alive hunters. {aliveRunnerCount} alive runners.");
+
 			}), false);
+
 		}
 		[EventHandler("test:logIdentifiers")]
-		void logIdentifiers([FromSource]Player player)
+		private void logIdentifiers([FromSource] Player player)
 		{
 			Debug.WriteLine(player.Identifiers["discord"]);
 		}
-		void OnPlayerDropped([FromSource]Player source, string reason)
+		#region playerConnectAndDisconnect
+		[EventHandler("playerConnecting")]
+		private void OnPlayerConnected([FromSource] Player source, string playerName, dynamic setKickReason, dynamic deferrals)
+		{
+			Debug.WriteLine("\nw");
+			PlayerData.Add(source.getLicense(), new SthvPlayer(source));
+
+			//Debug.WriteLine($"^3Player {source.Name} has {matchingPlayers} instances in sthvPlayers^7");
+		}
+
+		[EventHandler("playerDropped")]
+		private void OnPlayerDropped([FromSource] Player source, string reason)
 		{
 			if (source != null)
 			{
-				string _leftHandle = source.Name;
-				if (AlivePlayers.Contains(source))
+				//sthvPlayers
+				if (!PlayerData.Remove(source.getLicense()))
 				{
-					AlivePlayers.Remove(source);
+					Debug.WriteLine($"^3ERROR: PLAYER ${source.Name} WAS NOT IN sthvPlayers WHEN DROPPING.^7");
+					Debug.WriteLine("\nPlayers in PlayerInfo");
+					foreach (var p in PlayerData)
+					{
+						Debug.WriteLine("	" + p.Value.player.Name + " - ");
+					}
 				}
 				else
 				{
-					Debug.WriteLine($"player {source.Name} not in alive list anyways :(");
+					Debug.WriteLine("dropping player and removing from PlayerData: " + source.Name + ", license: " + source.getLicense());
 				}
-				if (Server.hasHuntStarted && _leftHandle == Server.runner.Handle)
+
+				if (Server.hasHuntStarted && source.Name == Server.runner.Handle)
 				{
 					Debug.WriteLine("^1Runner left :( ^7");
 					Server.isHuntOver = true;
@@ -76,25 +93,149 @@ namespace sthvServer
 			CheckAlivePlayers();
 			Server.refreshscoreboard();
 		}
-		[EventHandler("sthv:checkaliveplayers")]
-		public void CheckAlivePlayers()
-		{
-			var alivePlayerCount = 0;
-			foreach(Player p in Players)
-			{
-				if (!DeadPlayers.Contains(p.Identifiers["license"]))
-				{
-					alivePlayerCount += 1;
-				}
-			}
-			Debug.WriteLine("alive players" + alivePlayerCount.ToString());
+		#endregion
 
-			if(alivePlayerCount < 2 && Server.hasHuntStarted)
+		[EventHandler("sthv:checkaliveplayers")]
+		public static void CheckAlivePlayers()
+		{
+			var aliveHunterCount = PlayerData.Where(p => (p.Value.State == SthvPlayer.stateEnum.alive && p.Value.teamname != "runner")).Count();
+			var aliveRunnerCount = PlayerData.Where(p => (p.Value.State == SthvPlayer.stateEnum.alive && p.Value.teamname == "runner")).Count();
+			Debug.WriteLine($"^8{aliveHunterCount} alive hunters. {aliveRunnerCount} alive runners.^7");
+
+			//check if runner is alive
+			if (aliveRunnerCount < 1 && Server.hasHuntStarted && !Server.isHuntOver)
 			{
 				Server.isHuntOver = true;
-				Server.SendChatMessage("^4Hunt", "All hunters dead, hunt over.");
+				Server.SendChatMessage("^4Hunt", "Hunters win! Hunt ended because runner has died.");
+				Server.SendToastNotif("Hunters win! Hunt ended because runner has died.", 7000);
+			}
+			//check if any hunters are alive
+			if (aliveHunterCount < 1 && Server.hasHuntStarted && !Server.isHuntOver)
+			{
+				Server.isHuntOver = true;
+				Server.SendChatMessage("^4Hunt", "Runner wins! Hunt ended because all hunters have died.");
+				Server.SendToastNotif("Runner wins! Hunt ended because all hunters have died.", 7000);
 			}
 		}
+
+
+		#region PlayerDataMethods
+		/// <summary>
+		/// Marks player killed/dead in PlayerData collection
+		/// </summary>
+		/// <param name="player"></param>
+		public static void MarkPlayerDead(Player player, string killerName, string killerLicense)
+		{
+			SthvPlayer splayer;
+			if (PlayerData.TryGetValue(player.getLicense(), out splayer))
+			{
+				splayer.KillerNameAndLicense = (killerName, killerLicense);
+				splayer.State = SthvPlayer.stateEnum.dead;
+			}
+			else
+			{
+				Utilities.logError(player.Name + " not found in PlayerData, in MarkPlayerKilled");
+			}
+		}
+
+		/// <summary>
+		/// Marks player alive in PlayerData collection
+		/// </summary>
+		/// <param name="player"></param>
+		public static void MarkPlayerAlive(Player player)
+		{
+			SthvPlayer splayer;
+			if (PlayerData.TryGetValue(player.getLicense(), out splayer))
+			{
+				splayer.State = SthvPlayer.stateEnum.alive;
+			}
+			else
+			{
+				Utilities.logError(player.Name + " not found in PlayerData, in MarkPlayerAlive");
+			}
+		}
+
+		/// <summary>
+		/// Set player's team to provided team name.
+		/// </summary>
+		/// <param name="player"></param>
+		/// <param name="teamname">Can be set to null if player is in no team.</param>
+		public static void SetPlayerTeam(Player player, string teamname)
+		{
+			SthvPlayer splayer;
+			if (PlayerData.TryGetValue(player.getLicense(), out splayer))
+			{
+				splayer.teamname = teamname;
+			}
+			else
+			{
+				Utilities.logError(player.Name + " not found in PlayerData, in SetPlayerTeam");
+			}
+		}
+		/// <summary>
+		/// Returns all players in the given state(s).
+		/// </summary>
+		/// <param name="state">array of states to match players with.</param>
+		/// <returns></returns>
+		public static List<SthvPlayer> GetPlayersOfState(params SthvPlayer.stateEnum[] state)
+		{
+			List<SthvPlayer> output = new List<SthvPlayer>(32);
+
+			foreach (var item in PlayerData.Values)
+			{
+				if (state.Contains(item.State))
+				{
+					output.Add(item);
+				}
+			}
+			return output;
+		}
+
+		/// <summary>
+		/// Returns all players in the given team(s).
+		/// </summary>
+		/// <param name="state">array of states to match players with.</param>
+		/// <returns></returns>
+		public static List<SthvPlayer> GetPlayersInTeam(params string[] teams)
+		{
+			List<SthvPlayer> output = new List<SthvPlayer>(32);
+
+			foreach (var item in PlayerData.Values)
+			{
+				if (teams.Contains(item.teamname))
+				{
+					output.Add(item);
+				}
+			}
+			return output;
+		}
+
+		/// <summary>
+		/// Sets all alive and dead players' state to waiting. To be used at the end of a round.
+		/// </summary>
+		public static void setAllActiveToWaiting()
+		{
+			foreach (var p in PlayerData.Values)
+			{
+				if (p.State != SthvPlayer.stateEnum.inactive)
+				{
+					p.State = SthvPlayer.stateEnum.waiting;
+				}
+			}
+		}
+		public static SthvPlayer getPlayerByLicense(string license)
+		{
+			SthvPlayer p;
+			if (PlayerData.TryGetValue(license, out p))
+			{
+				return p;
+			}
+			else throw new Exception("Player not found by license " + license);
+
+		}
+		#endregion
+
+
 	}
 }
 

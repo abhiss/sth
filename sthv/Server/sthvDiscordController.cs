@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
 using Newtonsoft.Json;
+
+
 namespace sthvServer
 {
 	class sthvDiscordController : BaseScript

@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		helper.ps1 = helper.ps1
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sthvServer.Test", "sthvServerTests\sthvServer.Test.csproj", "{E3CEF2C8-B48B-49D0-9A5F-F3DD49D92B73}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,14 @@ Global
 		{421B1047-ECB2-4F9E-BFB4-E2DFE4D3E37B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{421B1047-ECB2-4F9E-BFB4-E2DFE4D3E37B}.Release|x64.ActiveCfg = Release|Any CPU
 		{421B1047-ECB2-4F9E-BFB4-E2DFE4D3E37B}.Release|x64.Build.0 = Release|Any CPU
+		{E3CEF2C8-B48B-49D0-9A5F-F3DD49D92B73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3CEF2C8-B48B-49D0-9A5F-F3DD49D92B73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3CEF2C8-B48B-49D0-9A5F-F3DD49D92B73}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E3CEF2C8-B48B-49D0-9A5F-F3DD49D92B73}.Debug|x64.Build.0 = Debug|Any CPU
+		{E3CEF2C8-B48B-49D0-9A5F-F3DD49D92B73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3CEF2C8-B48B-49D0-9A5F-F3DD49D92B73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3CEF2C8-B48B-49D0-9A5F-F3DD49D92B73}.Release|x64.ActiveCfg = Release|Any CPU
+		{E3CEF2C8-B48B-49D0-9A5F-F3DD49D92B73}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

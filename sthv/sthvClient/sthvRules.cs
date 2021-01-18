@@ -31,7 +31,7 @@ namespace sthv
 			missionBlip.Alpha = 0;
 
 	
-			Tick += CheckPedMission;
+			//Tick += CheckPedMission;
 			//Tick += ShowRunnerOnMap;
 
 			EventHandlers["sthv:setnewpedmission"] += new Action(SetNewMission);
@@ -39,13 +39,13 @@ namespace sthv
 			
 			_ped = API.PlayerPedId();
 			_pid = API.PlayerId();
+
 			API.StatSetInt((uint)Game.GenerateHash("MP0_STAMINA"), 100, true);
 			//API.SetPoliceIgnorePlayer(_pid, true);  //works like "turn cops blind eye", you get cops if you shoot them or something 
 			API.SetMaxWantedLevel(0);
 			API.SetPlayerCanDoDriveBy(_pid, false); 
 			API.NetworkSetFriendlyFireOption(true);
 			API.SetCanAttackFriendly(_ped, true, true);
-			API.SetMaxWantedLevel(0);
 			API.DisablePlayerVehicleRewards(_pid);
 			API.SetEveryoneIgnorePlayer(_pid, true);
 			//sthvClient.client.eventhandlers			
@@ -131,10 +131,11 @@ namespace sthv
 			await Delay(50000);
 			RunnerRadiusBlip.Delete();
 		}
-		public async Task isKeyPressed() //happens always
+		public async Task onTick() //happens always
 		{
 			API.HideHudComponentThisFrame((int)HudComponent.Cash);
 			API.HideHudComponentThisFrame((int)HudComponent.CashChange);
+
 			API.DisablePlayerVehicleRewards(_pid);
 			if (API.IsControlJustReleased(20, 48)) //Z
 			{
