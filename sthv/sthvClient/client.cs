@@ -7,7 +7,6 @@ using System.Dynamic;
 using System.Threading.Tasks;
 
 
-
 namespace sthv
 {
 	public class client : BaseScript
@@ -23,37 +22,26 @@ namespace sthv
 		{
 			//set props
 
-
 			TriggerServerEvent("sth:NeedLicense");//so player gets license on resource restarting
 			int _ped = Game.Player.Character.Handle;
 			//test 		
-			API.RegisterCommand("sendpos", new Action<int, List<object>, string>(async (src, args, raw) =>
+			API.RegisterCommand("sendpos", new Action<int, List<object>, string>((src, args, raw) =>
 			{
-				//TriggerServerEvent("sth:sendServerDebug", $"{Game.PlayerPed.CurrentVehicle.Position.X.ToString()}f, {Game.PlayerPed.CurrentVehicle.Position.Y.ToString()}f, {Game.PlayerPed.CurrentVehicle.Position.Z.ToString()}f");
-				await sthv.Spawn.SpawnPlayer("s_m_y_swat_01", CurrentMap.HunterSpawn.X, CurrentMap.HunterSpawn.Y, CurrentMap.HunterSpawn.Z, CurrentMap.HunterSpawn.W);
-				API.SetNuiFocus(false, false);
+				TriggerServerEvent("sth:sendServerDebug", $"{Game.PlayerPed.CurrentVehicle.Position.X}f, {Game.PlayerPed.CurrentVehicle.Position.Y}f, {Game.PlayerPed.CurrentVehicle.Position.Z}f");
 			}), false);
 
 			API.RegisterCommand("test", new Action<int, List<object>, string>(async (src, args, raw) =>
 		    {
-			    //TriggerNuiEvent("sthv:showToastNotification", new { message = "VV", display_time = 4000 });
-			    var i = await sthvFetch.DownloadString("ping");
-			    Debug.WriteLine(i);
-			    //Debug.WriteLine("requesting license");
-		 	    //TriggerServerEvent("sth:NeedLicense");  //asks server for serverid, runnerid, and discord validation. 
+			    var pingRes = await sthvFetch.Get<Shared.Ping>("ping");
+			    Debug.WriteLine(pingRes.response);
 		    }), false);
 
 			_thisPed = Game.PlayerPed;
 			var playArea = new sthv.sthvPlayArea();
 			var rules = new sthv.sthvRules();
 
-
-			Debug.WriteLine("Send toast notif");
-
-			Tick += rules.AutoBrakeLight;
-			Tick += playArea.OnTickPlayArea;
 			Tick += rules.onTick; //for big map toggle
-			Tick += OnTick;
+			Tick += RunnerRules;
 
 			EventHandlers["removeveh"] += new Action(async () => { await sthv.sthvHuntStart.RemoveAllVehicles(true); });
 
@@ -76,7 +64,6 @@ namespace sthv
 			EventHandlers["sthv:showToastNotification"] += new Action<string, int>((message, timeInSeconds) => //time_delay in ms
 			{
 				TriggerNuiEvent("sthv:showToastNotification", new { message = message, display_time = timeInSeconds });
-
 			});
 			EventHandlers["sthv:spawnhuntercars"] += new Action(() => sthv.sthvHuntStart.HunterVehicles());
 			EventHandlers["sthv:sendChosenMap"] += new Action<int>(i => sthvHuntStart.SetMap(i));
@@ -84,7 +71,6 @@ namespace sthv
 			TriggerServerEvent("NumberOfAvailableMaps", sthvMaps.Maps.Length);
 
 			EventHandlers["sth:spawnall"] += new Action(DefaultSpawn);
-			EventHandlers["sth:returnlicense"] += new Action<int, int, bool, bool, bool, bool>(ReceivedLicense); //gets myserverid, runnerserverid, hasdiscord, isinguild, in pc-voice 
 
 			//EventHandlers["playerSpawned"] += new Action(onPlayerSpawned); //called from client
 			EventHandlers["sth:updateRunnerHandle"] += new Action<int>(RunnerHandleUpdate);
@@ -143,23 +129,6 @@ namespace sthv
 			   API.SetNuiFocus(true, true);
 		   }), false);
 
-			//API.RegisterCommand("starttimer", new Action<int, List<object>, string>((src, args, raw) =>
-			//{
-			//	try {
-			//		int timerCountInSeconds = int.Parse(args[0].ToString());
-			//		//Debug.WriteLine($"^3 {args[0].ToString()}");
-
-
-			//		Debug.WriteLine("started timer");
-			//		API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel { EventName = "hunt.countdown", EventData = new sthv.NuiModels.NuiMessageModel { Message = "", Seconds = timerCountInSeconds } }));
-
-			//			//string testObj = JsonConvert.SerializeObject(new sthv.NuiEventModel { EventName = "this is the eventname" });
-			//			//sthv.NuiEventModel deserializedObj = JsonConvert.DeserializeObject<sthv.NuiEventModel>(testObj);
-			//			//Debug.WriteLine(deserializedObj.EventName);
-			//	}
-
-			//	catch (Exception ex) { Debug.WriteLine($"^3{ex}"); }
-
 
 			API.RegisterCommand("checkrunner", new Action<int, List<object>, string>((src, args, raw) =>
 			{
@@ -192,7 +161,7 @@ namespace sthv
 			#endregion
 		}
 
-		async Task OnTick() //checks rules
+		async Task RunnerRules() //checks rules
 		{
 			Debug.WriteLine("^2 isrunner: " + IsRunner);
 			if (IsRunner)
@@ -228,16 +197,37 @@ namespace sthv
 		{
 			Tick -= FirstTick;
 			API.SetManualShutdownLoadingScreenNui(true);
-			Debug.WriteLine("^1ONPLAYERLOADEKKKD");
+			Debug.WriteLine("STHV First Tick");
 			TriggerServerEvent("sth:NeedLicense");  //asks server for serverid, runnerid, and discord validation.
+			Shared.PlayerJoinInfo res = await sthvFetch.Get<Shared.PlayerJoinInfo>("PlayerJoinInfo");
+			
 			API.SetNuiFocus(true, true);
+			MyServerId = Game.Player.ServerId;
+			RunnerServerId = res.runnerServerId;
+			if (res.isInSTHGuild|| !res.isDiscordServerOnline)
+			{
+				spawnnuicontroller.isSpawnAllowed = true;
+			}
+			else
+			{
+				spawnnuicontroller.isSpawnAllowed = false;
+			}
+			Debug.WriteLine($"^2 serverid recieved, mine: {MyServerId} runner: {RunnerServerId}^7");
 
-
+			TriggerNuiEvent("sthv:discordVerification", new { has_discord = res.hasDiscord, is_in_sth = res.isInSTHGuild, is_in_vc = res.isInVc, is_discord_online = res.isDiscordServerOnline });
+			SendChatMessage("test", res.isDiscordServerOnline.ToString());
+			if (!res.isDiscordServerOnline)
+			{
+				Debug.WriteLine("Discord server not online");
+				//SendChatMessage("sthv", "Discord verification failed for technical reasons. Anyone can play.");
+			}
 		}
 
-		void ReceivedLicense(int myServerId, int runnerHandle, bool hasDiscord, bool isInSTH, bool isInVc, bool isDiscordServerOnline)  //gets license from server
+
+		//delete this
+		void ReceivedLicense( int runnerHandle, bool hasDiscord, bool isInSTH, bool isInVc, bool isDiscordServerOnline)  //gets license from server
 		{
-			MyServerId = myServerId;
+			
 			RunnerServerId = runnerHandle;
 			if (isInSTH || !isDiscordServerOnline)
 			{
@@ -247,7 +237,7 @@ namespace sthv
 			{
 				spawnnuicontroller.isSpawnAllowed = false;
 			}
-			Debug.WriteLine($"^2 serverid recieved, mine: {myServerId} runner: {RunnerServerId}^7");
+			Debug.WriteLine($"^2 serverid recieved, mine: {Game.Player.ServerId} runner: {RunnerServerId}^7");
 
 			TriggerNuiEvent("sthv:discordVerification", new { has_discord = hasDiscord, is_in_sth = isInSTH, is_in_vc = isInVc, is_discord_online = isDiscordServerOnline });
 			SendChatMessage("test", isDiscordServerOnline.ToString());

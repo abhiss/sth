@@ -151,7 +151,6 @@ namespace sthv
 			if (API.IsControlJustReleased(0, 86))
 			{
 				Debug.WriteLine("show me on map");
-				//sthv.test.addCoordToList();
 			}
 			if (API.IsControlJustPressed(0, 171))
 			{
@@ -174,7 +173,7 @@ namespace sthv
 				} 
 			}
 		}
-
+		[Tick]
 		public async Task AutoBrakeLight()              //autobrakelight
 		{
 			_ped = API.PlayerPedId();
@@ -191,7 +190,7 @@ namespace sthv
 			}
 			else
 			{
-				await BaseScript.Delay(200);
+				await BaseScript.Delay(700);
 			}
 		}
 
@@ -220,7 +219,6 @@ namespace sthv
 
 				API.SetBlockingOfNonTemporaryEvents(MissionPed.Handle, true);
 				API.TaskSetBlockingOfNonTemporaryEvents(MissionPed.Handle, true);
-			
 				ismissionactive = true;
 			}
 			else
@@ -248,7 +246,6 @@ namespace sthv
 				}
 
 			}
-			
 			await Delay(2000);
 		}
 	}

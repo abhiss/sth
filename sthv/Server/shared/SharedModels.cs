@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.Text;
 using CitizenFX.Core;
+using Newtonsoft.Json;
 
-
-namespace sthvServer.shared
+namespace Shared
 {
-	class gamerules
+	abstract class BaseSharedClass
+	{
+		public bool isSuccessful { get; set; }
+	}
+	class PlayerConfigOptionsModel : BaseSharedClass
 	{
 		/// <summary>
 		/// Player's stamina - Determines how much they can sprint.
@@ -29,13 +33,27 @@ namespace sthvServer.shared
 		public bool AllowVehicleRewards { get; set; } = false;
 
 		/// <summary>
-		/// Shows runner on hunters' map every 25 seconds if enabled. 
+		/// Shows runner on hunters' map every 30 seconds if enabled. 
 		/// </summary>
 		public bool EnableRunnerHints { get; set; } = false;
 
 		/// <summary>
-		/// Is minimap allowed? Allowing does NOT show any player on minimap.
+		/// Is minimap allowed? Allowing it does NOT show any player on minimap.
 		/// </summary>
 		public bool AllowRadar { get; set; } = true;
 	}
+	class PlayerJoinInfo : BaseSharedClass
+	{
+		public int runnerServerId;
+		public bool hasDiscord;
+		public bool isInSTHGuild;
+		public bool isInVc;
+		public bool isDiscordServerOnline;
+	}
+	class Ping : BaseSharedClass
+	{
+		public string response;
+
+	}
+
 }

@@ -24,10 +24,7 @@ namespace sthv
 			playarea.Color = BlipColor.Blue;
 			playarea.Alpha = 60;
 		}
-		public async Task OnTickPlayArea()
-		{
-			await GetDistance();
-		}
+		[Tick]
 		public async Task GetDistance()
 		{
 			float distance = Vector2.Distance(playAreaCenter, new Vector2(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y)); //get horizontal distance between player and playAreaCenter

@@ -66,7 +66,11 @@ namespace sthv
 			var retries = 0;
 			while (!await Game.Player.ChangeModel(GetHashKey(skin)))
 			{
-				if (retries > 3) throw new Exception("SpawnPlayer failed because skin was invalid");
+				if (retries > 5)
+				{
+					Debug.WriteLine("^3SpawnPlayer failed because skin was invalid");
+					break;
+				}
 				++retries;
 			}
 			SetPedDefaultComponentVariation(GetPlayerPed(-1));

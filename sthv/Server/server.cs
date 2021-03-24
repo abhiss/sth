@@ -14,7 +14,6 @@ namespace sthvServer
 	{
 		int runnerHandle { get; set; }
 		bool isRunnerKilled = false;
-		int totalTime;
 		static public Player runner;
 		public static bool hasHuntStarted = false; //
 		List<Player> NextRunnerQueue = new List<Player>();
@@ -26,7 +25,6 @@ namespace sthvServer
 		public sthvDiscordController discord { get; }
 		public static bool IsDiscordServerOnline { get; set; } = false;
 		public bool AutoHunt { get; set; } = false;
-		public static bool isInDevmode { get; } = (API.GetConvarInt("sthv_devmode", 0) != 0);
 
 
 		public static List<int> playersInHeliServerid { get; set; } = new List<int>();
@@ -35,15 +33,36 @@ namespace sthvServer
 		void onTest()
 		{
 			Debug.WriteLine("ran test");
+			var i = new Shared.Ping { isSuccessful = false, response = "d" };
+		
+			Debug.WriteLine("f4");
 		}
 		public Server()
 		{
 			discord = new sthvDiscordController();
 
+			FetchHandler fetchHandler = new FetchHandler();
+
+			fetchHandler.addHandler<Shared.PlayerJoinInfo>(new Func<Player,  Shared.BaseSharedClass>( source =>
+			{
 			
+				//retry loop incase of connection issues
+				
+				Debug.WriteLine($"^3 player: {source.Name} Triggered PlayerJoinInfo handler.^7");
+				string licenseId = source.Handle;
+				var discordid = source.Identifiers["discord"];
+				refreshscoreboard();
+				source.TriggerEvent("sth:updateRunnerHandle", runnerHandle);
+				source.TriggerEvent("sthv:sendChosenMap", currentplayarea);
+				return (new Shared.PlayerJoinInfo { hasDiscord = false, isDiscordServerOnline = false, isInSTHGuild = false, isInVc = false, runnerServerId = runnerHandle});
+
+			}));
+			fetchHandler.addHandler<Shared.Ping>(new Func<Player, Shared.BaseSharedClass>(source =>
+			{
+				return (new Shared.Ping {response="pong!!" });
+			}));
 
 			EventHandlers["sth:sendServerDebug"] += new Action<string>((string info) => { Debug.WriteLine(info); });
-
 
 			API.RegisterCommand("spawn", new Action<int, List<object>, string>((src, args, raw) =>
 			{
@@ -133,7 +152,6 @@ namespace sthvServer
 			});
 
 			//new hunt related
-			EventHandlers["sth:NeedLicense"] += new Action<Player>(OnRequestedLicense); //kind of means when they load in
 			EventHandlers["sth:sendserverkillerserverindex"] += new Action<Player, int>(KillfeedEventHandler);
 			////EventHandlers["sth:testevent"] += new Action<Player>(OnTestEvent);
 			//EventHandlers["sth:showMeOnMap"] += new Action<float, float, float>((float x, float y, float z) => { TriggerClientEvent("sth:sendShowOnMap", x, y, z); });
@@ -150,27 +168,29 @@ namespace sthvServer
 			Tick -= firstTick;
 
 			Debug.WriteLine("Starting server");
-			await Delay(7000);
+			await Delay(2000);
 
-			StartHunt(25);
+			//StartHunt(25);
+
 			//wait for atleast 1 player
 			//while (Players.Count() < 1) await Delay(1000);
 
-			//while (true)
-			//{
-			//	//$ select gamemode based on player count
-			//	BaseGamemodeSthv gamemode = new sthvGamemodes.ClassicHunt();
-			//	Debug.WriteLine("Instantiating gamemode " + gamemode.Name + ".");
+			while (true)
+			{
+				//$ select gamemode based on player count
+				BaseGamemodeSthv gamemode = new sthvGamemodes.ClassicHunt();
+				Debug.WriteLine("Instantiating gamemode " + gamemode.Name + ".");
 
-			//	Debug.WriteLine("^4Registering gamemode script.^7");
-			//	RegisterScript(gamemode);
+				Debug.WriteLine("^4Registering gamemode script.^7");
+				RegisterScript(gamemode);
 
-			//	Debug.WriteLine("^4Testing method^7");
-			//	await gamemode.Run();
+				Debug.WriteLine("^4Testing method^7");
+				await gamemode.Run();
 
-			//	Debug.WriteLine("^4Unregistering gamemode script.^7");
-			//	UnregisterScript(gamemode);
-			//}
+				Debug.WriteLine("^4Unregistering gamemode script.^7");
+				UnregisterScript(gamemode);
+				break;
+			}
 
 			Debug.WriteLine("Starting hunt");
 			await discord.GetPlayersInChannel(discord.pcVoice);
@@ -441,7 +461,6 @@ namespace sthvServer
 			#region resetVariables
 			runnerHandle = -1;
 			isRunnerKilled = false;
-			totalTime = 0;
 			runner = null;
 			hasHuntStarted = false; //
 			AlivePlayerList = new List<Player>();
@@ -498,52 +517,7 @@ namespace sthvServer
 			refreshscoreboard();
 			sthvLobbyManager.CheckAlivePlayers();
 		}
-		async void OnRequestedLicense([FromSource] Player source)        //send client their license 
-		{
-			var i = 1; //waits up to 3x2 seconds. Waits for firstick to check if discord server is online. 
-			if (isInDevmode)
-			{
-				i = 3;
-			}
 
-			//retry loop incase of connection issues
-			while (!IsDiscordServerOnline && i < 3)
-			{
-				Debug.WriteLine(IsDiscordServerOnline.ToString());
-				await Delay(2000);
-				i += 1;
-			}
-			Debug.WriteLine($"^3triggered:onRequestedLicense from: {source.Name}^7");
-			string licenseId = source.Handle;
-			var discordid = source.Identifiers["discord"];
-			Debug.WriteLine(i.ToString());
-			if (i < 3)
-			{
-				if ((discordid != null && discordid.Length > 4) || source.Identifiers["license"] == "705d1d418885080ecfd8aabb8710e624b6dc469e")
-				{
-					Debug.WriteLine(discordid);
-					var isInGuild = await this.discord.GetIsPlayerInGuild(discordid);
-					var vcMemberIds = await this.discord.GetPlayersInChannel(this.discord.pcVoice);
-					var isInVc = vcMemberIds.Contains(source.Identifiers["discord"]);
-					source.TriggerEvent("sth:returnlicense", licenseId, runnerHandle, true, isInGuild, isInVc, IsDiscordServerOnline);
-				}
-				else
-				{
-					source.TriggerEvent("sth:returnlicense", licenseId, runnerHandle, false, false, false, IsDiscordServerOnline); //p4-7 are discord related, used in client.cs
-					Debug.WriteLine("player " + source.Name + " doesnt have discord smh");
-				}
-			}
-			else
-			{
-				source.TriggerEvent("sth:returnlicense", licenseId, runnerHandle, false, false, false, false); //p4-7 are discord related, used in client.cs
-			}
-			refreshscoreboard();
-			source.TriggerEvent("sth:updateRunnerHandle", runnerHandle);
-			source.TriggerEvent("sthv:sendChosenMap", currentplayarea);
-
-			//Debug.WriteLine("discord check happens here");
-			//VerifyJustJoinedPlayer(source);
-		}
 
 		[EventHandler("baseevents:onPlayerDied")]
 		void onPlayerDead([FromSource] Player player)

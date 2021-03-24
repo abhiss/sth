@@ -8,7 +8,7 @@ namespace sthvServerTests
 	public class UnitTest1
 	{
 		[Fact]
-		public void test1()
+		public void Test()
 		{
 			
 		}
