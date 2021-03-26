@@ -50,6 +50,10 @@ namespace Shared
 		public bool isInVc;
 		public bool isDiscordServerOnline;
 	}
+	class GameInfo : BaseSharedClass
+	{
+		public int playarea;
+	}
 	class Ping : BaseSharedClass
 	{
 		public string response;

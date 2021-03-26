@@ -11,7 +11,7 @@ namespace sthvServer
 	{
 		static public bool isMissionPedActive { get; set; }
 		public Vector3 pedmissionpos { get; set; }
-		int pedmissionhealth { get;set; }
+		int pedmissionhealth { get; set; }
 		public int currentMpedNetId { get; set; } = 0; //netid of 0 means mission is over
 		internal sthvSyncClients()
 		{

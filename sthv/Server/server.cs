@@ -19,9 +19,9 @@ namespace sthvServer
 		List<Player> NextRunnerQueue = new List<Player>();
 		List<Player> AlivePlayerList = new List<Player>();
 		static public bool isHuntOver = true;
-		public bool TestMode { get; set; } = false;
-		int numberOfAvailableMaps = 1;
-		public int currentplayarea { get; set; } = 1;
+		public static bool TestMode { get; set; } = false;
+		public static int numberOfAvailableMaps = 1;
+		public static int currentplayarea { get; set; } = 1;
 		public sthvDiscordController discord { get; }
 		public static bool IsDiscordServerOnline { get; set; } = false;
 		public bool AutoHunt { get; set; } = false;
@@ -305,6 +305,8 @@ namespace sthvServer
 					}
 					Debug.WriteLine("0b0");
 
+
+					//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 					sthvLobbyManager.setAllActiveToWaiting();
 					Debug.WriteLine("0b1");
 

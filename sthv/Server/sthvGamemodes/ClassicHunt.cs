@@ -12,7 +12,7 @@ namespace sthvServer.sthvGamemodes
 		internal ClassicHunt() : base(gamemodeName: "ClassicHunt", gameLengthInSeconds: 15 * 60, minimumNumberOfPlayers: 1)
 		{
 			
-			CreateTeams(
+			CreateTeams(null, 
 				new sthvGamemodeTeam { Name = "runner", MaximumPlayers = 1, MinimumPlayers = 1 },
 				new sthvGamemodeTeam { Name = "hunter", MaximumPlayers = -1, MinimumPlayers = 0 }
 			);

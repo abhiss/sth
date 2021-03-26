@@ -30,7 +30,7 @@ namespace sthvServer
 						break;
 					case stateEnum.dead:
 						_state = stateEnum.dead;
-						if(KillerNameAndLicense == ("",""))
+						if (KillerNameAndLicense == ("", ""))
 						{
 							Utilities.logError($"Killer name and license was not set when player {player.Name} was killed");
 						}
@@ -52,6 +52,7 @@ namespace sthvServer
 		//public static List<string> Teams { get; set; } = new List<string>();
 
 		public string teamname;
+		public string Name;
 
 		/// <summary>
 		/// FiveM Player object
@@ -61,6 +62,9 @@ namespace sthvServer
 		{
 			player = source;
 			State = stateEnum.inactive;
+			if (source is null) { Name = ""; }
+			else { this.Name = source.Name; 
+			}
 		}
 
 		/// <summary>
