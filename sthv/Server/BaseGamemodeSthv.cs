@@ -26,6 +26,7 @@ namespace sthvServer
 			Debug.WriteLine("^1Message from BaseGamemodeSthv. Triggered by " + gamemodeName + ".");
 			sthvLobbyManager.setAllActiveToWaiting();
 
+
 			#region test
 			Debug.WriteLine("^1Invariant: all players should be inactive or waiting. ");
 
@@ -42,6 +43,8 @@ namespace sthvServer
 		#region manager_methods
 		//used in server.cs for now
 
+
+
 		public async Task AwaitStartConditions()
 		{
 
@@ -50,7 +53,7 @@ namespace sthvServer
 		/// <summary>
 		/// Starts the gamemode! 
 		/// </summary>
-		public async Task<string[]> Run()
+		public async Task<(string, string)> Run()
 		{
 			int playerCount = 0;
 			while (true)
@@ -65,8 +68,8 @@ namespace sthvServer
 					Server.SendChatMessage("hunt", "waiting for 2 people before hunt starts", 105, 0, 225);
 					Server.SendToastNotif("Waiting for 2 players before the hunt starts.");
 
-					Debug.WriteLine("^8 Not enough players to start^7");
-					await Delay(15000);
+					Debug.WriteLine("^8 Not enough players to start gamemode^7 " + playerCount);
+					await Delay(1000);
 				}
 			}
 
@@ -75,7 +78,10 @@ namespace sthvServer
 			Server.currentplayarea = r.Next(0, Server.numberOfAvailableMaps);
 			Debug.WriteLine($"{Server.numberOfAvailableMaps} maps available, {Server.currentplayarea} chosen");
 
-			if (gamemodeTeams == null)
+
+			CreateTeams(null, SetTeams()); 
+
+			if (gamemodeTeams == null) //not really needed. Indirectly verifies that gamemode used SetTeams correctly, but CreateTeams should probably handle that. 
 			{
 				throw new NullReferenceException("GamemodeTeams not set by gamemode: " + Name + ".");
 			}
@@ -91,7 +97,7 @@ namespace sthvServer
 				Debug.WriteLine($"key: {i.Key} value: {i.Value}");
 			}
 
-			while (TimedEventsList.Count > 0)
+			while (GameLengthInSeconds - TimeSecondsSinceRoundStart > 0 && String.IsNullOrEmpty(Server.winnerTeamAndReason.Item1))
 			{
 				uint timeleft = GameLengthInSeconds - TimeSecondsSinceRoundStart;
 
@@ -114,8 +120,12 @@ namespace sthvServer
 			}
 			Debug.WriteLine("Ending run task");
 
-			string[] winners = { "sd", "sd" };
-			return winners;
+
+			if (Server.winnerTeamAndReason == (null, null))
+			{
+				return ("runner", "time ran out");
+			} 
+			else return Server.winnerTeamAndReason;
 		}
 		public void endGamemode(string reason)
 		{
@@ -134,8 +144,11 @@ namespace sthvServer
 
 		public abstract void test();
 
+
+		public abstract sthvGamemodeTeam[] SetTeams();
+	
 		/// <summary>
-		/// Used by gamemode to create teams. 
+		/// Used by BaseGamemodeSthv to create teams. Not to be used by gamemodes - gamemodes must set teams via SetTeams. 
 		/// </summary>
 		/// <param name="players">Custom list of players. Only used by unit tests, set to NULL when used in gamemodes.</param>
 		/// <param name="teams">A collection of teams and the associated properties.</param>
@@ -158,6 +171,7 @@ namespace sthvServer
 			List<int> unallowed = new List<int>(maxIndex + 1);
 			int currentIndex = 0;
 
+			//assign players to teams
 			foreach (SthvPlayer sthvPlayer in players) //sthv guarantees all players are inactive or waiting at gamemode start.
 			{
 				for (; ; )

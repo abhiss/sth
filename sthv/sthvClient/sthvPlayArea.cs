@@ -24,12 +24,20 @@ namespace sthv
 			playarea.Color = BlipColor.Blue;
 			playarea.Alpha = 60;
 		}
+		[Command("playareainfo")]
+		void command_playareainfo()
+		{
+			Debug.WriteLine(playAreaCenter.X  + " " + playAreaCenter.Y);
+			Debug.WriteLine($"IsHuntActive: {sthvPlayerCache.isHuntActive} distance: {Vector2.Distance(playAreaCenter, new Vector2(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y))}");
+		}
 		[Tick]
 		public async Task GetDistance()
 		{
 			float distance = Vector2.Distance(playAreaCenter, new Vector2(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y)); //get horizontal distance between player and playAreaCenter
+			Debug.WriteLine("^3distance from playareacenter: " + distance.ToString());
 			if ((sthv.sthvPlayerCache.isHuntActive) && (Game.PlayerPed.IsAlive) && (distance > Radius) && (distance != 0))
 			{
+				
 				API.ApplyDamageToPed(API.PlayerPedId(), 5, true);
 				sthv.client.SendChatMessage("WARNING:", "OUT OF PLAY AREA", 255, 0, 0);
 			}

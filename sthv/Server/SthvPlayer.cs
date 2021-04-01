@@ -51,7 +51,16 @@ namespace sthvServer
 
 		//public static List<string> Teams { get; set; } = new List<string>();
 
-		public string teamname;
+		private string _teamname;
+		public string teamname {
+			get { return _teamname; }
+			set
+			{
+				Debug.WriteLine($"^3Player: {this.player.Name} assigned to team: {value}");
+				_teamname = value;
+				//throw new Exception("-- test");
+			}
+		}
 		public string Name;
 
 		/// <summary>

@@ -12,6 +12,12 @@ namespace sthvServer
 
 	class Server : BaseScript
 	{
+		/* When gamemodemanager detects winnerTeamAndReason != null,
+		 * team is declared winner and the tuple is set to null. 
+		 */
+		public static (string, string) winnerTeamAndReason = (null, null);
+
+
 		int runnerHandle { get; set; }
 		bool isRunnerKilled = false;
 		static public Player runner;
@@ -34,7 +40,7 @@ namespace sthvServer
 		{
 			Debug.WriteLine("ran test");
 			var i = new Shared.Ping { isSuccessful = false, response = "d" };
-		
+
 			Debug.WriteLine("f4");
 		}
 		public Server()
@@ -43,23 +49,24 @@ namespace sthvServer
 
 			FetchHandler fetchHandler = new FetchHandler();
 
-			fetchHandler.addHandler<Shared.PlayerJoinInfo>(new Func<Player,  Shared.BaseSharedClass>( source =>
-			{
-			
-				//retry loop incase of connection issues
-				
-				Debug.WriteLine($"^3 player: {source.Name} Triggered PlayerJoinInfo handler.^7");
-				string licenseId = source.Handle;
-				var discordid = source.Identifiers["discord"];
-				refreshscoreboard();
-				source.TriggerEvent("sth:updateRunnerHandle", runnerHandle);
-				source.TriggerEvent("sthv:sendChosenMap", currentplayarea);
-				return (new Shared.PlayerJoinInfo { hasDiscord = false, isDiscordServerOnline = false, isInSTHGuild = false, isInVc = false, runnerServerId = runnerHandle});
+			fetchHandler.addHandler<Shared.PlayerJoinInfo>(new Func<Player, Shared.BaseSharedClass>(source =>
+		  {
 
-			}));
+				//retry loop incase of connection issues
+
+				Debug.WriteLine($"^3 player: {source.Name} Triggered PlayerJoinInfo handler.^7");
+			  string licenseId = source.Handle;
+			  var discordid = source.Identifiers["discord"];
+			  refreshscoreboard();
+			  source.TriggerEvent("sth:updateRunnerHandle", runnerHandle);
+			  source.TriggerEvent("sthv:sendChosenMap", currentplayarea);
+			  sthvLobbyManager.getPlayerByLicense(source.getLicense()).State = SthvPlayer.stateEnum.waiting;
+			  return (new Shared.PlayerJoinInfo { hasDiscord = false, isDiscordServerOnline = false, isInSTHGuild = false, isInVc = false, runnerServerId = runnerHandle });
+
+		  }));
 			fetchHandler.addHandler<Shared.Ping>(new Func<Player, Shared.BaseSharedClass>(source =>
 			{
-				return (new Shared.Ping {response="pong!!" });
+				return (new Shared.Ping { response = "pong!!" });
 			}));
 
 			EventHandlers["sth:sendServerDebug"] += new Action<string>((string info) => { Debug.WriteLine(info); });
@@ -177,6 +184,14 @@ namespace sthvServer
 
 			while (true)
 			{
+				if (Players.Count() < 1)
+				{
+					await Delay(1000);
+					Debug.WriteLine("^8waiting for more players^7");
+					continue;
+
+				}
+
 				//$ select gamemode based on player count
 				BaseGamemodeSthv gamemode = new sthvGamemodes.ClassicHunt();
 				Debug.WriteLine("Instantiating gamemode " + gamemode.Name + ".");
@@ -185,16 +200,15 @@ namespace sthvServer
 				RegisterScript(gamemode);
 
 				Debug.WriteLine("^4Testing method^7");
-				await gamemode.Run();
+				var (winner, reason) = await gamemode.Run();
+
+				SendChatMessage("HUNT", "Team " + winner + " wins because " + reason  + "!", 225, 225, 100);
+				SendToastNotif("Team " + winner + " wins because " + reason + "!", 4000);
+				await Delay(2000);
 
 				Debug.WriteLine("^4Unregistering gamemode script.^7");
 				UnregisterScript(gamemode);
-				break;
 			}
-
-			Debug.WriteLine("Starting hunt");
-			await discord.GetPlayersInChannel(discord.pcVoice);
-			IsDiscordServerOnline = true;
 		}
 
 
@@ -212,6 +226,7 @@ namespace sthvServer
 		/// <param name="runnerID"></param>
 		async void StartHunt(int timeInMinutes, int playarea = -1, int runnerID = -1)
 		{
+			return;
 			if (isHuntOver)
 			{
 				//try
@@ -226,7 +241,7 @@ namespace sthvServer
 							SendChatMessage("hunt", "waiting for 2 people before we start", 105, 0, 225);
 							SendToastNotif("Waiting for 2 players before the hunt starts.");
 
-							Debug.WriteLine("^8 Not enough players to start^7");
+							Debug.WriteLine("^1 Not enough players to start^7");
 							await Delay(15000);
 						}
 					}
@@ -341,7 +356,7 @@ namespace sthvServer
 														  //freezehunters, remveh, 
 
 
-					//offer hunters to opt into runner 
+					//offer hunters to opt into runner ?
 					TriggerClientEvent("removeveh");
 					await Delay(500);
 					Players.First().TriggerEvent("sthv:spawnhuntercars");
@@ -542,11 +557,12 @@ namespace sthvServer
 			if (KillerIndex < 0)
 			{
 				SendChatMessage("KILLFEED", killed.Name + " died.");
+				sthvLobbyManager.MarkPlayerDead(killed, killed.Name, killed.getLicense());
+
 				if (int.Parse(killed.Handle) == runnerHandle && !isHuntOver)
 				{
 					SendChatMessage("HUNT", "Runner " + runner.Name + " died.");
 					SendToastNotif("Runner " + runner.Name + " died.");
-					sthvLobbyManager.MarkPlayerDead(killed, killed.Name, killed.getLicense());
 				}
 			}
 			else foreach (Player i in Players)
@@ -635,7 +651,7 @@ namespace sthvServer
 			TriggerClientEvent("sthv:showToastNotification", message, displayTimeInSeconds);
 
 		}
-		private enum spawnType
+		public enum spawnType
 		{
 			idle = 0,
 			runner = 1,

@@ -34,12 +34,18 @@ namespace sthvServer
 
 			API.RegisterCommand("checkaliveplayers", new Action<int, List<object>, string>((src, args, raw) =>
 			{
-				Debug.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(PlayerData));
+				//Debug.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(PlayerData));
 
 				var aliveHunterCount = PlayerData.Where(p => (p.Value.State == SthvPlayer.stateEnum.alive && p.Value.teamname != "runner")).Count();
 				var aliveRunnerCount = PlayerData.Where(p => (p.Value.State == SthvPlayer.stateEnum.alive && p.Value.teamname == "runner")).Count();
 
 				Debug.WriteLine($"{aliveHunterCount} alive hunters. {aliveRunnerCount} alive runners.");
+
+				foreach (var p in PlayerData)
+				{
+					Debug.WriteLine($"Player: {p.Value.player.Name} | State: {p.Value.State.ToString()} | Team: {p.Value.teamname}\n");
+				}
+
 
 			}), false);
 
@@ -105,6 +111,8 @@ namespace sthvServer
 			//check if runner is alive
 			if (aliveRunnerCount < 1 && Server.hasHuntStarted && !Server.isHuntOver)
 			{
+				Server.winnerTeamAndReason = ("hunter", "all runners died");
+
 				Server.isHuntOver = true;
 				Server.SendChatMessage("^4Hunt", "Hunters win! Hunt ended because runner has died.");
 				Server.SendToastNotif("Hunters win! Hunt ended because runner has died.", 7000);
@@ -112,7 +120,10 @@ namespace sthvServer
 			//check if any hunters are alive
 			if (aliveHunterCount < 1 && Server.hasHuntStarted && !Server.isHuntOver)
 			{
+				Server.winnerTeamAndReason = ("runner", "all hunters died");
+
 				Server.isHuntOver = true;
+
 				Server.SendChatMessage("^4Hunt", "Runner wins! Hunt ended because all hunters have died.");
 				Server.SendToastNotif("Runner wins! Hunt ended because all hunters have died.", 7000);
 			}
