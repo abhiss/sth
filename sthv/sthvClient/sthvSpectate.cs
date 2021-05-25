@@ -29,9 +29,7 @@ namespace sthv
 					isSpectating = false;
 				} 
 			});
-
 		}
-
 
 		async Task updateNuiOnSpectateStatus()
 		{

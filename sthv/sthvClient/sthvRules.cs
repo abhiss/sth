@@ -23,6 +23,12 @@ namespace sthv
 		public bool ismissionactive { get; set; }
 		public Blip missionBlip { get; set; }
 		int missionPedNetID = 0;
+
+		// allowedweapons is currently a constant, should be changed by an 
+		// event from server via host menu in the future
+		public static WeaponHash[] AllowedWeapons = { WeaponHash.CombatPistol };
+
+
 		public sthvRules()
 		{
 			Ped _thisPed = Game.PlayerPed;
@@ -131,6 +137,8 @@ namespace sthv
 			await Delay(50000);
 			RunnerRadiusBlip.Delete();
 		}
+
+		[Tick]
 		public async Task onTick() //happens always
 		{
 			API.HideHudComponentThisFrame((int)HudComponent.Cash);
@@ -173,6 +181,49 @@ namespace sthv
 				} 
 			}
 		}
+
+		async Task GameRules() //checks rules
+		{
+			Debug.WriteLine("^2 isrunner: " + client.IsRunner);
+			if (client.IsRunner)
+			{
+				Debug.WriteLine("is runner");
+				if (Game.PlayerPed.IsInSub || Game.PlayerPed.IsInFlyingVehicle)
+				{
+					World.AddExplosion(Game.PlayerPed.Position, ExplosionType.Rocket, 5f, 2f);
+				}
+				if (API.IsPedInAnyPoliceVehicle(Game.PlayerPed.Handle))
+				{
+					Debug.WriteLine("in police car");
+					API.SetHornEnabled(Game.Player.LastVehicle.Handle, true);
+					API.SetHornEnabled(API.GetVehiclePedIsIn(API.PlayerPedId(), false), true);
+					//API.SetVehicleTyreBurst(Game.PlayerPed.LastVehicle.Handle, 0, true, 100);
+				}
+				if (Game.PlayerPed.IsInSub || Game.PlayerPed.IsInFlyingVehicle)
+				{
+					World.AddExplosion(Game.PlayerPed.Position, ExplosionType.Rocket, 5f, 2f);
+				}
+			}
+			if (Game.PlayerPed.IsSittingInVehicle() && (Game.PlayerPed.LastVehicle.ClassType == VehicleClass.Super))
+			{
+				Vehicle veh = Game.PlayerPed.LastVehicle;
+				veh.MaxSpeed = 25f;
+				//veh.Speed = 100f;
+			}
+
+			//check for unallowed weapons
+			foreach (WeaponHash w in Enum.GetValues(typeof(WeaponHash)))
+			{
+				if (!AllowedWeapons.Contains(w) && Game.PlayerPed.Weapons.HasWeapon(w))
+				{
+					Game.PlayerPed.Weapons.Remove(w);
+					Debug.WriteLine("RULES:", "An unallowed weapon was removed from your inventory.");
+				}
+			}
+
+			await BaseScript.Delay(10000);
+		}
+
 		[Tick]
 		public async Task AutoBrakeLight()              //autobrakelight
 		{

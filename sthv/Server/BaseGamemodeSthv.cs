@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CitizenFX.Core;
+
+
 namespace sthvServer
 {
 	abstract internal class BaseGamemodeSthv : BaseScript
@@ -16,6 +18,7 @@ namespace sthvServer
 		private Dictionary<uint, Action> TimedEventsList = new Dictionary<uint, Action>();
 		public string Name { get; }
 		private sthvGamemodeTeam[] gamemodeTeams;
+		public bool isGameloopActive = false;
 
 		internal BaseGamemodeSthv(string gamemodeName, uint gameLengthInSeconds, int minimumNumberOfPlayers, int numberOfTeams = 2)
 		{
@@ -31,7 +34,7 @@ namespace sthvServer
 			Debug.WriteLine("^1Invariant: all players should be inactive or waiting. ");
 
 			//#remove inactive from list and handle else
-			foreach (var p in sthvLobbyManager.GetPlayersOfState(SthvPlayer.stateEnum.alive, SthvPlayer.stateEnum.inactive, SthvPlayer.stateEnum.waiting, SthvPlayer.stateEnum.dead))
+			foreach (var p in sthvLobbyManager.GetPlayersOfState(playerState.alive, playerState.inactive, playerState.ready, playerState.dead))
 			{
 				Debug.WriteLine(p.player.Name + " is in state " + p.State.ToString());
 			}
@@ -58,7 +61,7 @@ namespace sthvServer
 			int playerCount = 0;
 			while (true)
 			{
-				playerCount = sthvLobbyManager.GetPlayersOfState(SthvPlayer.stateEnum.waiting).Count;
+				playerCount = sthvLobbyManager.GetPlayersOfState(playerState.ready).Count;
 				if (playerCount > this.MinimumPlayers || (Server.TestMode && playerCount == 1))
 				{
 					break;
@@ -66,18 +69,12 @@ namespace sthvServer
 				else
 				{
 					Server.SendChatMessage("hunt", "waiting for 2 people before hunt starts", 105, 0, 225);
-					Server.SendToastNotif("Waiting for 2 players before the hunt starts.");
+					Server.SendToastNotif("Waiting for 2 players before the hunt starts.", 2000);
 
 					Debug.WriteLine("^8 Not enough players to start gamemode^7 " + playerCount);
-					await Delay(1000);
+					await Delay(5000);
 				}
 			}
-
-			//pick random playarea 
-			Random r = new Random();
-			Server.currentplayarea = r.Next(0, Server.numberOfAvailableMaps);
-			Debug.WriteLine($"{Server.numberOfAvailableMaps} maps available, {Server.currentplayarea} chosen");
-
 
 			CreateTeams(null, SetTeams()); 
 
@@ -87,7 +84,7 @@ namespace sthvServer
 			}
 			else
 			{
-				Debug.WriteLine($"Starting gamemode {Name} with {sthvLobbyManager.GetPlayersOfState(SthvPlayer.stateEnum.waiting).Count} players.");
+				Debug.WriteLine($"Starting gamemode {Name} with {sthvLobbyManager.GetPlayersOfState(playerState.ready).Count} players.");
 			}
 			uint TimeSecondsSinceRoundStart = 0;
 			uint accuracy = 1; //second
@@ -97,7 +94,8 @@ namespace sthvServer
 				Debug.WriteLine($"key: {i.Key} value: {i.Value}");
 			}
 
-			while (GameLengthInSeconds - TimeSecondsSinceRoundStart > 0 && String.IsNullOrEmpty(Server.winnerTeamAndReason.Item1))
+			isGameloopActive = true;
+			while (GameLengthInSeconds - TimeSecondsSinceRoundStart > 0 && String.IsNullOrEmpty(sthvLobbyManager.winnerTeamAndReason.Item1))
 			{
 				uint timeleft = GameLengthInSeconds - TimeSecondsSinceRoundStart;
 
@@ -118,14 +116,18 @@ namespace sthvServer
 				await Delay((int)accuracy * 1000);
 				TimeSecondsSinceRoundStart += 1;
 			}
+			isGameloopActive = false;
+
 			Debug.WriteLine("Ending run task");
 
-
-			if (Server.winnerTeamAndReason == (null, null))
+			var winners = sthvLobbyManager.winnerTeamAndReason;
+			sthvLobbyManager.winnerTeamAndReason = (null, null);
+			
+			if (winners == (null, null))
 			{
 				return ("runner", "time ran out");
-			} 
-			else return Server.winnerTeamAndReason;
+			}
+			else return winners;
 		}
 		public void endGamemode(string reason)
 		{
@@ -156,11 +158,11 @@ namespace sthvServer
 		public string CreateTeams(List<SthvPlayer> players = null, params sthvGamemodeTeam[] teams)
 		{
 			if (teams.Length == 0) throw new Exception("Empty teams array passed to CreateTeams. Cannot create a gamemode with no teams.");
-			if (teams == null) throw new Exception("Null passed to CreateTeams.");
+			if (teams == null) throw new Exception("Null passed to CreateTeams. SetTeams was likely implemented incorrectly.");
 
 			if (players == null)
 			{
-				players = sthvLobbyManager.GetPlayersOfState(SthvPlayer.stateEnum.waiting);
+				players = sthvLobbyManager.GetPlayersOfState(playerState.ready);
 			}
 			
 			//shuffle players before picking teams.
@@ -230,7 +232,7 @@ namespace sthvServer
 		{
 			p.TriggerEvent("_" + Name + "_" + eventName, args);
 		}
-		internal void log(string i) { Debug.WriteLine("^3[" + Name + "]" + i + "^7"); }
+		internal void log(string i) { Debug.WriteLine("^3[" + Name + "] " + i + "^7"); }
 
 		#endregion
 

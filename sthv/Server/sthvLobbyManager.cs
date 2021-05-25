@@ -14,15 +14,14 @@ namespace sthvServer
 
 	class sthvLobbyManager : BaseScript
 	{
-		/// <summary>
-		/// reset and used in server.cs to check if joining player had died before so people cant rejoin and get a second life.
-		/// </summary>
-		//public static List<string> DeadPlayers = new List<string>();
-
-		//List<Player> AlivePlayers = new List<Player>();
-
-		//public static List<sthvPlayer> sthvPlayers = new List<sthvPlayer>(); //replaced by playersinfo
 		private static Dictionary<string, SthvPlayer> PlayerData = new Dictionary<string, SthvPlayer>();
+
+
+		/* When gamemodemanager detects winnerTeamAndReason != null,
+		 * team is declared winner and the tuple is set to null. 
+		 */
+		public static (string, string) winnerTeamAndReason = (null, null);
+		public static bool isGameActive = false;
 
 		public sthvLobbyManager()
 		{
@@ -36,8 +35,8 @@ namespace sthvServer
 			{
 				//Debug.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(PlayerData));
 
-				var aliveHunterCount = PlayerData.Where(p => (p.Value.State == SthvPlayer.stateEnum.alive && p.Value.teamname != "runner")).Count();
-				var aliveRunnerCount = PlayerData.Where(p => (p.Value.State == SthvPlayer.stateEnum.alive && p.Value.teamname == "runner")).Count();
+				var aliveHunterCount = PlayerData.Where(p => (p.Value.State == playerState.alive && p.Value.teamname != "runner")).Count();
+				var aliveRunnerCount = PlayerData.Where(p => (p.Value.State == playerState.alive && p.Value.teamname == "runner")).Count();
 
 				Debug.WriteLine($"{aliveHunterCount} alive hunters. {aliveRunnerCount} alive runners.");
 
@@ -61,6 +60,7 @@ namespace sthvServer
 		{
 			Debug.WriteLine("\nw");
 			PlayerData.Add(source.getLicense(), new SthvPlayer(source));
+			CheckAlivePlayers();
 
 			//Debug.WriteLine($"^3Player {source.Name} has {matchingPlayers} instances in sthvPlayers^7");
 		}
@@ -104,28 +104,33 @@ namespace sthvServer
 		[EventHandler("sthv:checkaliveplayers")]
 		public static void CheckAlivePlayers()
 		{
-			var aliveHunterCount = PlayerData.Where(p => (p.Value.State == SthvPlayer.stateEnum.alive && p.Value.teamname != "runner")).Count();
-			var aliveRunnerCount = PlayerData.Where(p => (p.Value.State == SthvPlayer.stateEnum.alive && p.Value.teamname == "runner")).Count();
+
+			/* counts waiting players (waiting to spawn before hunt starts) so
+			 * CheckAlivePlayers doesn't end hunt while its starting */
+			//var activePlayers = GetPlayersOfState(playerState.alive, playerState.ready); 
+
+			//i dont think including ready players is necessary.
+
+			var activePlayers = GetPlayersOfState(playerState.alive);
+
+			var aliveHunterCount = activePlayers.Where(p => (p.teamname != "runner")).Count();
+			var aliveRunnerCount = activePlayers.Where(p => (p.teamname == "runner")).Count();
 			Debug.WriteLine($"^8{aliveHunterCount} alive hunters. {aliveRunnerCount} alive runners.^7");
 
-			//check if runner is alive
-			if (aliveRunnerCount < 1 && Server.hasHuntStarted && !Server.isHuntOver)
-			{
-				Server.winnerTeamAndReason = ("hunter", "all runners died");
+			if (!string.IsNullOrEmpty(winnerTeamAndReason.Item1))
+				return; //because winner was already declared.
 
-				Server.isHuntOver = true;
-				Server.SendChatMessage("^4Hunt", "Hunters win! Hunt ended because runner has died.");
-				Server.SendToastNotif("Hunters win! Hunt ended because runner has died.", 7000);
+			if (!isGameActive) return; //game isn't started, can't declare winner.
+			//check if runner is alive
+			if (aliveRunnerCount < 1)
+			{
+				winnerTeamAndReason = ("hunter", "all runners died");
+
 			}
 			//check if any hunters are alive
-			if (aliveHunterCount < 1 && Server.hasHuntStarted && !Server.isHuntOver)
+			if (aliveHunterCount < 1)
 			{
-				Server.winnerTeamAndReason = ("runner", "all hunters died");
-
-				Server.isHuntOver = true;
-
-				Server.SendChatMessage("^4Hunt", "Runner wins! Hunt ended because all hunters have died.");
-				Server.SendToastNotif("Runner wins! Hunt ended because all hunters have died.", 7000);
+				winnerTeamAndReason = ("runner", "all hunters died");
 			}
 		}
 
@@ -141,28 +146,12 @@ namespace sthvServer
 			if (PlayerData.TryGetValue(player.getLicense(), out splayer))
 			{
 				splayer.KillerNameAndLicense = (killerName, killerLicense);
-				splayer.State = SthvPlayer.stateEnum.dead;
+				splayer.State = playerState.dead;
+				CheckAlivePlayers();
 			}
 			else
 			{
 				Utilities.logError(player.Name + " not found in PlayerData, in MarkPlayerKilled");
-			}
-		}
-
-		/// <summary>
-		/// Marks player alive in PlayerData collection
-		/// </summary>
-		/// <param name="player"></param>
-		public static void MarkPlayerAlive(Player player)
-		{
-			SthvPlayer splayer;
-			if (PlayerData.TryGetValue(player.getLicense(), out splayer))
-			{
-				splayer.State = SthvPlayer.stateEnum.alive;
-			}
-			else
-			{
-				Utilities.logError(player.Name + " not found in PlayerData, in MarkPlayerAlive");
 			}
 		}
 
@@ -184,11 +173,11 @@ namespace sthvServer
 			}
 		}
 		/// <summary>
-		/// Returns all players in the given state(s).
+		/// Returns all players in the given state(s). A call without any states returns all players.
 		/// </summary>
 		/// <param name="state">array of states to match players with.</param>
 		/// <returns></returns>
-		public static List<SthvPlayer> GetPlayersOfState(params SthvPlayer.stateEnum[] state)
+		public static List<SthvPlayer> GetPlayersOfState(params playerState[] state)
 		{
 			List<SthvPlayer> output = new List<SthvPlayer>(32);
 
@@ -198,6 +187,16 @@ namespace sthvServer
 				{
 					output.Add(item);
 				}
+			}
+			return output;
+		}
+
+		public static List<SthvPlayer> GetAllPlayers()
+		{
+			List<SthvPlayer> output = new List<SthvPlayer>(32);
+			foreach(var p in PlayerData.Values)
+			{
+				output.Add(p);
 			}
 			return output;
 		}
@@ -228,9 +227,9 @@ namespace sthvServer
 		{
 			foreach (var p in PlayerData.Values)
 			{
-				if (p.State != SthvPlayer.stateEnum.inactive)
+				if (p.State != playerState.inactive)
 				{
-					p.State = SthvPlayer.stateEnum.waiting;
+					p.State = playerState.ready;
 				}
 			}
 		}

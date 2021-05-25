@@ -111,10 +111,6 @@ namespace sthvServer
 			Debug.WriteLine(output.ToString());
 			return output;
 		}
-		public string getDiscordId(Player player)
-		{
-			return player.Identifiers["discord"];
-		}
 		private async Task<string> DownloadString(string url)
 		{
 			var args = new Dictionary<string, object> {

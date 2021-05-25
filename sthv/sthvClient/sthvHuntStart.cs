@@ -8,10 +8,9 @@ using CitizenFX.Core.Native;
 
 namespace sthv
 {
-	static class sthvHuntStart
+	public static class sthvHuntStart
 	{
-
-		public static async void HunterVehicles(int gametimeInMsec = 25)
+		public static async void HunterVehicles(int mapId)
 		{
 
 			//cop cars: 
@@ -27,31 +26,28 @@ namespace sthv
 			//await World.CreateVehicle(new Model(VehicleHash.Polmav),	new Vector3(382.9529f, -1656.624f, 48.69487f), 48.4f); //heli
 			//await World.CreateVehicle(new Model(VehicleHash.Police4),	new Vector3(380f, -1655f, 48.5f), 48.4f);
 
-			foreach (Vector4 i in sthv.client.CurrentMap.CarSpawnpoints)
+			Debug.WriteLine("Spawning vehicles for map: " + mapId);
+			var map = Shared.sthvMaps.Maps[mapId];
+			bool toggle = false;
+			foreach (Vector4 i in map.CarSpawnpoints)
 			{
-				await World.CreateVehicle(new Model(VehicleHash.Police2), new Vector3(i.X,i.Y,i.Z), i.W);
+				await World.CreateVehicle(new Model(toggle ? VehicleHash.Police : VehicleHash.Police2), new Vector3(i.X,i.Y,i.Z), i.W);
+				toggle = !toggle;
 				Debug.WriteLine("veh");
 			}
-			foreach(Vector4 i in client.CurrentMap.HeliSpawnPoints)
+			foreach(Vector4 i in map.HeliSpawnPoints)
 			{
 				await World.CreateVehicle(new Model(VehicleHash.Polmav), new Vector3(i.X, i.Y, i.Z), i.W);
 
 			}
 		
 		}
-		public static void SetMap(int mapNumber)
-		{
-			client.CurrentMap = sthvMaps.Maps[mapNumber];
-			sthvPlayArea.SetPlayarea(client.CurrentMap.Radius, client.CurrentMap.AreaCenter.X, client.CurrentMap.AreaCenter.Y);
-
-		}
-
 		/// <summary>
 		/// delete props along with vehicles?
 		/// </summary>
-		/// <param name="props"></param>
+		/// <param name="shouldRemoveProps"></param>
 		/// <returns></returns>
-		public static async Task RemoveAllVehicles(bool props)
+		public static async Task RemoveAllVehicles(bool shouldRemoveProps)
 		{
 			Debug.WriteLine("^4destroy all vehicles^7");
 			Vehicle[] allVeh = World.GetAllVehicles();
@@ -59,7 +55,7 @@ namespace sthv
 			{
 				veh.Delete();
 			}
-			if (props)
+			if (shouldRemoveProps)
 			{
 				Prop[] allProp = World.GetAllProps();
 				foreach (Prop prop in allProp)

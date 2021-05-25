@@ -19,7 +19,6 @@ namespace sthv
 
 		public sthvPlayArea()
 		{
-
 			playarea = new Blip(API.AddBlipForRadius(playAreaCenter.X, playAreaCenter.Y, 130, Radius));
 			playarea.Color = BlipColor.Blue;
 			playarea.Alpha = 60;
@@ -30,6 +29,7 @@ namespace sthv
 			Debug.WriteLine(playAreaCenter.X  + " " + playAreaCenter.Y);
 			Debug.WriteLine($"IsHuntActive: {sthvPlayerCache.isHuntActive} distance: {Vector2.Distance(playAreaCenter, new Vector2(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y))}");
 		}
+
 		[Tick]
 		public async Task GetDistance()
 		{
@@ -56,10 +56,7 @@ namespace sthv
 		}
 		void removePlayArea()
 		{
-
 			blippy.Delete();
 		}
-
-
 	}
 }

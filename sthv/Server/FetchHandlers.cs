@@ -18,14 +18,14 @@ namespace sthvServer
 		private void OnFetchRequest([FromSource] Player source, int token, string requestUrl)
 		{
 			Debug.WriteLine($"Fetch request received. Token: {token}. URL: {requestUrl}. Player: {source.Name}");
-			
+
 			if (!FetchRequestHandlers.TryGetValue(requestUrl, out Func<Player, Shared.BaseSharedClass> func))
 			{
 				Utilities.logError($"Fetch requestUrl {requestUrl} from {source.Name} (id:{source.Handle}) did not have an associated FetchRequestHandler.");
 			}
 			else
 			{
-				var returnObject  = func.Invoke(source);
+				var returnObject = func.Invoke(source);
 				response(source, token, returnObject);
 			}
 		}
@@ -45,6 +45,10 @@ namespace sthvServer
 
 		public void addHandler<T>(Func<Player, Shared.BaseSharedClass> func) where T : Shared.BaseSharedClass
 		{
+			if (FetchRequestHandlers.ContainsKey(typeof(T).Name))
+			{
+				throw new Exception("Tried adding duplicate FetchHandlers for type: " + typeof(T).Name);
+			}
 			FetchRequestHandlers.Add(typeof(T).Name, func);
 			Debug.WriteLine("^2Adding fetch handler: " + typeof(T).Name + "^7");
 		}

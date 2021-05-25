@@ -57,6 +57,7 @@
     <Compile Include="client.cs" />
     <Compile Include="GamemodeUtilities.cs" />
     <Compile Include="NuiEventModel.cs" />
+    <Compile Include="shared\sthvMapModel.cs" />
     <Compile Include="Spawn\SpawnNuiController.cs" />
     <Compile Include="fetch\sthvFetch.cs" />
     <Compile Include="sthvGameoverHandler.cs" />

@@ -2,6 +2,7 @@ using System;
 using Xunit;
 using CitizenFX.Core;
 using sthvServer;
+
 using sthvServer.sthvGamemodes;
 using System.Collections.Generic;
 
@@ -18,7 +19,7 @@ namespace sthvServerTests
 			for (int i = 0; i < 10; i++)
 			{
 				SthvPlayer p = new SthvPlayer(null);
-				p.State = SthvPlayer.stateEnum.waiting;
+				p.State = playerState.ready;
 				p.Name = "Player" + i;
 				players.Add(p);
 			}
