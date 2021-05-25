@@ -42,6 +42,14 @@ namespace sthv
 			}
 		
 		}
+
+		public static void SetMap(int mapNumber)
+		{
+			Debug.WriteLine("##!!!!!!!!!!!!###########");
+			client.CurrentMap = sthvMaps.Maps[mapNumber];
+			sthvPlayArea.SetPlayarea(client.CurrentMap.Radius, client.CurrentMap.AreaCenter.X, client.CurrentMap.AreaCenter.Y);
+		}
+
 		/// <summary>
 		/// delete props along with vehicles?
 		/// </summary>

@@ -31,12 +31,6 @@ namespace sthv
 
 		public sthvRules()
 		{
-			Ped _thisPed = Game.PlayerPed;
-			missionBlip = new Blip(API.AddBlipForRadius(0, 0, 0, 50));
-			missionBlip.Color = BlipColor.TrevorOrange;
-			missionBlip.Alpha = 0;
-
-	
 			//Tick += CheckPedMission;
 			//Tick += ShowRunnerOnMap;
 

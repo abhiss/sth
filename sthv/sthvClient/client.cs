@@ -41,11 +41,16 @@ namespace sthv
 
 			_thisPed = Game.PlayerPed;
 			var playArea = new sthv.sthvPlayArea();
+			Tick += playArea.GetDistance;
 			var rules = new sthv.sthvRules();
 
 
 			EventHandlers["removeveh"] += new Action(async () => { await sthv.sthvHuntStart.RemoveAllVehicles(true); });
 			EventHandlers["sthv:spawnhuntercars"] += new Action<int>((mapid) => { sthvHuntStart.HunterVehicles(mapid); });
+			EventHandlers["sthv:sendChosenMap"] += new Action<int>(i => {
+				sthvHuntStart.SetMap(i);
+				});
+
 
 
 			//Killfeed stuff:
@@ -239,23 +244,22 @@ namespace sthv
 		{
 			RunnerServerId = newRunnerHandle;
 			Debug.WriteLine($"^5updated runner handle{RunnerServerId}, my handle {MyServerId}");
-			sthv.sthvPlayerCache.runnerPlayer = GetPlayerFromServerId(RunnerServerId, Players);
-			if (newRunnerHandle < 0)
+			if (newRunnerHandle <= 0)
 			{
-				sthv.sthvPlayerCache.isHuntActive = false;//means hunts over
+				sthv.sthvPlayerCache.isHuntActive = false; //means hunts over
 				IsRunner = false;
+				sthv.sthvPlayerCache.runnerPlayer = null;
 			}
 			else
 			{
-				sthv.sthvPlayerCache.isHuntActive = true;//means hunts over
+				sthv.sthvPlayerCache.isHuntActive = true; //means hunts started
+				sthv.sthvPlayerCache.runnerPlayer = GetPlayerFromServerId(RunnerServerId, Players);
+
 			}
-			if (MyServerId == RunnerServerId) //forced spawn to update runner weapon/ outfit
+			if (MyServerId == RunnerServerId) //update runner weapon/ outfit
 			{
 				IsRunner = true;
-				if (Game.PlayerPed.Model == new Model(PedHash.Swat01SMY))
-				{
 					API.SetPedRandomComponentVariation(Game.Player.Character.Handle, false);
-				}
 			}
 			else if (MyServerId != RunnerServerId)
 			{

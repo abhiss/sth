@@ -16,6 +16,7 @@ namespace sthvServer
 		private protected string endModeReason = null;
 		public int MinimumPlayers { get; }
 		private Dictionary<uint, Action> TimedEventsList = new Dictionary<uint, Action>();
+		public Action Finalizer = null;
 		public string Name { get; }
 		private sthvGamemodeTeam[] gamemodeTeams;
 		public bool isGameloopActive = false;
@@ -99,7 +100,6 @@ namespace sthvServer
 			{
 				uint timeleft = GameLengthInSeconds - TimeSecondsSinceRoundStart;
 
-				Debug.WriteLine("Looking for time " + TimeSecondsSinceRoundStart + " in TimedEventList");
 				Action action;
 				if (TimedEventsList.TryGetValue(TimeSecondsSinceRoundStart, out action))
 				{
@@ -107,15 +107,17 @@ namespace sthvServer
 					action.Invoke();
 					TimedEventsList.Remove(TimeSecondsSinceRoundStart);
 				}
-				if ((timeleft % 10) == 0)
-				{
-					Debug.WriteLine($"timeleft: {timeleft}");
-					TriggerClientEvent("sth:starttimer", timeleft);
-				}
+				//if ((timeleft % 10) == 0)
+				//{
+				//	Debug.WriteLine($"timeleft: {timeleft}");
+				//	TriggerClientEvent("sth:starttimer", timeleft);
+				//}
 
 				await Delay((int)accuracy * 1000);
 				TimeSecondsSinceRoundStart += 1;
 			}
+			Finalizer.Invoke(); //from AddFinalizerEvent
+
 			isGameloopActive = false;
 
 			Debug.WriteLine("Ending run task");
@@ -221,6 +223,22 @@ namespace sthvServer
 			}
 			TimedEventsList.Add(seconds, action);
 		}
+		
+		/// <summary>.
+		///	The action will be triggered at the end of the gamemode. Should be used to clean up and reset client state.
+		/// </summary
+		/// <param name="action"></param>
+		public void AddFinalizerEvent(Action action)
+		{
+			Finalizer = action;
+		}
+
+		/// <summary>
+		/// Triggers event for all memebers of a team.
+		/// </summary>
+		/// <param name="team">Target team</param>
+		/// <param name="eventName">Name of event</param>
+		/// <param name="args">event arguments</param>
 		public void sthvTriggerClientEventForTeam(sthvGamemodeTeam team, string eventName, params object[] args)
 		{
 			foreach (var sthvPlayer in team.TeamPlayers)

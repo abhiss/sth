@@ -19,9 +19,9 @@ namespace Shared
 	}
 	public static class sthvMaps
 	{
-		public static sthvMapModel[] Maps = new sthvMapModel[] //1
+		public static sthvMapModel[] Maps = new sthvMapModel[]
 		{
-			new sthvMapModel
+			new sthvMapModel //1
 			{
 				CarSpawnpoints = new Vector4[] {
 					new Vector4(-222.5026f, -265.7659f, 49f, 69.05865f),
@@ -36,9 +36,9 @@ namespace Shared
 				HunterSpawn = new Vector4(-237.2401f, -273.996f, 48f, 327.2174f),
 				RunnerSpawn = new Vector4(7.744703f, -404.0017f, 41f, 0.01032947f),
 			},
-			new sthvMapModel
+			new sthvMapModel //2
 			{
-				CarSpawnpoints = new Vector4[] //2
+				CarSpawnpoints = new Vector4[]
 				{
 					new Vector4(219.2715f, -766.7899f, 30.56348f, 172.9773f),
 					new Vector4(223.0478f, -766.2462f, 30.54808f, 182.2132f),

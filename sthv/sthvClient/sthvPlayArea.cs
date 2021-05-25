@@ -14,7 +14,6 @@ namespace sthv
 		static Vector2 playAreaCenter { get; set; } = new Vector2(100f, -1740f);
 		static float Radius { get; set; }//570
 
-		Blip blippy = null;
 		static Blip playarea = new Blip(-1);
 
 		public sthvPlayArea()
@@ -30,7 +29,6 @@ namespace sthv
 			Debug.WriteLine($"IsHuntActive: {sthvPlayerCache.isHuntActive} distance: {Vector2.Distance(playAreaCenter, new Vector2(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y))}");
 		}
 
-		[Tick]
 		public async Task GetDistance()
 		{
 			float distance = Vector2.Distance(playAreaCenter, new Vector2(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y)); //get horizontal distance between player and playAreaCenter
@@ -38,7 +36,7 @@ namespace sthv
 			if ((sthv.sthvPlayerCache.isHuntActive) && (Game.PlayerPed.IsAlive) && (distance > Radius) && (distance != 0))
 			{
 				
-				API.ApplyDamageToPed(API.PlayerPedId(), 5, true);
+				API.ApplyDamageToPed(API.PlayerPedId(), 8, true);
 				sthv.client.SendChatMessage("WARNING:", "OUT OF PLAY AREA", 255, 0, 0);
 			}
 			//Debug.WriteLine($"1");
@@ -46,6 +44,7 @@ namespace sthv
 		}
 		public static void SetPlayarea(float radius, float x, float y)
 		{
+			Debug.WriteLine("!!!!!Radius " + radius + " x " + x + " y " + y);
 			playarea.Delete();
 			playAreaCenter = new Vector2(x, y);
 			Radius = radius;
@@ -53,10 +52,6 @@ namespace sthv
 			playarea = new Blip(API.AddBlipForRadius(x, y, 130, radius));
 			playarea.Color = BlipColor.Blue;
 			playarea.Alpha = 60;
-		}
-		void removePlayArea()
-		{
-			blippy.Delete();
 		}
 	}
 }

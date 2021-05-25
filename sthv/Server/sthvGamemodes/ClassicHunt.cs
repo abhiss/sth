@@ -24,10 +24,12 @@ namespace sthvServer.sthvGamemodes
 			{
 				//pick random playarea 
 				Random r = new Random();
-				int playareaindex = r.Next(0, Server.numberOfAvailableMaps);
+				int playareaindex = r.Next(0, Shared.sthvMaps.Maps.Length);
 				Server.currentMap = Shared.sthvMaps.Maps[playareaindex];
+				map = Shared.sthvMaps.Maps[playareaindex];
+				Debug.WriteLine("current map index: " + playareaindex);
 				currentmapid = playareaindex;
-				Debug.WriteLine($"{Server.numberOfAvailableMaps} maps available, {Server.currentMap} chosen");
+				TriggerClientEvent("sthv:sendChosenMap", playareaindex);
 
 				runner = sthvLobbyManager.GetPlayersInTeam(TRunner)[0];
 				if (sthvLobbyManager.GetPlayersInTeam("runner").Count != 1) throw new Exception("Unexpected number of runners were assigned in ClassicHunt");
@@ -65,12 +67,21 @@ namespace sthvServer.sthvGamemodes
 			{
 				log("Giving weapons after 30 seconds");
 
-				runner.player.TriggerEvent("sth:updateRunnerHandle", runnerServerId);
+				runner.player.TriggerEvent("sth:updateRunnerHandle", runnerServerId); //incase runner has wrong clothes
 
 				TriggerClientEvent("sth:setguns", true);
 				Server.SendChatMessage("^5HUNT", "You now have guns");
 				Server.SendToastNotif("You now have weapons!");
 				Server.SendToastNotif("You now have weapons!");
+			}));
+
+			AddFinalizerEvent(new Action(() =>
+			{
+				TriggerClientEvent("sth:updateRunnerHandle", -1);
+				foreach( var p in sthvLobbyManager.GetPlayersOfState(playerState.alive, playerState.ready))
+				{
+				p.Spawn(map.RunnerSpawn, true, playerState.ready);
+				}
 			}));
 
 		}

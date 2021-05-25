@@ -45,7 +45,7 @@ $(document).ready(function () {
 			return;
 		}
 		if(event.EventName == "sthv:showToastNotification"){
-			console.log("GOT MESSAGE FOR TOASTNOTIF ")
+			//console.log("GOT MESSAGE FOR TOASTNOTIF ")
 			if(item.display_time) addToastNotification(item.message, item.display_time)
 			else addToastNotification(item.message);
 		}
@@ -63,7 +63,7 @@ $(document).ready(function () {
 			}
 		}
 		if (event.EventName === "sthvnui:updateAlive") {
-			this.console.log(`^1 sthvnui:updateAlive triggered, serverid= ${item["serverid"]}, isalive = ${item["isalive"]}`);
+			//this.console.log(`^1 sthvnui:updateAlive triggered, serverid= ${item["serverid"]}, isalive = ${item["isalive"]}`);
 			let serverid = item["serverid"];
 			let targetelem = document.getElementById(`player${serverid}`).childNodes[5];
 			if (targetelem) {
@@ -78,7 +78,7 @@ $(document).ready(function () {
 		}
 		if (event.EventName === "sthv.showsb") {
 			let show = item["data"];
-			this.console.log("showing sb:" + item["data"]);
+			//this.console.log("showing sb:" + item["data"]);
 			if (show) {
 				$(".scoreboardtable").css("visibility", "visible");
 			}
@@ -91,7 +91,7 @@ $(document).ready(function () {
 		if (event.EventName === "sthv:updatesb") {
 			resetsb();
 			item.forEach(element => {
-				this.console.log(`^1 list of stuff name = ${element["name"]}, isrunner = ${element["runner"]}, serverid = ${element["serverid"]}, isalive = ${element["alive"]}, isinhel = ${element["isinheli"]}`);
+				//this.console.log(`^1 list of stuff name = ${element["name"]}, isrunner = ${element["runner"]}, serverid = ${element["serverid"]}, isalive = ${element["alive"]}, isinhel = ${element["isinheli"]}`);
 				AddPlayer(element["serverid"], element["name"], element["alive"], element["runner"], element["isinheli"]);
 
 			});
@@ -118,7 +118,6 @@ $(document).ready(function () {
 			let inSth = item["is_in_sth"];
 			let inVc = item["is_in_vc"];
 			let isDiscordOnline = item['is_discord_online']
-			console.log("yaya " + item);
 
 			if (hasDiscord) {
 				document.getElementById("hasdiscord").innerHTML += '<img src="assets/check.png" alt="true">';

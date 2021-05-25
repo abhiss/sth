@@ -20,8 +20,7 @@ namespace sthvServer
 		List<Player> AlivePlayerList = new List<Player>();
 		static public bool isHuntOver = true;
 		public static bool TestMode { get; set; } = false;
-		public static int numberOfAvailableMaps = 1;
-		public static Shared.sthvMapModel currentMap = Shared.sthvMaps.Maps[2];
+		public static Shared.sthvMapModel currentMap;
 		public sthvDiscordController discord { get; }
 		public static bool IsDiscordServerOnline { get; set; } = false;
 		public bool AutoHunt { get; set; } = false;
@@ -40,7 +39,7 @@ namespace sthvServer
 		public Server()
 		{
 			discord = new sthvDiscordController();
-
+			currentMap = Shared.sthvMaps.Maps[2];
 			FetchHandler fetchHandler = new FetchHandler();
 
 			fetchHandler.addHandler<Shared.PlayerJoinInfo>(new Func<Player, Shared.BaseSharedClass>(source =>
@@ -159,7 +158,6 @@ namespace sthvServer
 			////EventHandlers["sth:testevent"] += new Action<Player>(OnTestEvent);
 			//EventHandlers["sth:showMeOnMap"] += new Action<float, float, float>((float x, float y, float z) => { TriggerClientEvent("sth:sendShowOnMap", x, y, z); });
 
-			EventHandlers["NumberOfAvailableMaps"] += new Action<int>(i => numberOfAvailableMaps = i);
 
 			//test
 
@@ -246,12 +244,7 @@ namespace sthvServer
 						}
 					}
 					resetVars();
-					if (playarea < 0)
-					{
-						Random r = new Random();
-						playarea = r.Next(0, numberOfAvailableMaps);
-						Debug.WriteLine($"{numberOfAvailableMaps} maps available, {playarea} chosen");
-					}
+					
 					TriggerClientEvent("sthv:sendChosenMap", playarea);
 					//currentplayarea = playarea;
 					int totalTimeSecs = timeInMinutes * 60;
