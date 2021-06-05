@@ -71,29 +71,84 @@
             </ul>
         </div>
     </div>
-
-    <!-- <div class="scoreboard">
-        <div class="title">title</div> 
-        <div class="playerlist">
-            <div class="players">
-                <div class = "">player</div>
-                <div>player</div>
-                <div>player</div>
-                <div>player</div>
-                <div>player</div>
-                <div>player</div>
-                <div>player</div>
-            </div>
-        </div>
-        <div>
-
-        </div>
-    </div> -->
     <div id="toast_message_wrapper">
         <div id="toast_message">
             <div id="toast_message_text">This is a message.</div>
         </div>
     </div>
+
+    <div id="admin_menu_wrapper">
+        <div id="admin_menu">
+            <div id="admin_menu_title">STHV Host Menu</div>
+            <div class="admin_menu_item">Respawn Time (seconds) <input id="ip1" type="number"  min="0" name="Time in Seconds" id=""> </div>
+            <div class="admin_menu_item">Next Runner (server id) <input id="ip2" type="number" min="0" name="next runner serverid" id=""> </div>
+            <div class="admin_menu_item">Next Hunt Length (minutes) <input id="ip3" type="number" min="0" name="next hunt length" id=""> </div>
+            <div class="admin_menu_item">Next Map (map id: 0-5 inclusive) <input id="ip4" type="number" max="6" min="0" name="next map" id=""> </div>
+            <div class="admin_menu_item">
+                Friendly Fire 
+                <select name="" id="ip5">
+                    <option>Allowed</option>
+                    <option>Punished</option>
+                </select>
+            </div>
+
+            <button id="admin_menu_save">Save</button>
+        </div>
+    </div>
+    <style>
+        #admin_menu_wrapper {
+            position: absolute;
+            top:0px;
+            height: 100vh;
+            right: 0vh;
+            width: 30vw;
+            background-color: rgba(0, 0, 0, 0.513);
+            display: grid;
+            place-items: center;
+        }
+        #admin_menu{
+            width: 100%;
+            background:black;
+            color:white;
+        }
+        #admin_menu_title{
+            padding: 0.5em 1em;
+            font-size: 2em;
+            text-align: center;
+        }
+        .admin_menu_item{
+            font-size: 1vw;
+            margin: 1em 2em;
+            height: 1.5em;
+            font-weight: 500;
+        }
+        #admin_menu_save{
+            border: solid white 2px;
+            margin: 2em auto;
+            width: fit-content;
+            text-align: center;
+            padding: 0.5em 1em;
+            background:black;
+            color:white;
+            display: block;
+        }
+        #admin_menu_save:active{ 
+            background-color: rgb(195, 195, 195);
+        }
+        .admin_menu_item > input, .admin_menu_item > select {
+            position: absolute;
+            right: 2em;
+            width: 7em;
+            height: inherit;
+            margin: 0px;
+            padding: 0px;
+            background:white;
+            border: white solid 1px;
+            text-align: center;
+        }
+
+
+    </style>
 </body>
 
 </html>
@@ -123,5 +178,4 @@
         padding: 1vh;
         min-height: 1vh;
     }
-
 </style>

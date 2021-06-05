@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using Newtonsoft.Json;
 
 namespace sthvServer.sthvGamemodes
 {
@@ -78,9 +79,9 @@ namespace sthvServer.sthvGamemodes
 			AddFinalizerEvent(new Action(() =>
 			{
 				TriggerClientEvent("sth:updateRunnerHandle", -1);
-				foreach( var p in sthvLobbyManager.GetPlayersOfState(playerState.alive, playerState.ready))
+				foreach (var p in sthvLobbyManager.GetPlayersOfState(playerState.alive, playerState.ready))
 				{
-				p.Spawn(map.RunnerSpawn, true, playerState.ready);
+					p.Spawn(map.RunnerSpawn, true, playerState.ready);
 				}
 			}));
 
@@ -109,7 +110,7 @@ namespace sthvServer.sthvGamemodes
 			var killed = sthvLobbyManager.getPlayerByLicense(killedLicense);
 
 			//friendly fire
-			if (killer.teamname == killed.teamname)
+			if (killer.teamname == killed.teamname && !GamemodeConfig.isFriendlyFireAllowed)
 			{
 				killer.player.TriggerEvent("sthv:kill"); //kills the teamkiller
 				Server.SendChatMessage("", $"^5{killer.Name} was killed by Karma and {killed.Name} respawned.");
@@ -117,7 +118,46 @@ namespace sthvServer.sthvGamemodes
 				if (killed.teamname == TRunner) killed.Spawn(map.RunnerSpawn, true, playerState.alive); //spawns killed player at spawn location
 				else if (killed.teamname == THunter) killed.Spawn(map.HunterSpawn, false, playerState.alive);
 				else log("Killed isn't a runner or hunter!?");
+				killed = killer;
+			}
+
+			//respawn player after 2 mins
+			var timer = GamemodeConfig.respawnTimeSeconds;
+			if (TimeLeft > timer + 10)
+			{
+				AddTimeEvent(timer + TimeSinceRoundStart, new Action(() =>
+				{
+					if (killed.teamname == THunter) killed.Spawn(map.HunterSpawn, false, playerState.alive);
+				}));
 			}
 		}
+		[EventHandler("admin_menu_save_request")]
+		void adminMenuSaveHandler([FromSource] Player source, string jsonData)
+		{
+			if(API.IsPlayerAceAllowed(source.Handle, "sthv.host"))
+			{
+				try
+				{
+					var data = JsonConvert.DeserializeObject<Shared.AdminMenuSave>(jsonData);
+					GamemodeConfig.isFriendlyFireAllowed = data.is_friendly_fire_allowed;
+					GamemodeConfig.huntLengthSeconds = data.next_hunt_length;
+					GamemodeConfig.respawnTimeSeconds = data.next_respawn_time;
+					GamemodeConfig.huntNextRunnerServerId = data.next_runner_serverid;
+					GamemodeConfig.huntNextMapIndex = data.next_map;
+				}
+				catch (Exception e)
+				{
+					Debug.WriteLine("Exception thrown in Classic Hunt becuase jsonconvert failed on admin_menu_save_request. \n" + e);
+				}
+			}
+			else
+			{
+				Debug.WriteLine($"Player {source.Name} tried sending admin_menu_save_request without permission.");
+				source.Drop("Permission denied: Host Menu. Contact server owner if you think this is a mistake.");
+			}
+		}
+
+
+
 	}
 }

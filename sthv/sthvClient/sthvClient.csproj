@@ -89,6 +89,7 @@
     <None Include="ui\package-lock.json" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ui\AdminMenu.js" />
     <Content Include="ui\assets\check.png" />
     <Content Include="ui\assets\cross.png" />
     <Content Include="ui\assets\dead.png" />
@@ -99,6 +100,7 @@
     <Content Include="ui\index.html" />
     <Content Include="ui\script.js" />
     <Content Include="ui\style.css" />
+    <Content Include="ui\toastNotify.js" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="ui\node_modules\%40types\gsap\Animation.d.ts" />

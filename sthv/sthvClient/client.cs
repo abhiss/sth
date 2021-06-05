@@ -36,7 +36,7 @@ namespace sthv
 			{
 				//var pingRes = await sthvFetch.Get<Shared.Ping>("ping");
 				Debug.WriteLine("Hide cursor");
-				API.SetNuiFocus(false, false);
+				API.SetNuiFocus(true, true);
 			}), false);
 
 			_thisPed = Game.PlayerPed;
@@ -67,7 +67,7 @@ namespace sthv
 				}));
 			});
 
-
+			
 
 			EventHandlers["sthv:showToastNotification"] += new Action<string, int>((message, timeInSeconds) => //time_delay in ms
 			{

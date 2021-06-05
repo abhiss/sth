@@ -60,6 +60,10 @@ namespace sthv
 			//		TriggerServerEvent("sthv:opttorun");
 			//	}
 			//}));
+			RegisterEventHandler("admin_menu_save", new Action<IDictionary<string, object>>(e =>
+			{
+			 TriggerServerEvent("admin_menu_save_request", JsonConvert.SerializeObject(e));
+			}));
 		}
 
 		private void requestspawn(IDictionary<string, object> obj)
@@ -69,12 +73,7 @@ namespace sthv
 			Debug.WriteLine("requested spawn");
 		}
 
-		public void gameInputForNui(int keycode) //from client.isKeyPressed task
-		{
-			
-		}
-
-		public void RegisterNuiEventHandler(string eventName, Action<IDictionary<string, object>> action)
+		void RegisterNuiEventHandler(string eventName, Action<IDictionary<string, object>> action)
 		{
 			API.RegisterNuiCallbackType(eventName);
 			RegisterEventHandler($"__cfx_nui:{eventName}", new Action<ExpandoObject>(o => {

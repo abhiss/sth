@@ -10,7 +10,6 @@ namespace sthvServer
 {
 	abstract internal class BaseGamemodeSthv : BaseScript
 	{
-
 		private uint GameLengthInSeconds { get; set; }
 		private protected bool endMode = false; //used to end mode prematurely. Can be called either by gamemode manager (server.cs) or the gamemode.
 		private protected string endModeReason = null;
@@ -20,7 +19,11 @@ namespace sthvServer
 		public string Name { get; }
 		private sthvGamemodeTeam[] gamemodeTeams;
 		public bool isGameloopActive = false;
-
+		private uint timeleft;
+		private uint timeSecondsSinceRoundStart;
+		
+		public uint TimeLeft { get { return timeleft; } }
+		public uint TimeSinceRoundStart { get { return timeSecondsSinceRoundStart; } }
 		internal BaseGamemodeSthv(string gamemodeName, uint gameLengthInSeconds, int minimumNumberOfPlayers, int numberOfTeams = 2)
 		{
 			Name = gamemodeName;
@@ -87,25 +90,24 @@ namespace sthvServer
 			{
 				Debug.WriteLine($"Starting gamemode {Name} with {sthvLobbyManager.GetPlayersOfState(playerState.ready).Count} players.");
 			}
-			uint TimeSecondsSinceRoundStart = 0;
+			timeSecondsSinceRoundStart = 0;
 			uint accuracy = 1; //second
 			Debug.WriteLine(TimedEventsList.Count + "events in TimedEventList.");
 			foreach (var i in TimedEventsList)
 			{
 				Debug.WriteLine($"key: {i.Key} value: {i.Value}");
 			}
-
 			isGameloopActive = true;
-			while (GameLengthInSeconds - TimeSecondsSinceRoundStart > 0 && String.IsNullOrEmpty(sthvLobbyManager.winnerTeamAndReason.Item1))
+			while (GameLengthInSeconds - timeSecondsSinceRoundStart > 0 && String.IsNullOrEmpty(sthvLobbyManager.winnerTeamAndReason.Item1))
 			{
-				uint timeleft = GameLengthInSeconds - TimeSecondsSinceRoundStart;
+				timeleft = GameLengthInSeconds - timeSecondsSinceRoundStart;
 
 				Action action;
-				if (TimedEventsList.TryGetValue(TimeSecondsSinceRoundStart, out action))
+				if (TimedEventsList.TryGetValue(timeSecondsSinceRoundStart, out action))
 				{
-					Debug.WriteLine("^2Running TimedEvent at time: " + TimeSecondsSinceRoundStart + "^7"); ;
+					Debug.WriteLine("^2Running TimedEvent at time: " + timeSecondsSinceRoundStart + "^7"); ;
 					action.Invoke();
-					TimedEventsList.Remove(TimeSecondsSinceRoundStart);
+					TimedEventsList.Remove(timeSecondsSinceRoundStart);
 				}
 				//if ((timeleft % 10) == 0)
 				//{
@@ -114,7 +116,7 @@ namespace sthvServer
 				//}
 
 				await Delay((int)accuracy * 1000);
-				TimeSecondsSinceRoundStart += 1;
+				timeSecondsSinceRoundStart += 1;
 			}
 			Finalizer.Invoke(); //from AddFinalizerEvent
 
@@ -147,7 +149,6 @@ namespace sthvServer
 		//methods the gamemode must implement.
 
 		public abstract void test();
-
 
 		public abstract sthvGamemodeTeam[] SetTeams();
 	

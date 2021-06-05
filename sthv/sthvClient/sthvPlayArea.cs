@@ -25,20 +25,25 @@ namespace sthv
 		[Command("playareainfo")]
 		void command_playareainfo()
 		{
-			Debug.WriteLine(playAreaCenter.X  + " " + playAreaCenter.Y);
+			Debug.WriteLine(playAreaCenter.X + " " + playAreaCenter.Y);
 			Debug.WriteLine($"IsHuntActive: {sthvPlayerCache.isHuntActive} distance: {Vector2.Distance(playAreaCenter, new Vector2(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y))}");
 		}
 
 		public async Task GetDistance()
 		{
 			float distance = Vector2.Distance(playAreaCenter, new Vector2(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y)); //get horizontal distance between player and playAreaCenter
-			Debug.WriteLine("^3distance from playareacenter: " + distance.ToString());
+			//Debug.WriteLine("^3distance from playareacenter: " + distance.ToString());
 			if ((sthv.sthvPlayerCache.isHuntActive) && (Game.PlayerPed.IsAlive) && (distance > Radius) && (distance != 0))
 			{
-				
 				API.ApplyDamageToPed(API.PlayerPedId(), 8, true);
 				sthv.client.SendChatMessage("WARNING:", "OUT OF PLAY AREA", 255, 0, 0);
+				API.SetPedIsDrunk(sthvPlayerCache.playerpedid, true);
 			}
+			else
+			{
+				API.SetPedIsDrunk(sthvPlayerCache.playerpedid, false);
+			}
+
 			//Debug.WriteLine($"1");
 			await BaseScript.Delay(1000);
 		}

@@ -57,7 +57,14 @@ namespace Shared
 	class Ping : BaseSharedClass
 	{
 		public string response;
-
+	}
+	public class AdminMenuSave
+	{
+		public uint next_respawn_time;
+		public string next_runner_serverid;
+		public uint next_hunt_length;
+		public int next_map;
+		public bool is_friendly_fire_allowed;
 	}
 
 }

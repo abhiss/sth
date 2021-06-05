@@ -14,6 +14,8 @@ namespace sthvServer
 		/// </summary>
 		static private Dictionary<string, Func<Player, Shared.BaseSharedClass>> FetchRequestHandlers = new Dictionary<string, Func<Player, Shared.BaseSharedClass>>();
 
+		
+
 		[EventHandler("__sthv__internal:fetchRequest")]
 		private void OnFetchRequest([FromSource] Player source, int token, string requestUrl)
 		{

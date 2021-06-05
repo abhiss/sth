@@ -13,7 +13,6 @@ namespace sthvServer
 	class Server : BaseScript
 	{
 		int runnerHandle { get; set; }
-		bool isRunnerKilled = false;
 		static public Player runner;
 		public static bool hasHuntStarted = false; //
 		List<Player> NextRunnerQueue = new List<Player>();
@@ -21,44 +20,39 @@ namespace sthvServer
 		static public bool isHuntOver = true;
 		public static bool TestMode { get; set; } = false;
 		public static Shared.sthvMapModel currentMap;
-		public sthvDiscordController discord { get; }
+		
 		public static bool IsDiscordServerOnline { get; set; } = false;
 		public bool AutoHunt { get; set; } = false;
 
+		public sthvDiscordController discord { get; }
+
+		BaseGamemodeSthv gamemode;
 
 		public static List<int> playersInHeliServerid { get; set; } = new List<int>();
 
-		[Command("test")]
-		void onTest()
-		{
-			foreach(var p in sthvLobbyManager.GetAllPlayers())
-			{
-				p.Spawn(Shared.sthvMaps.Maps[2].RunnerSpawn, true, playerState.ready);
-			}
-		}
 		public Server()
 		{
 			discord = new sthvDiscordController();
+
 			currentMap = Shared.sthvMaps.Maps[2];
 			FetchHandler fetchHandler = new FetchHandler();
 
 			fetchHandler.addHandler<Shared.PlayerJoinInfo>(new Func<Player, Shared.BaseSharedClass>(source =>
-		  {
+			{
+				//retry loop incase of connection issues
 
-			  //retry loop incase of connection issues
+				Debug.WriteLine($"^3 player: {source.Name} Triggered PlayerJoinInfo handler.^7");
+				string licenseId = source.Handle;
+				var discordid = source.getDiscordId();
+				refreshscoreboard();
+				source.TriggerEvent("sth:updateRunnerHandle", runnerHandle);
+				sthvLobbyManager.getPlayerByLicense(source.getLicense()).Spawn(currentMap.HunterSpawn, false, playerState.ready); //defaults to hunter spawn
 
-			  Debug.WriteLine($"^3 player: {source.Name} Triggered PlayerJoinInfo handler.^7");
-			  string licenseId = source.Handle;
-			  var discordid = source.getDiscordId();
-			  refreshscoreboard();
-			  source.TriggerEvent("sth:updateRunnerHandle", runnerHandle);
-			  sthvLobbyManager.getPlayerByLicense(source.getLicense()).Spawn(currentMap.HunterSpawn,false, playerState.ready); //defaults to hunter spawn
+				TriggerClientEvent("hudintrooff");
 
-			  TriggerClientEvent("hudintrooff");
+				return (new Shared.PlayerJoinInfo { hasDiscord = false, isDiscordServerOnline = false, isInSTHGuild = false, isInVc = false, runnerServerId = runnerHandle });
 
-			  return (new Shared.PlayerJoinInfo { hasDiscord = false, isDiscordServerOnline = false, isInSTHGuild = false, isInVc = false, runnerServerId = runnerHandle });
-
-		  }));
+			}));
 			fetchHandler.addHandler<Shared.Ping>(new Func<Player, Shared.BaseSharedClass>(source =>
 			{
 				return (new Shared.Ping { response = "pong!!" });
@@ -92,28 +86,6 @@ namespace sthvServer
 			{
 				TriggerClientEvent("removeveh");
 			}), true);
-			API.RegisterCommand("toggleautohunt", new Action<int, List<object>, string>((src, args, raw) =>
-			{
-				AutoHunt = !AutoHunt;
-				Debug.WriteLine("autohunt now " + AutoHunt);
-			}), true);
-			API.RegisterCommand("hunt", new Action<int, List<object>, string>((src, args, raw) =>
-			{
-				//int time = int.Parse(args[0].ToString());
-				try
-				{
-					int huntplayarea = int.Parse(args[0].ToString());
-					int huntrunnerindex = int.Parse(args[1].ToString());
-					StartHunt(25, huntplayarea, huntrunnerindex);
-				}
-				catch (Exception ex)
-				{
-					StartHunt(25);
-					Debug.WriteLine("^5Error in hunt command. Probably invalid parameters.^7");
-				}
-
-			}), true);
-
 			API.RegisterCommand("spawnall", new Action<int, List<object>, string>((src, args, raw) =>
 			{
 				Debug.WriteLine();
@@ -155,11 +127,6 @@ namespace sthvServer
 
 			//new hunt related
 			EventHandlers["sth:sendserverkillerserverindex"] += new Action<Player, int>(KillfeedEventHandler);
-			////EventHandlers["sth:testevent"] += new Action<Player>(OnTestEvent);
-			//EventHandlers["sth:showMeOnMap"] += new Action<float, float, float>((float x, float y, float z) => { TriggerClientEvent("sth:sendShowOnMap", x, y, z); });
-
-
-			//test
 
 		}
 
@@ -180,21 +147,18 @@ namespace sthvServer
 			{
 				if (Players.Count() < 1)
 				{
-					await Delay(1000);
+					await Delay(5000);
 					Debug.WriteLine("^8waiting for more players^7");
 					continue;
-
 				}
 
 				//$ select gamemode based on player count
-				BaseGamemodeSthv gamemode = new sthvGamemodes.ClassicHunt();
+				gamemode = new sthvGamemodes.ClassicHunt();
 				Debug.WriteLine("Instantiating gamemode " + gamemode.Name + ".");
 
 				Debug.WriteLine("^4Registering gamemode script.^7");
 				RegisterScript(gamemode);
 
-				Debug.WriteLine("^4Testing method^7");
-				
 				sthvLobbyManager.isGameActive = true;
 				var (winner, reason) = await gamemode.Run();
 				sthvLobbyManager.isGameActive = false;
@@ -244,7 +208,7 @@ namespace sthvServer
 						}
 					}
 					resetVars();
-					
+
 					TriggerClientEvent("sthv:sendChosenMap", playarea);
 					//currentplayarea = playarea;
 					int totalTimeSecs = timeInMinutes * 60;
@@ -466,7 +430,6 @@ namespace sthvServer
 		{
 			#region resetVariables
 			runnerHandle = -1;
-			isRunnerKilled = false;
 			runner = null;
 			hasHuntStarted = false; //
 			AlivePlayerList = new List<Player>();
@@ -497,7 +460,7 @@ namespace sthvServer
 				return null;
 			}
 		}
-		
+
 		[EventHandler("baseevents:onPlayerDied")]
 		void onPlayerDead([FromSource] Player player)
 		{
@@ -541,7 +504,6 @@ namespace sthvServer
 							Debug.WriteLine("runner: " + runner.Name);
 							if (killed.Handle == runner.Handle && !isHuntOver) //if runner gets killed 
 							{
-								isRunnerKilled = true;
 								isHuntOver = true;
 								SendChatMessage("^5HUNT", $"{i.Name} killed runner: {runner.Name}");
 							}
@@ -591,10 +553,7 @@ namespace sthvServer
 			}
 			refreshscoreboard();
 		}
-		public void RegisterEventHandler(string eventName, Delegate action)
-		{
-			EventHandlers[eventName] += action;
-		}
+	
 		public static void SendChatMessage(string title, string message, int r = 255, int g = 255, int b = 255)
 		{
 			var msg = new Dictionary<string, object>
@@ -617,6 +576,23 @@ namespace sthvServer
 			runner = 1,
 			hunter = 2,
 			spectator = 3
+		}
+
+		public void RegisterEventHandler(string eventName, Delegate action)
+		{
+			EventHandlers[eventName] += action;
+		}
+		public void RegisterTickHandler( Func<Task> tick ) {
+			Tick += tick;
+		}
+		public void DeregisterTickHandler( Func<Task> tick ) {
+			Tick -= tick;
+		}
+		public void RegisterExport( string exportName, Delegate callback ) {
+			Exports.Add( exportName, callback );
+		}
+		public dynamic GetExport( string resourceName ) {
+			return Exports[resourceName];
 		}
 	}
 

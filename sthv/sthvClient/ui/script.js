@@ -1,9 +1,13 @@
 import {ModuleLoadTest, addToastNotification} from "./modules/toastNotify.js";
+import {  } from "./modules/AdminMenu.js";
+
+
 console.log(ModuleLoadTest);
 
 
 var timer = 0;
 var letPlay = false;
+window.sthv = {}
 
 $(document).ready(function () {
 	var time = 20;
@@ -257,7 +261,7 @@ function startCountdown(msg, time) {
 	//$('#countdown-message').text(msg);
 	$('.countdown').show(); //should be .timer but i dont want to hide it anyways
 };
-function sendNuiEvent(name, data = {}) {
+window.sendNuiEvent = function(name, data = {}) {
 	$.post("https://sthv/" + name, JSON.stringify(data));
 };
 
