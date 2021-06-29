@@ -64,7 +64,10 @@ namespace Shared
 		public string next_runner_serverid;
 		public uint next_hunt_length;
 		public int next_map;
+		public uint seconds_between_hints;
 		public bool is_friendly_fire_allowed;
+		public bool is_cops_enabled;
+		public bool end_hunt;
 	}
 
 }

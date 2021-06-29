@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -11,38 +11,12 @@
     <!-- <script src="gsap.js"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
-    
+
     <script type="module" src="script.js"></script>
 
 </head>
 
 <body>
-    <div class="intro">
-        <div class="intro-mid">
-            <h5 class="hide">DISCORD.GG/hBKcxju</h5>
-            <p class="hide">
-                You must be in the Survive the Hunt Discord server and have Discord installed to play on this server.
-                <br>
-                If you're not in the STHV Beta Discord, join at https://discord.gg/hBKcxju
-            </p>
-            <!-- <div class="discordverifications">
-                <ul>
-                    <li id="hasdiscord">Discord Detected </li>
-                    <li id="insth">In Survive the Hunt Discord </li>
-                    <li id="invc">In PC-Voice Channel </li>
-                </ul>
-
-            </div> -->
-            <p id="validatingWithDiscord">Awaiting validation...</p>
-            
-        </div>
-        <div class="intro-g2">
-            <p id="playbtn" class="intro-selectable">Play</p>
-            <p id="discordbtn">Discord</p class="discordbtn">
-            <p id="rulesbtn">Rules</p>
-            <p id="settingsbtn">Settings</p>
-        </div>
-    </div>
     <div class="scoreboard">
         <div class="boardheaderwrapper">
             <span class="tabletitle">Abhi's Survive the Hunt</span>
@@ -80,25 +54,41 @@
     <div id="admin_menu_wrapper">
         <div id="admin_menu">
             <div id="admin_menu_title">STHV Host Menu</div>
-            <div class="admin_menu_item">Respawn Time (seconds) <input id="ip1" type="number"  min="0" name="Time in Seconds" id=""> </div>
-            <div class="admin_menu_item">Next Runner (server id) <input id="ip2" type="number" min="0" name="next runner serverid" id=""> </div>
-            <div class="admin_menu_item">Next Hunt Length (minutes) <input id="ip3" type="number" min="0" name="next hunt length" id=""> </div>
-            <div class="admin_menu_item">Next Map (map id: 0-5 inclusive) <input id="ip4" type="number" max="6" min="0" name="next map" id=""> </div>
+            <div class="admin_menu_item">Respawn Time (seconds) <input id="respawn_time"  type="number" min="0"  
+                    name="Time in Seconds"> </div>
+            <div class="admin_menu_item">Next Runner (server id) <input id="next_runner" type="number" min="0"
+                    name="next runner serverid" id=""> </div>
+            <div class="admin_menu_item">Next Hunt Length (minutes) <input id="hunt_length" type="number" min="0"
+                    name="next hunt length" id=""> </div>
+            <div class="admin_menu_item">Next Map (map id: 0-5 inclusive) <input id="next_map" type="number" max="6" min="0"
+                    name="next map" id=""> </div>
+            <div class="admin_menu_item">Time Between Hints (seconds)<input id="hints_interval" type="number" max="6" min="0"
+                    name="hints interval" id=""></div>
             <div class="admin_menu_item">
-                Friendly Fire 
-                <select name="" id="ip5">
+                Friendly Fire
+                <select name="friendly fire" id="friendly_fire">
                     <option>Allowed</option>
                     <option>Punished</option>
                 </select>
             </div>
-
+            <div class="admin_menu_item">
+                Police
+                <select name="cops" id="enable_cops">
+                    <option>Enabled</option>
+                    <option>Disabled</option>
+                </select>
+            </div>
+            <div class="admin_menu_item">
+                End Hunt
+                <input type="checkbox" name="end hunt" id="end_hunt">
+            </div>
             <button id="admin_menu_save">Save</button>
         </div>
     </div>
     <style>
         #admin_menu_wrapper {
             position: absolute;
-            top:0px;
+            top: 0px;
             height: 100vh;
             right: 0vh;
             width: 30vw;
@@ -106,57 +96,68 @@
             display: grid;
             place-items: center;
         }
-        #admin_menu{
+
+        #admin_menu {
             width: 100%;
-            background:black;
-            color:white;
+            background: black;
+            color: white;
         }
-        #admin_menu_title{
+
+        #admin_menu_title {
             padding: 0.5em 1em;
             font-size: 2em;
             text-align: center;
         }
-        .admin_menu_item{
+
+        .admin_menu_item {
             font-size: 1vw;
+            
             margin: 1em 2em;
             height: 1.5em;
             font-weight: 500;
         }
-        #admin_menu_save{
+
+        #admin_menu_save {
             border: solid white 2px;
             margin: 2em auto;
             width: fit-content;
             text-align: center;
             padding: 0.5em 1em;
-            background:black;
-            color:white;
+            background: black;
+            color: white;
             display: block;
         }
-        #admin_menu_save:active{ 
+
+        #admin_menu_save:active {
             background-color: rgb(195, 195, 195);
         }
-        .admin_menu_item > input, .admin_menu_item > select {
+
+        .admin_menu_item>input,
+        .admin_menu_item>select {
             position: absolute;
             right: 2em;
             width: 7em;
             height: inherit;
             margin: 0px;
             padding: 0px;
-            background:white;
+            background: white;
             border: white solid 1px;
             text-align: center;
         }
 
-
+        #ip7 {
+            border: solid yellow 20px;
+        }
     </style>
 </body>
 
 </html>
 <style>
     /* body {} */
-    #toast_message_text{
-        opacity: 0;        
+    #toast_message_text {
+        opacity: 0;
     }
+
     #toast_message_wrapper {
         opacity: 1;
         width: 400px;
@@ -169,6 +170,7 @@
         /* animation: fade 3s linear; */
 
     }
+
     #toast_message {
         font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         font-weight: 100;

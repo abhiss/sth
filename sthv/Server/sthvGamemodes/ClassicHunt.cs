@@ -23,6 +23,7 @@ namespace sthvServer.sthvGamemodes
 
 			AddTimeEvent(0, new Action(async () =>
 			{
+				Tick += runnerHintHandler;
 				//pick random playarea 
 				Random r = new Random();
 				int playareaindex = r.Next(0, Shared.sthvMaps.Maps.Length);
@@ -33,6 +34,7 @@ namespace sthvServer.sthvGamemodes
 				TriggerClientEvent("sthv:sendChosenMap", playareaindex);
 
 				runner = sthvLobbyManager.GetPlayersInTeam(TRunner)[0];
+
 				if (sthvLobbyManager.GetPlayersInTeam("runner").Count != 1) throw new Exception("Unexpected number of runners were assigned in ClassicHunt");
 				runnerServerId = runner.player.Handle;
 
@@ -81,8 +83,11 @@ namespace sthvServer.sthvGamemodes
 				TriggerClientEvent("sth:updateRunnerHandle", -1);
 				foreach (var p in sthvLobbyManager.GetPlayersOfState(playerState.alive, playerState.ready))
 				{
-					p.Spawn(map.RunnerSpawn, true, playerState.ready);
+					p.Spawn(map.HunterSpawn, true, playerState.ready);
 				}
+
+				TriggerClientEvent("removeveh");
+				Tick -= runnerHintHandler;
 			}));
 
 		}
@@ -109,8 +114,10 @@ namespace sthvServer.sthvGamemodes
 			var killer = sthvLobbyManager.getPlayerByLicense(killerLicense);
 			var killed = sthvLobbyManager.getPlayerByLicense(killedLicense);
 
+			log($"{killer.player.Name} ({killer.teamname}) killed {killed.player.Name} ({killed.teamname})");
+
 			//friendly fire
-			if (killer.teamname == killed.teamname && !GamemodeConfig.isFriendlyFireAllowed)
+			if (killer.teamname == killed.teamname)
 			{
 				killer.player.TriggerEvent("sthv:kill"); //kills the teamkiller
 				Server.SendChatMessage("", $"^5{killer.Name} was killed by Karma and {killed.Name} respawned.");
@@ -134,16 +141,41 @@ namespace sthvServer.sthvGamemodes
 		[EventHandler("admin_menu_save_request")]
 		void adminMenuSaveHandler([FromSource] Player source, string jsonData)
 		{
-			if(API.IsPlayerAceAllowed(source.Handle, "sthv.host"))
+			Debug.WriteLine(jsonData);
+			if (API.IsPlayerAceAllowed(source.Handle, "sthv.host"))
 			{
 				try
 				{
 					var data = JsonConvert.DeserializeObject<Shared.AdminMenuSave>(jsonData);
-					GamemodeConfig.isFriendlyFireAllowed = data.is_friendly_fire_allowed;
-					GamemodeConfig.huntLengthSeconds = data.next_hunt_length;
-					GamemodeConfig.respawnTimeSeconds = data.next_respawn_time;
-					GamemodeConfig.huntNextRunnerServerId = data.next_runner_serverid;
+					if (data.next_respawn_time != 0 &&
+						GamemodeConfig.respawnTimeSeconds != data.next_respawn_time)
+					{
+						GamemodeConfig.respawnTimeSeconds = data.next_respawn_time;
+					}
+					if(data.next_runner_serverid != "0") GamemodeConfig.huntNextRunnerServerId = data.next_runner_serverid;
+					if (data.next_hunt_length != 0) { 
+						GamemodeConfig.huntLengthSeconds = data.next_hunt_length * 60; 
+					}
+					
 					GamemodeConfig.huntNextMapIndex = data.next_map;
+					GamemodeConfig.isFriendlyFireAllowed = data.is_friendly_fire_allowed;
+
+					if (GamemodeConfig.secondsBetweenHints != data.seconds_between_hints)
+					{
+						GamemodeConfig.secondsBetweenHints = data.seconds_between_hints;
+						if (GamemodeConfig.secondsBetweenHints < 20)
+						{
+							GamemodeConfig.secondsBetweenHints = 20;
+							Server.SendChatMessage("Host Menu", "Time Between Hunts was set to the minimum value of 20 seconds", 255, 255, 255, source.Handle);
+						}
+					}
+					if (GamemodeConfig.isPoliceEnabled != data.is_cops_enabled)
+					{
+						//send players event to enable cops
+						GamemodeConfig.isPoliceEnabled = data.is_cops_enabled;
+					}
+
+					if (data.end_hunt) sthvLobbyManager.winnerTeamAndReason = ("Nobody", "Host: " + source.Name + " ended the hunt. ");
 				}
 				catch (Exception e)
 				{
@@ -156,8 +188,11 @@ namespace sthvServer.sthvGamemodes
 				source.Drop("Permission denied: Host Menu. Contact server owner if you think this is a mistake.");
 			}
 		}
-
-
-
+		async Task runnerHintHandler()
+		{
+			TriggerClientEvent("sthv:showRunnerOnMap", int.Parse(runner.player.Handle));
+			Debug.WriteLine(TimeSinceRoundStart.ToString());
+			await Delay((int)GamemodeConfig.secondsBetweenHints * 1000);
+		}
 	}
 }

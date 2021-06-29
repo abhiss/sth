@@ -27,17 +27,17 @@ namespace sthv
 			Tick += ScoreboardUpdater;
 			Tick += CheckHeliStatus;
 			ServerId = Game.Player.ServerId;
-			
-			
-			EventHandlers["sthv:refreshsb"] += new Action<string>(async (string playersinheliserverid) =>
+
+
+			EventHandlers["sthv:refreshsb"] += new Action<string>(async (string playersinheliserverid)
+			=>
 			{
 				Debug.WriteLine("RECEVED REFRESH SCOREBOARD EVENT");
 				playersInHeliServerId = JsonConvert.DeserializeObject<int[]>(playersinheliserverid);
 				await ScoreboardUpdater();
 				Debug.WriteLine("^5updated sb");
-				Debug.WriteLine(this.playersInHeliServerId.ToString());
+				Debug.WriteLine(playersInHeliServerId.ToString());
 			});
-
 		}
 
 		public async Task ScoreboardUpdater()
@@ -65,18 +65,18 @@ namespace sthv
 		}
 		async Task CheckHeliStatus()
 		{
-			if(!isInHeli && Game.PlayerPed.IsInFlyingVehicle)
+			if (!isInHeli && Game.PlayerPed.IsInFlyingVehicle)
 			{
 				TriggerServerEvent("sthv:isinheli", true);
 				isInHeli = true;
 			}
-			if(isInHeli && !Game.PlayerPed.IsInFlyingVehicle)
+			if (isInHeli && !Game.PlayerPed.IsInFlyingVehicle)
 			{
 				TriggerServerEvent("sthv:isinheli", false);
 				isInHeli = false;
 			}
 			await Delay(1000);
 		}
-		
+
 	}
 }

@@ -32,6 +32,8 @@ namespace sthvServer
 			}
 			set { }
 		}
+		public static bool isPoliceEnabled;
+		public static uint secondsBetweenHints = 20;
 
 	}
 }

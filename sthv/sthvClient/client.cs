@@ -123,7 +123,10 @@ namespace sthv
 				if (shouldgivegun)
 				{
 					//AllowedWeapons[0] is a placeholder till HostMenu apis are in place
-					Game.PlayerPed.Weapons.Give(sthvRules.AllowedWeapons[0], 500, true, true);
+					foreach(var i in sthvRules.AllowedWeapons)
+					{
+						Game.PlayerPed.Weapons.Give(i, 500, true, true);
+					}
 				}
 				else
 				{
@@ -169,6 +172,9 @@ namespace sthv
 		async Task FirstTick() // res from mapmanager_cliend.lua line 47, stores name of map resource
 		{
 			Tick -= FirstTick;
+
+			
+
 			API.SetManualShutdownLoadingScreenNui(true);
 			Debug.WriteLine("STHV First Tick");
 			TriggerServerEvent("sth:NeedLicense");  //asks server for serverid, runnerid, and discord validation.
@@ -209,32 +215,29 @@ namespace sthv
 
 			}
 			TriggerEvent("sthv:spectate", false);
-
 		}
-
-		//delete this
-		void ReceivedLicense(int runnerHandle, bool hasDiscord, bool isInSTH, bool isInVc, bool isDiscordServerOnline)  //gets license from server
+		[EventHandler("sthv:showRunnerOnMap")]
+		async void ShowRunnerOnMap(int runnerServerId)
 		{
+			Player _runner = Players[runnerServerId];
 
-			RunnerServerId = runnerHandle;
-			if (isInSTH || !isDiscordServerOnline)
-			{
-				spawnnuicontroller.isSpawnAllowed = true;
-			}
-			else
-			{
-				spawnnuicontroller.isSpawnAllowed = false;
-			}
-			Debug.WriteLine($"^2 serverid recieved, mine: {Game.Player.ServerId} runner: {RunnerServerId}^7");
+			Debug.WriteLine($"showing runner {_runner.Name} on map");
 
-			TriggerNuiEvent("sthv:discordVerification", new { has_discord = hasDiscord, is_in_sth = isInSTH, is_in_vc = isInVc, is_discord_online = isDiscordServerOnline });
-			SendChatMessage("test", isDiscordServerOnline.ToString());
-			if (!isDiscordServerOnline)
+			var RunnerRadiusBlip = new Blip(API.AddBlipForRadius(_runner.Character.Position.X, _runner.Character.Position.Y, _runner.Character.Position.Z, 150));
+
+			RunnerRadiusBlip.Color = BlipColor.Red;
+			RunnerRadiusBlip.Alpha = 80;
+			RunnerRadiusBlip.ShowRoute = true;
+			Debug.WriteLine($"is on minimap: {RunnerRadiusBlip.IsOnMinimap}");
+
+			await Delay(10 * 1000);
+			if (RunnerRadiusBlip.Exists())
 			{
-				Debug.WriteLine("Discord server not online");
-				//SendChatMessage("sthv", "Discord verification failed for technical reasons. Anyone can play.");
+				RunnerRadiusBlip.Delete();
 			}
 		}
+
+
 		void OnPlayerKilled(int killerServerIndex, ExpandoObject info)
 		{
 			Debug.WriteLine($"killer: {killerServerIndex}");

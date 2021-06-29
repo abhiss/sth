@@ -89,7 +89,7 @@ namespace sthv
 			{
 				await Delay(1);
 			}
-
+			ShutdownLoadingScreenNui();
 			ShutdownLoadingScreen();
 			DoScreenFadeIn(500);
 

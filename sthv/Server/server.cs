@@ -554,13 +554,21 @@ namespace sthvServer
 			refreshscoreboard();
 		}
 	
-		public static void SendChatMessage(string title, string message, int r = 255, int g = 255, int b = 255)
+		public static void SendChatMessage(string title, string message, int r = 255, int g = 255, int b = 255, string serverid = null)
 		{
 			var msg = new Dictionary<string, object>
 			{
 				["color"] = new[] { r, g, b },
 				["args"] = new[] { title, message }
 			};
+			if(serverid != null)
+			{
+				var targetPlayer = sthvLobbyManager.GetAllPlayers().First(p => p.player.Handle == serverid);
+				if(targetPlayer != null)
+				{
+					targetPlayer.player.TriggerEvent("chat:addMessage", msg);
+				}
+			}
 			TriggerClientEvent("chat:addMessage", msg);
 			if (title == "^1KILLFEED") TriggerClientEvent("sthv:showToastNotification", msg, 1000);
 

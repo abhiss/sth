@@ -18,7 +18,7 @@ namespace sthv
 
 		public static bool GetInput { get { return optionOpen; } }
 		public bool isSpawnAllowed { get; set; } = false;
-
+		bool isAdminMenuOpen = false;
 		public SpawnNuiController()
 		{
 
@@ -48,7 +48,6 @@ namespace sthv
 					TriggerNuiEvent("sthv:runneropt", false);
 					TriggerServerEvent("sthv:opttorun");
 				}
-
 			});
 			RegisterNuiEventHandler("sthv:requestspawn", requestspawn);
 			//RegisterNuiEventHandler(("nui:returnWantsToRun"), new Action<IDictionary<string, object>>((i) =>
@@ -60,12 +59,27 @@ namespace sthv
 			//		TriggerServerEvent("sthv:opttorun");
 			//	}
 			//}));
-			RegisterEventHandler("admin_menu_save", new Action<IDictionary<string, object>>(e =>
+			RegisterNuiEventHandler("admin_menu_close", new Action<IDictionary<string, object>>(e =>
 			{
-			 TriggerServerEvent("admin_menu_save_request", JsonConvert.SerializeObject(e));
+				API.SetNuiFocus(false, false);	
 			}));
-		}
 
+			RegisterNuiEventHandler("admin_menu_save", new Action<IDictionary<string, object>>(e =>
+			{
+				Debug.WriteLine("sending admin_menu settings to server.");
+				TriggerServerEvent("admin_menu_save_request", JsonConvert.SerializeObject(e));
+			}));
+			API.RegisterKeyMapping("ToggleHostMenu", "Test", "keyboard", "F5");
+
+		}
+		[Command("ToggleHostMenu")]
+		public void toggle_host_menu()
+		{
+			TriggerNuiEvent("sthv:toggleHostMenu");
+			Debug.WriteLine("w");
+			isAdminMenuOpen = !isAdminMenuOpen;
+			API.SetNuiFocus(isAdminMenuOpen, isAdminMenuOpen);
+		}
 		private void requestspawn(IDictionary<string, object> obj)
 		{
 			isSpawnAllowed = true; //if they could press play, they have discord

@@ -121,7 +121,7 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>pwsh  $(SolutionDir)helper.ps1 -source $(ProjectDir)ui
-xcopy /y /d "$(TargetPath)" "C:\Servers\volumes\fivem_sthv_dev\resources\[local]\sthv"</PostBuildEvent>
+    <PostBuildEvent>xcopy /y /d "$(TargetPath)" "C:\Servers\volumes\fivem_sthv_dev\resources\[local]\sthv"
+pwsh  $(SolutionDir)helper.ps1 -source $(ProjectDir)ui</PostBuildEvent>
   </PropertyGroup>
 </Project>

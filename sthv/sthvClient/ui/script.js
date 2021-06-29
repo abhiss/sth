@@ -1,9 +1,7 @@
-import {ModuleLoadTest, addToastNotification} from "./modules/toastNotify.js";
-import {  } from "./modules/AdminMenu.js";
-
+import { ModuleLoadTest, addToastNotification } from "./modules/toastNotify.js";
+import { OpenMenu } from "./modules/AdminMenu.js";
 
 console.log(ModuleLoadTest);
-
 
 var timer = 0;
 var letPlay = false;
@@ -13,7 +11,16 @@ $(document).ready(function () {
 	var time = 20;
 	let spectatedPlayerNameBeingShown = "error"
 	//document.querySelector(".scoreboard").style.display = 'none';//
-
+	document.onkeydown = disableF5;
+	document.onkeypress = disableF5
+	document.onkeyup = disableF5;
+	function disableF5(e) {
+		if ((e.which || e.keyCode) == 115) {
+			e.preventDefault();
+			OpenMenu()
+			window.sendNuiEvent("admin_menu_close");
+		}
+	};
 	//gsap stuff
 	let dur1 = 1
 	gsap.from('.intro-g2', { duration: dur1, opacity: 0, ease: 'back.out(.5)' })
@@ -21,7 +28,7 @@ $(document).ready(function () {
 	addToastNotification("Welcome to Survive the Hunt.", 2000);
 	// var tl = gsap.timeline({onComplete: ()=> {t1.reverse()}});
 	// tl.to("#toast_message_wrapper", {opacity: 100, duration: 1000}, '+=1');
-	
+	OpenMenu();
 	//t1.play();
 
 	window.setInterval(function () {
@@ -48,11 +55,16 @@ $(document).ready(function () {
 			startCountdown(item["Message"], item["Seconds"]);
 			return;
 		}
-		if(event.EventName == "sthv:showToastNotification"){
+		if (event.EventName == "sthv:showToastNotification") {
 			//console.log("GOT MESSAGE FOR TOASTNOTIF ")
-			if(item.display_time) addToastNotification(item.message, item.display_time)
+			if (item.display_time) addToastNotification(item.message, item.display_time)
 			else addToastNotification(item.message);
 		}
+		if (event.EventName == "sthv:toggleHostMenu") {
+			OpenMenu();
+			console.log("lsthv:toggleHostMenu")
+		}
+
 		if (event.EventName === "sthv:runneropt") {
 			console.log("show: " + item)
 			if (item) {
@@ -137,7 +149,7 @@ $(document).ready(function () {
 				const playbtn_elm = document.getElementById('playbtn')
 				playbtn_elm.classList.add('intro-selectable');
 				playbtn_elm.click();
-				
+
 				letPlay = true;
 
 			}
@@ -261,7 +273,7 @@ function startCountdown(msg, time) {
 	//$('#countdown-message').text(msg);
 	$('.countdown').show(); //should be .timer but i dont want to hide it anyways
 };
-window.sendNuiEvent = function(name, data = {}) {
+window.sendNuiEvent = function (name, data = {}) {
 	$.post("https://sthv/" + name, JSON.stringify(data));
 };
 
