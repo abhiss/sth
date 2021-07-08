@@ -6,11 +6,11 @@ using Newtonsoft.Json;
 
 namespace Shared
 {
-	abstract class BaseSharedClass
+	abstract class BaseFetchClass
 	{
 		public bool isSuccessful { get; set; }
 	}
-	class PlayerConfigOptionsModel : BaseSharedClass
+	class PlayerConfigOptionsModel : BaseFetchClass
 	{
 		/// <summary>
 		/// Player's stamina - Determines how much they can sprint.
@@ -42,7 +42,7 @@ namespace Shared
 		/// </summary>
 		public bool AllowRadar { get; set; } = true;
 	}
-	class PlayerJoinInfo : BaseSharedClass
+	class PlayerJoinInfo : BaseFetchClass
 	{
 		public int runnerServerId;
 		public bool hasDiscord;
@@ -50,11 +50,11 @@ namespace Shared
 		public bool isInVc;
 		public bool isDiscordServerOnline;
 	}
-	class GameInfo : BaseSharedClass
+	class GameInfo : BaseFetchClass
 	{
 		public int playarea;
 	}
-	class Ping : BaseSharedClass
+	class Ping : BaseFetchClass
 	{
 		public string response;
 	}
@@ -69,5 +69,11 @@ namespace Shared
 		public bool is_cops_enabled;
 		public bool end_hunt;
 	}
-
+	public class ScoreboardInfoPlayer
+	{
+		public string serverid;
+		public bool is_in_helicopter;
+		public bool is_runner; //todo: remove gamemode specific property
+		public bool is_alive;
+	}
 }

@@ -12,7 +12,7 @@ namespace sthvServer
 		/// <summary>
 		/// tuple consists of (isSuccessful, returnObject)
 		/// </summary>
-		static private Dictionary<string, Func<Player, Shared.BaseSharedClass>> FetchRequestHandlers = new Dictionary<string, Func<Player, Shared.BaseSharedClass>>();
+		static private Dictionary<string, Func<Player, Shared.BaseFetchClass>> FetchRequestHandlers = new Dictionary<string, Func<Player, Shared.BaseFetchClass>>();
 
 		
 
@@ -21,7 +21,7 @@ namespace sthvServer
 		{
 			Debug.WriteLine($"Fetch request received. Token: {token}. URL: {requestUrl}. Player: {source.Name}");
 
-			if (!FetchRequestHandlers.TryGetValue(requestUrl, out Func<Player, Shared.BaseSharedClass> func))
+			if (!FetchRequestHandlers.TryGetValue(requestUrl, out Func<Player, Shared.BaseFetchClass> func))
 			{
 				Utilities.logError($"Fetch requestUrl {requestUrl} from {source.Name} (id:{source.Handle}) did not have an associated FetchRequestHandler.");
 			}
@@ -39,13 +39,13 @@ namespace sthvServer
 		/// <param name="token">token recieved in request</param>
 		/// <param name="isSuccessful">if request was successful</param>
 		/// <param name="body">response body</param>
-		private void response(Player source, int token, Shared.BaseSharedClass body)
+		private void response(Player source, int token, Shared.BaseFetchClass body)
 		{
 			var jsonBody = JsonConvert.SerializeObject(body);
 			source.TriggerEvent("__sthv__internal:fetchResponse", token, jsonBody);
 		}
 
-		public void addHandler<T>(Func<Player, Shared.BaseSharedClass> func) where T : Shared.BaseSharedClass
+		public void addHandler<T>(Func<Player, Shared.BaseFetchClass> func) where T : Shared.BaseFetchClass
 		{
 			if (FetchRequestHandlers.ContainsKey(typeof(T).Name))
 			{

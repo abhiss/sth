@@ -19,49 +19,42 @@ namespace sthv
 		static public int playerpedid = Game.PlayerPed.Handle;
 		static public Player runnerPlayer { get; set; } = null;
 		Dictionary<string, int> playersPing = new Dictionary<string, int>();//key is serverid
-		public int[] playersInHeliServerId { get; set; } = { -1 };
 		bool isInHeli = false;
 		public sthvPlayerCache()
 		{
 			Debug.WriteLine($"isAlreadyDead: {isAlreadyDead}");
-			Tick += ScoreboardUpdater;
 			Tick += CheckHeliStatus;
 			ServerId = Game.Player.ServerId;
 
 
-			EventHandlers["sthv:refreshsb"] += new Action<string>(async (string playersinheliserverid)
+			EventHandlers["sthv:refreshsb"] += new Action<string>((string playersinheliserverid)
 			=>
 			{
 				Debug.WriteLine("RECEVED REFRESH SCOREBOARD EVENT");
-				playersInHeliServerId = JsonConvert.DeserializeObject<int[]>(playersinheliserverid);
-				await ScoreboardUpdater();
-				Debug.WriteLine("^5updated sb");
-				Debug.WriteLine(playersInHeliServerId.ToString());
-			});
-		}
+				var sb_playerlist = JsonConvert.DeserializeObject<List<Shared.ScoreboardInfoPlayer>>(playersinheliserverid);
 
-		public async Task ScoreboardUpdater()
-		{
-			List<NuiModels.Player> playerInfoList = new List<NuiModels.Player>();
-			foreach (Player p in Players)
-			{
-				playerInfoList.Add(
-					new NuiModels.Player
-					{
-						alive = p.IsAlive,
-						name = p.Name,
-						runner = (sthv.client.RunnerServerId == p.ServerId),
-						serverid = p.ServerId,
-						isinheli = (playersInHeliServerId.Contains(p.ServerId))
-					}
-				);
-			}
-			API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel
-			{
-				EventName = "sthv:updatesb",
-				EventData = playerInfoList
-			}));
-			await Delay(10000);
+				List<NuiModels.Player> playerInfoList = new List<NuiModels.Player>();
+				foreach (var p in sb_playerlist)
+				{
+					playerInfoList.Add(
+						new NuiModels.Player
+						{
+							alive = p.is_alive,
+							name = Players[int.Parse(p.serverid)].Name,
+							runner = p.is_runner,
+							serverid = int.Parse(p.serverid),
+							isinheli = p.is_in_helicopter
+						}
+					);
+				}
+				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel
+				{
+					EventName = "sthv:updatesb",
+					EventData = playerInfoList
+				}));
+				Debug.WriteLine("^5updated sb");
+
+			});
 		}
 		async Task CheckHeliStatus()
 		{

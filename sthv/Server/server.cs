@@ -37,7 +37,7 @@ namespace sthvServer
 			currentMap = Shared.sthvMaps.Maps[2];
 			FetchHandler fetchHandler = new FetchHandler();
 
-			fetchHandler.addHandler<Shared.PlayerJoinInfo>(new Func<Player, Shared.BaseSharedClass>(source =>
+			fetchHandler.addHandler<Shared.PlayerJoinInfo>(new Func<Player, Shared.BaseFetchClass>(source =>
 			{
 				//retry loop incase of connection issues
 
@@ -53,7 +53,7 @@ namespace sthvServer
 				return (new Shared.PlayerJoinInfo { hasDiscord = false, isDiscordServerOnline = false, isInSTHGuild = false, isInVc = false, runnerServerId = runnerHandle });
 
 			}));
-			fetchHandler.addHandler<Shared.Ping>(new Func<Player, Shared.BaseSharedClass>(source =>
+			fetchHandler.addHandler<Shared.Ping>(new Func<Player, Shared.BaseFetchClass>(source =>
 			{
 				return (new Shared.Ping { response = "pong!!" });
 			}));
@@ -474,7 +474,7 @@ namespace sthvServer
 			TriggerClientEvent("sthv:updateAlive", killed.Handle, false);
 
 			//if there is no killer
-			if (KillerIndex < 0)
+			if (KillerIndex < 1)
 			{
 				TriggerEvent("gamemode::player_killed", null, killed.getLicense());
 
@@ -537,7 +537,19 @@ namespace sthvServer
 		public static void refreshscoreboard()
 		{
 			Debug.WriteLine("REFRESHING SCOREBOARD");
-			TriggerClientEvent("sthv:refreshsb", JsonConvert.SerializeObject(playersInHeliServerid.ToArray()));
+			List<Shared.ScoreboardInfoPlayer> sb_playerlist = new List<Shared.ScoreboardInfoPlayer>();
+			foreach (SthvPlayer player in sthvLobbyManager.GetAllPlayers())
+			{
+				sb_playerlist.Add(new Shared.ScoreboardInfoPlayer()
+				{
+					is_alive = (player.State == playerState.alive || player.State == playerState.ready),
+					is_in_helicopter = playersInHeliServerid.Contains(int.Parse(player.player.Handle)),
+					is_runner = (player.teamname == "runner"),
+					serverid = player.player.Handle
+
+				});
+			}
+			TriggerLatentClientEvent("sthv:refreshsb", 2000, JsonConvert.SerializeObject(sb_playerlist));
 		}
 		[EventHandler("sthv:isinheli")]
 		private void onPlayerJustHeli([FromSource] Player source, bool isJustInHeli) //true when just entered heli, false when just left heli

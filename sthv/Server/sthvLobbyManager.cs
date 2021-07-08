@@ -101,6 +101,10 @@ namespace sthvServer
 		}
 		#endregion
 
+		/// <summary>
+		/// Checks if runner or hunter team has <1 alive player. If so, sets winnerTeamAndReason, which is an end condition 
+		/// handled by gamemode. Also refreshes scoreboard. 
+		/// </summary>
 		[EventHandler("sthv:checkaliveplayers")]
 		public static void CheckAlivePlayers()
 		{
@@ -132,6 +136,8 @@ namespace sthvServer
 			{
 				winnerTeamAndReason = ("runner", "all hunters died");
 			}
+			Server.refreshscoreboard();
+			
 		}
 
 
