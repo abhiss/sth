@@ -10,6 +10,10 @@ namespace sthvServer
 		public static uint huntLengthSeconds = 15 * 60;
 		public static uint respawnTimeSeconds;
 		private static string next_runner_serverid;
+		
+		/// <summary>
+		/// If a value was not assigned, this will be null and a random value should be chosen by the gamemode.
+		/// </summary>
 		public static string huntNextRunnerServerId
 		{
 			get
@@ -22,6 +26,9 @@ namespace sthvServer
 		}
 
 		private static int next_map;
+		/// <summary>
+		/// If a value was not assigned, this will be negative and a random value should be chosen by the gamemode.
+		/// </summary>
 		public static int huntNextMapIndex
 		{
 			get

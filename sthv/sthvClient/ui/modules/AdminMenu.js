@@ -6,18 +6,15 @@ let Menu = {
         saveButton.style.borderColor = 'white';
     }
 }
-let is_menu_open = true;
 export function OpenMenu() {
-    // is_menu_open = !is_menu_open;
-    // if (is_menu_open) open_menu();
-    // else close_menu();
-
     var x = document.getElementById("admin_menu_wrapper");
-    if (x.style.display === "none") {
-      x.style.display = "grid";
-    } else {
-      x.style.display = "none";
-    }
+        x.style.display = "grid";
+    
+}
+export function CloseMenu() {
+    var x = document.getElementById("admin_menu_wrapper");
+    x.style.display = "none";
+
 }
 
 function open_menu() {
@@ -39,6 +36,6 @@ document.getElementById('admin_menu_save').onclick = function onAdminMenuSaveCli
     res['is_cops_enabled'] = (document.getElementById('enable_cops').value == 'Enabled')
     res['end_hunt'] = document.getElementById("end_hunt").checked
     let result = JSON.stringify(res);
-	console.log(res)
+    console.log(res);
     $.post("https://sthv/" + "admin_menu_save", result);
 }

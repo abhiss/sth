@@ -35,7 +35,6 @@ namespace sthv
 
 			EventHandlers["sthv:setnewpedmission"] += new Action(SetNewMission);
 
-
 			_ped = API.PlayerPedId();
 			_pid = API.PlayerId();
 
@@ -167,6 +166,7 @@ namespace sthv
 			{
 				Vehicle veh = Game.PlayerPed.LastVehicle;
 				veh.MaxSpeed = 25f;
+				veh.SoundHorn(5000);
 				//veh.Speed = 100f;
 			}
 

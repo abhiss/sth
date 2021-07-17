@@ -49,6 +49,7 @@ namespace Shared
 		public bool isInSTHGuild;
 		public bool isInVc;
 		public bool isDiscordServerOnline;
+		public bool isAllowedHostMenu;
 	}
 	class GameInfo : BaseFetchClass
 	{

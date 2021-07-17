@@ -25,37 +25,43 @@ namespace sthv
 			Debug.WriteLine($"isAlreadyDead: {isAlreadyDead}");
 			Tick += CheckHeliStatus;
 			ServerId = Game.Player.ServerId;
-
-
-			EventHandlers["sthv:refreshsb"] += new Action<string>((string playersinheliserverid)
-			=>
-			{
-				Debug.WriteLine("RECEVED REFRESH SCOREBOARD EVENT");
-				var sb_playerlist = JsonConvert.DeserializeObject<List<Shared.ScoreboardInfoPlayer>>(playersinheliserverid);
-
-				List<NuiModels.Player> playerInfoList = new List<NuiModels.Player>();
-				foreach (var p in sb_playerlist)
-				{
-					playerInfoList.Add(
-						new NuiModels.Player
-						{
-							alive = p.is_alive,
-							name = Players[int.Parse(p.serverid)].Name,
-							runner = p.is_runner,
-							serverid = int.Parse(p.serverid),
-							isinheli = p.is_in_helicopter
-						}
-					);
-				}
-				API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel
-				{
-					EventName = "sthv:updatesb",
-					EventData = playerInfoList
-				}));
-				Debug.WriteLine("^5updated sb");
-
-			});
 		}
+		[EventHandler("sthv:refreshsb")]
+		private async void refreshSb(string playerinfo_json)
+		{
+
+			Debug.WriteLine("RECEVED REFRESH SCOREBOARD EVENT: " + playerinfo_json);
+			var sb_playerlist = JsonConvert.DeserializeObject<List<Shared.ScoreboardInfoPlayer>>(playerinfo_json);
+
+			List<NuiModels.Player> playerInfoList = new List<NuiModels.Player>();
+
+
+			if (sb_playerlist == null) Debug.WriteLine("playerlist is null");
+			if (playerinfo_json == null) Debug.WriteLine("json is null");
+			if (playerInfoList == null) Debug.WriteLine("playerinfolist is null");
+
+			foreach (var p in sb_playerlist)
+			{
+				playerInfoList.Add(
+					new NuiModels.Player
+					{
+						alive = p.is_alive,
+						name = Players[int.Parse(p.serverid)].Name,
+						runner = p.is_runner,
+						serverid = p.serverid,
+						isinheli = p.is_in_helicopter
+					}
+				);
+			}
+			API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel
+			{
+				EventName = "sthv:updatesb",
+				EventData = playerInfoList
+			}));
+			Debug.WriteLine("^5updated sb");
+
+		}
+
 		async Task CheckHeliStatus()
 		{
 			if (!isInHeli && Game.PlayerPed.IsInFlyingVehicle)

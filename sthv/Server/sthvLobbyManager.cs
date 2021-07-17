@@ -42,7 +42,7 @@ namespace sthvServer
 
 				foreach (var p in PlayerData)
 				{
-					Debug.WriteLine($"Player: {p.Value.player.Name} | State: {p.Value.State.ToString()} | Team: {p.Value.teamname}\n");
+					Debug.WriteLine($"Player: {p.Value.player.Name} | State: {p.Value.State.ToString()} | Team: {p.Value.teamname} | license: {p.Value.player.getLicense()}\n");
 				}
 
 
@@ -55,8 +55,8 @@ namespace sthvServer
 			Debug.WriteLine(player.Identifiers["discord"]);
 		}
 		#region playerConnectAndDisconnect
-		[EventHandler("playerConnecting")]
-		private void OnPlayerConnected([FromSource] Player source, string playerName, dynamic setKickReason, dynamic deferrals)
+		[EventHandler("playerJoining")]
+		private void OnPlayerJoin([FromSource] Player source, string playerName, dynamic setKickReason, dynamic deferrals)
 		{
 			Debug.WriteLine("\nw");
 			PlayerData.Add(source.getLicense(), new SthvPlayer(source));

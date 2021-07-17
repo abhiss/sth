@@ -65,7 +65,8 @@ namespace sthvServer
 			int playerCount = 0;
 			while (true)
 			{
-				playerCount = sthvLobbyManager.GetPlayersOfState(playerState.ready).Count;
+				//alive and dead players are "ready" for next hunt since it means they're done loading
+				playerCount = sthvLobbyManager.GetPlayersOfState(playerState.ready, playerState.alive, playerState.dead).Count;
 				if (playerCount > this.MinimumPlayers || (Server.TestMode && playerCount == 1))
 				{
 					break;
@@ -101,7 +102,6 @@ namespace sthvServer
 			while (GameLengthInSeconds - timeSecondsSinceRoundStart > 0 && String.IsNullOrEmpty(sthvLobbyManager.winnerTeamAndReason.Item1))
 			{
 				timeleft = GameLengthInSeconds - timeSecondsSinceRoundStart;
-
 				Action action;
 				if (TimedEventsList.TryGetValue(timeSecondsSinceRoundStart, out action))
 				{
@@ -109,11 +109,11 @@ namespace sthvServer
 					action.Invoke();
 					TimedEventsList.Remove(timeSecondsSinceRoundStart);
 				}
-				//if ((timeleft % 10) == 0)
-				//{
-				//	Debug.WriteLine($"timeleft: {timeleft}");
-				//	TriggerClientEvent("sth:starttimer", timeleft);
-				//}
+				if ((timeleft % 10) == 0)
+				{
+					Debug.WriteLine($"timeleft: {timeleft}");
+					TriggerClientEvent("sth:starttimer", timeleft);
+				}
 
 				await Delay((int)accuracy * 1000);
 				timeSecondsSinceRoundStart += 1;
@@ -167,7 +167,34 @@ namespace sthvServer
 			{
 				players = sthvLobbyManager.GetPlayersOfState(playerState.ready);
 			}
-			
+			if(Name == "ClassicHunt" && GamemodeConfig.huntNextRunnerServerId != null)
+			{
+				foreach(var p in players)
+				{
+					int numOfRunnersAssigned = 0;
+					if (p.player.Handle == GamemodeConfig.huntNextRunnerServerId)
+					{
+						numOfRunnersAssigned++;
+						p.teamname = "runner";
+						Debug.WriteLine(p.Name + " assigned runner as assigned by AdminMenu");
+					}
+					else
+					{
+						p.teamname = "hunter";
+					}
+				
+					if(numOfRunnersAssigned != 1)
+					{
+						log("[BaseGamemode] numOfRunnersAssigned was " + numOfRunnersAssigned + " instead of 1. Maybe the assigned player [ServerId: " + GamemodeConfig.huntNextRunnerServerId + "] left.");
+						//doesn't return so the teams are assigned randomly like they normally would.
+					}
+					else
+					{
+						return "teams assigned using GamemodeConfig.huntNextRunnerServerId";
+					}
+				}
+
+			}
 			//shuffle players before picking teams.
 			var random = new Random();
 			players = players.OrderBy(x => random.Next()).ToList();

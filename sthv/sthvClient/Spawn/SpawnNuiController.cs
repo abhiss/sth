@@ -18,7 +18,9 @@ namespace sthv
 
 		public static bool GetInput { get { return optionOpen; } }
 		public bool isSpawnAllowed { get; set; } = false;
-		bool isAdminMenuOpen = false;
+		
+		public static bool IsAllowedHostMenu = false;
+
 		public SpawnNuiController()
 		{
 
@@ -69,16 +71,17 @@ namespace sthv
 				Debug.WriteLine("sending admin_menu settings to server.");
 				TriggerServerEvent("admin_menu_save_request", JsonConvert.SerializeObject(e));
 			}));
-			API.RegisterKeyMapping("ToggleHostMenu", "Test", "keyboard", "F5");
+			API.RegisterKeyMapping("ToggleHostMenu", "Test", "keyboard", "F4");
 
 		}
 		[Command("ToggleHostMenu")]
 		public void toggle_host_menu()
 		{
-			TriggerNuiEvent("sthv:toggleHostMenu");
-			Debug.WriteLine("w");
-			isAdminMenuOpen = !isAdminMenuOpen;
-			API.SetNuiFocus(isAdminMenuOpen, isAdminMenuOpen);
+			if (IsAllowedHostMenu)
+			{
+				TriggerNuiEvent("sthv:toggleHostMenu");
+				API.SetNuiFocus(true, true);
+			}
 		}
 		private void requestspawn(IDictionary<string, object> obj)
 		{
@@ -95,12 +98,7 @@ namespace sthv
 				action.Invoke(data);
 			}));
 		}
-		[EventHandler("hudintrooff")]
-		private void turnoffintro()
-		{
-			TriggerNuiEvent("sthvui:introoff");
-			Debug.WriteLine("introoff");
-		}
+
 		public void TriggerNuiEvent(string eventName, dynamic data = null)
 		{
 			API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel

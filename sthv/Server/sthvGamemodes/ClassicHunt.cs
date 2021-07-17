@@ -18,28 +18,36 @@ namespace sthvServer.sthvGamemodes
 
 		int currentmapid = 0;
 
-		internal ClassicHunt() : base(gamemodeName: "ClassicHunt", gameLengthInSeconds: 24 * 60, minimumNumberOfPlayers: 1)
+		internal ClassicHunt() : base(gamemodeName: "ClassicHunt", gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 1)
 		{
 
 			AddTimeEvent(0, new Action(async () =>
 			{
 				Tick += runnerHintHandler;
-				//pick random playarea 
-				Random r = new Random();
-				int playareaindex = r.Next(0, Shared.sthvMaps.Maps.Length);
+				int playareaindex;
+				if (GamemodeConfig.huntNextMapIndex > 0)
+				{
+					playareaindex = GamemodeConfig.huntNextMapIndex;
+				}
+				else {
+					//pick random playarea 
+					Random r = new Random();
+					playareaindex = r.Next(0, Shared.sthvMaps.Maps.Length);
+				}
 				Server.currentMap = Shared.sthvMaps.Maps[playareaindex];
 				map = Shared.sthvMaps.Maps[playareaindex];
 				Debug.WriteLine("current map index: " + playareaindex);
 				currentmapid = playareaindex;
 				TriggerClientEvent("sthv:sendChosenMap", playareaindex);
 
+				//BaseGamemode picks runner already.
 				runner = sthvLobbyManager.GetPlayersInTeam(TRunner)[0];
 
 				if (sthvLobbyManager.GetPlayersInTeam("runner").Count != 1) throw new Exception("Unexpected number of runners were assigned in ClassicHunt");
 				runnerServerId = runner.player.Handle;
 
 				log($"^2runner handle is now: {runnerServerId}^7");
-				TriggerClientEvent("sth:updateRunnerHandle", runnerServerId);
+				TriggerClientEvent("sth:updateRunnerHandle", int.Parse(runnerServerId));
 				Server.SendChatMessage("^2HUNT", $"Runner is:{runner.Name}", 255, 255, 255);
 				Server.SendToastNotif($"Hunt starting with runner: {runner.Name}", 3000);
 
@@ -73,6 +81,8 @@ namespace sthvServer.sthvGamemodes
 				runner.player.TriggerEvent("sth:updateRunnerHandle", runnerServerId); //incase runner has wrong clothes
 
 				TriggerClientEvent("sth:setguns", true);
+				TriggerClientEvent("sth:setcops", GamemodeConfig.isPoliceEnabled);
+
 				Server.SendChatMessage("^5HUNT", "You now have guns");
 				Server.SendToastNotif("You now have weapons!");
 				Server.SendToastNotif("You now have weapons!");
@@ -119,13 +129,22 @@ namespace sthvServer.sthvGamemodes
 			//friendly fire
 			if (killer.teamname == killed.teamname)
 			{
-				killer.player.TriggerEvent("sthv:kill"); //kills the teamkiller
-				Server.SendChatMessage("", $"^5{killer.Name} was killed by Karma and {killed.Name} respawned.");
+				if (GamemodeConfig.isFriendlyFireAllowed)
+				{
+					Server.SendChatMessage("", $"^5{killer.Name} teamkilled {killed.Name}.");
+					Debug.WriteLine("^5{killer.Name} teamkilled {killed.Name} because friendly fire is enable in GamemodeConfig.");
+				}
+				else {
+					//punish killer and respawn killed if FF is disallowed.
 
-				if (killed.teamname == TRunner) killed.Spawn(map.RunnerSpawn, true, playerState.alive); //spawns killed player at spawn location
-				else if (killed.teamname == THunter) killed.Spawn(map.HunterSpawn, false, playerState.alive);
-				else log("Killed isn't a runner or hunter!?");
-				killed = killer;
+					killer.player.TriggerEvent("sthv:kill"); //kills the teamkiller
+					Server.SendChatMessage("", $"^5{killer.Name} was killed by Karma and {killed.Name} respawned.");
+
+					if (killed.teamname == TRunner) killed.Spawn(map.RunnerSpawn, true, playerState.alive); //spawns killed player at spawn location
+					else if (killed.teamname == THunter) killed.Spawn(map.HunterSpawn, false, playerState.alive);
+					else log("Killed isn't a runner or hunter!?");
+					killed = killer;
+				}
 			}
 
 			//respawn player after 2 mins
@@ -146,6 +165,7 @@ namespace sthvServer.sthvGamemodes
 			{
 				try
 				{
+					Debug.WriteLine("jsondata: " + jsonData);
 					var data = JsonConvert.DeserializeObject<Shared.AdminMenuSave>(jsonData);
 					if (data.next_respawn_time != 0 &&
 						GamemodeConfig.respawnTimeSeconds != data.next_respawn_time)
@@ -171,11 +191,12 @@ namespace sthvServer.sthvGamemodes
 					}
 					if (GamemodeConfig.isPoliceEnabled != data.is_cops_enabled)
 					{
-						//send players event to enable cops
+						if (data.is_cops_enabled) Server.SendChatMessage("Host Menu", "Cops will be enabled next round.", 255, 255, 255, source.Handle);
+						else Server.SendChatMessage("Host Menu", "Cops will be disabled next round.", 255, 255, 255, source.Handle);
 						GamemodeConfig.isPoliceEnabled = data.is_cops_enabled;
 					}
 
-					if (data.end_hunt) sthvLobbyManager.winnerTeamAndReason = ("Nobody", "Host: " + source.Name + " ended the hunt. ");
+					if (data.end_hunt) sthvLobbyManager.winnerTeamAndReason = ("Nobody", "Host: " + source.Name + " ended the hunt with Host Menu.");
 				}
 				catch (Exception e)
 				{
@@ -184,14 +205,13 @@ namespace sthvServer.sthvGamemodes
 			}
 			else
 			{
-				Debug.WriteLine($"Player {source.Name} tried sending admin_menu_save_request without permission.");
+				Debug.WriteLine($"Player {source.Name} tried sending admin_menu_save_request without permission!");
 				source.Drop("Permission denied: Host Menu. Contact server owner if you think this is a mistake.");
 			}
 		}
 		async Task runnerHintHandler()
 		{
 			TriggerClientEvent("sthv:showRunnerOnMap", int.Parse(runner.player.Handle));
-			Debug.WriteLine(TimeSinceRoundStart.ToString());
 			await Delay((int)GamemodeConfig.secondsBetweenHints * 1000);
 		}
 	}
