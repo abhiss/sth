@@ -24,21 +24,38 @@ namespace sthvServer.sthvGamemodes
 			AddTimeEvent(0, new Action(async () =>
 			{
 				Tick += runnerHintHandler;
-				int playareaindex;
+				Random rand = new Random();
 				if (GamemodeConfig.huntNextMapIndex > 0)
 				{
-					playareaindex = GamemodeConfig.huntNextMapIndex;
+					currentmapid = GamemodeConfig.huntNextMapIndex;
 				}
-				else {
+				else
+				{
 					//pick random playarea 
-					Random r = new Random();
-					playareaindex = r.Next(0, Shared.sthvMaps.Maps.Length);
+					currentmapid = rand.Next(0, Shared.sthvMaps.Maps.Length);
 				}
-				Server.currentMap = Shared.sthvMaps.Maps[playareaindex];
-				map = Shared.sthvMaps.Maps[playareaindex];
-				Debug.WriteLine("current map index: " + playareaindex);
-				currentmapid = playareaindex;
-				TriggerClientEvent("sthv:sendChosenMap", playareaindex);
+				Server.currentMap = Shared.sthvMaps.Maps[currentmapid];
+				map = Shared.sthvMaps.Maps[currentmapid];
+				TriggerClientEvent("sthv:sendChosenMap", currentmapid);
+				log("current map index: " + currentmapid);
+
+				//Assigning teams.
+				//Framework assures all dead players are ready for next hunt. Non-ready players could be loading, not authenticated, etc.
+				var readyPlayers = sthvLobbyManager.GetPlayersOfState(playerState.ready);
+				log(readyPlayers.Count + " ready players in this hunt.");
+
+				//picking and assigning runner
+				int runnerindex = rand.Next(0, readyPlayers.Count);
+				readyPlayers[runnerindex].teamname = TRunner;
+				
+				//assigning everyone else hunter team
+				foreach(var p in readyPlayers)
+				{
+					if(p.teamname != TRunner)
+					{
+						p.teamname = THunter;
+					}
+				}
 
 				//BaseGamemode picks runner already.
 				runner = sthvLobbyManager.GetPlayersInTeam(TRunner)[0];
@@ -105,13 +122,13 @@ namespace sthvServer.sthvGamemodes
 		{
 			Debug.WriteLine("Here is a test message!!");
 		}
-		public override sthvGamemodeTeam[] SetTeams()
-		{
-			sthvGamemodeTeam[] teams = {
-				new sthvGamemodeTeam { Name = TRunner, MaximumPlayers = 1, MinimumPlayers = 1 },
-				new sthvGamemodeTeam { Name = THunter, MaximumPlayers = -1, MinimumPlayers = 0 } };
-			return teams;
-		}
+		//public override sthvGamemodeTeam[] SetTeams()
+		//{
+		//	sthvGamemodeTeam[] teams = {
+		//		new sthvGamemodeTeam { Name = TRunner, MaximumPlayers = 1, MinimumPlayers = 1 },
+		//		new sthvGamemodeTeam { Name = THunter, MaximumPlayers = 99, MinimumPlayers = 0 } };
+		//	return teams;
+		//}
 
 		[EventHandler("gamemode::player_killed")]
 		void playerKilledHandler(string killerLicense, string killedLicense)
@@ -134,7 +151,8 @@ namespace sthvServer.sthvGamemodes
 					Server.SendChatMessage("", $"^5{killer.Name} teamkilled {killed.Name}.");
 					Debug.WriteLine("^5{killer.Name} teamkilled {killed.Name} because friendly fire is enable in GamemodeConfig.");
 				}
-				else {
+				else
+				{
 					//punish killer and respawn killed if FF is disallowed.
 
 					killer.player.TriggerEvent("sthv:kill"); //kills the teamkiller
@@ -172,21 +190,22 @@ namespace sthvServer.sthvGamemodes
 					{
 						GamemodeConfig.respawnTimeSeconds = data.next_respawn_time;
 					}
-					if(data.next_runner_serverid != "0") GamemodeConfig.huntNextRunnerServerId = data.next_runner_serverid;
-					if (data.next_hunt_length != 0) { 
-						GamemodeConfig.huntLengthSeconds = data.next_hunt_length * 60; 
+					if (data.next_runner_serverid != "0") GamemodeConfig.huntNextRunnerServerId = data.next_runner_serverid;
+					if (data.next_hunt_length != 0)
+					{
+						GamemodeConfig.huntLengthSeconds = data.next_hunt_length * 60;
 					}
-					
+
 					GamemodeConfig.huntNextMapIndex = data.next_map;
 					GamemodeConfig.isFriendlyFireAllowed = data.is_friendly_fire_allowed;
 
 					if (GamemodeConfig.secondsBetweenHints != data.seconds_between_hints)
 					{
 						GamemodeConfig.secondsBetweenHints = data.seconds_between_hints;
-						if (GamemodeConfig.secondsBetweenHints < 20)
+						if (GamemodeConfig.secondsBetweenHints < 5)
 						{
-							GamemodeConfig.secondsBetweenHints = 20;
-							Server.SendChatMessage("Host Menu", "Time Between Hunts was set to the minimum value of 20 seconds", 255, 255, 255, source.Handle);
+							GamemodeConfig.secondsBetweenHints = 5;
+							Server.SendChatMessage("Host Menu", "Time Between Hunts was set to the minimum value of 5 seconds.", 255, 255, 255, source.Handle);
 						}
 					}
 					if (GamemodeConfig.isPoliceEnabled != data.is_cops_enabled)

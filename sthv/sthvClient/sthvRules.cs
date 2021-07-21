@@ -34,7 +34,17 @@ namespace sthv
 			//Tick += CheckPedMission;
 
 			EventHandlers["sthv:setnewpedmission"] += new Action(SetNewMission);
-
+			EventHandlers["sth:setcops"] += new Action<bool>(isCopsEnabled =>
+			{
+				if (isCopsEnabled)
+				{
+					API.SetMaxWantedLevel(5);
+				}
+				else
+				{
+					API.SetMaxWantedLevel(0);
+				}
+			});
 			_ped = API.PlayerPedId();
 			_pid = API.PlayerId();
 

@@ -70,35 +70,35 @@ namespace sthv
 		{
 			if (Game.PlayerPed.IsDead && shouldSpectateOnDeath)
 			{
-				List<Player> runnerPeds = new List<Player>();
+				List<Player> SpectateablePlayers = new List<Player>();
 				foreach(Player p in Players)
 				{
 
 					if (p.ServerId != RunnerServerId && (p.IsAlive))
 					{
-						runnerPeds.Add(p);
+						SpectateablePlayers.Add(p);
 					}
 				}
-				if (runnerPeds.Count < 1)
+				if (SpectateablePlayers.Count < 1)
 				{
-					Debug.WriteLine("^1Noone to spectate, trying to spectate dead people^7");
+					Debug.WriteLine("^1Noone to spectate, trying to spectate dead people.^7");
 					foreach(Player p in Players)
 					{
 						if((p.ServerId != RunnerServerId)){
-							runnerPeds.Add(p);
+							SpectateablePlayers.Add(p);
 						}
 					}
 				}
 				Random i = new Random();
-				int runnerToSpectate = i.Next(runnerPeds.Count);
-				API.NetworkSetInSpectatorMode(true, runnerPeds[runnerToSpectate].Character.Handle);
-				Debug.WriteLine($"^3You are spectating {runnerPeds[runnerToSpectate].Name}");
+				int runnerToSpectate = i.Next(SpectateablePlayers.Count);
+				API.NetworkSetInSpectatorMode(true, SpectateablePlayers[runnerToSpectate].Character.Handle);
+				Debug.WriteLine($"^3You are spectating {SpectateablePlayers[runnerToSpectate].Name}");
 				isSpectating = true;
-				_handleOfSpectatedPlayer = runnerPeds[runnerToSpectate].ServerId;
+				_handleOfSpectatedPlayer = SpectateablePlayers[runnerToSpectate].ServerId;
 
 			}
 
-			await Delay(10000);
+			await Delay(5000);
 		}
 	}
 }

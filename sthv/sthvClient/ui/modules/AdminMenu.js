@@ -38,4 +38,7 @@ document.getElementById('admin_menu_save').onclick = function onAdminMenuSaveCli
     let result = JSON.stringify(res);
     console.log(res);
     $.post("https://sthv/" + "admin_menu_save", result);
+
+    CloseMenu();
+    window.sendNuiEvent("admin_menu_close");
 }

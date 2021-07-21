@@ -176,10 +176,15 @@ namespace sthv
 		async void ShowRunnerOnMap(int runnerServerId)
 		{
 			Player _runner = Players[runnerServerId];
+			int radius = 150;
+
+			var r = new Random();
+			int y_offset = r.Next(-radius / 2, radius / 2);
+			int x_offset = r.Next(-radius / 2, radius / 2);
 
 			Debug.WriteLine($"showing runner {_runner.Name} on map");
 
-			var RunnerRadiusBlip = new Blip(API.AddBlipForRadius(_runner.Character.Position.X, _runner.Character.Position.Y, _runner.Character.Position.Z, 150));
+			var RunnerRadiusBlip = new Blip(API.AddBlipForRadius(_runner.Character.Position.X + x_offset, _runner.Character.Position.Y + y_offset, _runner.Character.Position.Z, radius ));
 
 			RunnerRadiusBlip.Color = BlipColor.Red;
 			RunnerRadiusBlip.Alpha = 80;

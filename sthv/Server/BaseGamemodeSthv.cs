@@ -21,7 +21,7 @@ namespace sthvServer
 		public bool isGameloopActive = false;
 		private uint timeleft;
 		private uint timeSecondsSinceRoundStart;
-		
+
 		public uint TimeLeft { get { return timeleft; } }
 		public uint TimeSinceRoundStart { get { return timeSecondsSinceRoundStart; } }
 		internal BaseGamemodeSthv(string gamemodeName, uint gameLengthInSeconds, int minimumNumberOfPlayers, int numberOfTeams = 2)
@@ -81,16 +81,9 @@ namespace sthvServer
 				}
 			}
 
-			CreateTeams(null, SetTeams()); 
 
-			if (gamemodeTeams == null) //not really needed. Indirectly verifies that gamemode used SetTeams correctly, but CreateTeams should probably handle that. 
-			{
-				throw new NullReferenceException("GamemodeTeams not set by gamemode: " + Name + ".");
-			}
-			else
-			{
-				Debug.WriteLine($"Starting gamemode {Name} with {sthvLobbyManager.GetPlayersOfState(playerState.ready).Count} players.");
-			}
+			Debug.WriteLine($"Starting gamemode {Name} with {sthvLobbyManager.GetPlayersOfState(playerState.ready).Count} players.");
+			
 			timeSecondsSinceRoundStart = 0;
 			uint accuracy = 1; //second
 			Debug.WriteLine(TimedEventsList.Count + "events in TimedEventList.");
@@ -99,6 +92,8 @@ namespace sthvServer
 				Debug.WriteLine($"key: {i.Key} value: {i.Value}");
 			}
 			isGameloopActive = true;
+
+			//game loop
 			while (GameLengthInSeconds - timeSecondsSinceRoundStart > 0 && String.IsNullOrEmpty(sthvLobbyManager.winnerTeamAndReason.Item1))
 			{
 				timeleft = GameLengthInSeconds - timeSecondsSinceRoundStart;
@@ -118,7 +113,17 @@ namespace sthvServer
 				await Delay((int)accuracy * 1000);
 				timeSecondsSinceRoundStart += 1;
 			}
+
+			/**
+			 * Clean up
+			 */
 			Finalizer.Invoke(); //from AddFinalizerEvent
+
+			//remove player teams
+			foreach( var p in sthvLobbyManager.GetAllPlayers())
+			{
+				p.teamname = null;
+			}
 
 			isGameloopActive = false;
 
@@ -126,7 +131,7 @@ namespace sthvServer
 
 			var winners = sthvLobbyManager.winnerTeamAndReason;
 			sthvLobbyManager.winnerTeamAndReason = (null, null);
-			
+
 			if (winners == (null, null))
 			{
 				return ("runner", "time ran out");
@@ -150,8 +155,6 @@ namespace sthvServer
 
 		public abstract void test();
 
-		public abstract sthvGamemodeTeam[] SetTeams();
-	
 		/// <summary>
 		/// Used by BaseGamemodeSthv to create teams. Not to be used by gamemodes - gamemodes must set teams via SetTeams. 
 		/// </summary>
@@ -167,9 +170,9 @@ namespace sthvServer
 			{
 				players = sthvLobbyManager.GetPlayersOfState(playerState.ready);
 			}
-			if(Name == "ClassicHunt" && GamemodeConfig.huntNextRunnerServerId != null)
+			if (Name == "ClassicHunt" && GamemodeConfig.huntNextRunnerServerId != null)
 			{
-				foreach(var p in players)
+				foreach (var p in players)
 				{
 					int numOfRunnersAssigned = 0;
 					if (p.player.Handle == GamemodeConfig.huntNextRunnerServerId)
@@ -182,8 +185,8 @@ namespace sthvServer
 					{
 						p.teamname = "hunter";
 					}
-				
-					if(numOfRunnersAssigned != 1)
+
+					if (numOfRunnersAssigned != 1)
 					{
 						log("[BaseGamemode] numOfRunnersAssigned was " + numOfRunnersAssigned + " instead of 1. Maybe the assigned player [ServerId: " + GamemodeConfig.huntNextRunnerServerId + "] left.");
 						//doesn't return so the teams are assigned randomly like they normally would.
@@ -251,7 +254,7 @@ namespace sthvServer
 			}
 			TimedEventsList.Add(seconds, action);
 		}
-		
+
 		/// <summary>.
 		///	The action will be triggered at the end of the gamemode. Should be used to clean up and reset client state.
 		/// </summary

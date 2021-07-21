@@ -26,6 +26,7 @@ namespace sthv
 			Tick += CheckHeliStatus;
 			ServerId = Game.Player.ServerId;
 		}
+
 		[EventHandler("sthv:refreshsb")]
 		private async void refreshSb(string playerinfo_json)
 		{

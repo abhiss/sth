@@ -83,9 +83,6 @@
     <None Include="ui\node_modules\%40types\jquery\LICENSE" />
     <None Include="ui\node_modules\%40types\jquery\package.json" />
     <None Include="ui\node_modules\%40types\jquery\README.md" />
-    <None Include="ui\node_modules\%40types\sizzle\LICENSE" />
-    <None Include="ui\node_modules\%40types\sizzle\package.json" />
-    <None Include="ui\node_modules\%40types\sizzle\README.md" />
     <None Include="ui\package-lock.json" />
   </ItemGroup>
   <ItemGroup>
@@ -116,7 +113,6 @@
     <TypeScriptCompile Include="ui\node_modules\%40types\jquery\JQueryStatic.d.ts" />
     <TypeScriptCompile Include="ui\node_modules\%40types\jquery\legacy.d.ts" />
     <TypeScriptCompile Include="ui\node_modules\%40types\jquery\misc.d.ts" />
-    <TypeScriptCompile Include="ui\node_modules\%40types\sizzle\index.d.ts" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
