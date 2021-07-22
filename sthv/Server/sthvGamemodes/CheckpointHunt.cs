@@ -6,23 +6,26 @@ using CitizenFX.Core;
 using CitizenFX.Core.Native;
 using Newtonsoft.Json;
 
+using Shared;
+
 namespace sthvServer.sthvGamemodes
 {
-	internal class ClassicHunt : BaseGamemodeSthv
+	internal class CheckpointHunt : BaseGamemodeSthv
 	{
 		SthvPlayer runner = null;
 		string runnerServerId = null;
 		Shared.sthvMapModel map = Shared.sthvMaps.Maps[2];
 		const string TRunner = "runner";
 		const string THunter = "hunter";
-		
+
 		int currentmapid = 0;
 
-		internal ClassicHunt() : base(gamemodeName: "ClassicHunt", GamemodeId: Shared.Gamemode.ClassicHunt, gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 1, numberOfTeams: 2)
+		internal CheckpointHunt() : base(gamemodeName: "CheckpointHunt", GamemodeId: Gamemode.CheckpointHunt, gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 1, numberOfTeams: 2)
 		{
 		}
 		public override void CreateEvents()
 		{
+
 			AddTimeEvent(0, new Action(async () =>
 			{
 				Tick += runnerHintHandler;
@@ -47,7 +50,7 @@ namespace sthvServer.sthvGamemodes
 				log(readyPlayers.Count + " ready players in this hunt.");
 
 				//picking and assigning runner
-				int runnerindex = rand.Next(0, readyPlayers.Count-1);
+				int runnerindex = rand.Next(0, readyPlayers.Count - 1);
 				readyPlayers[runnerindex].teamname = TRunner;
 				//assigning everyone else hunter team
 				foreach (var p in readyPlayers)

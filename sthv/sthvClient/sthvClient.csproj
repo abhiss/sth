@@ -43,6 +43,9 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -51,13 +54,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Server\Shared\SharedEnums.cs">
+      <Link>Shared\SharedEnums.cs</Link>
+    </Compile>
     <Compile Include="..\Server\shared\SharedModels.cs">
       <Link>shared\SharedModels.cs</Link>
     </Compile>
+    <Compile Include="BaseGamemode.cs" />
     <Compile Include="client.cs" />
+    <Compile Include="Gamemodes\CheckpointHunt.cs" />
     <Compile Include="GamemodeUtilities.cs" />
     <Compile Include="NuiEventModel.cs" />
-    <Compile Include="shared\sthvMapModel.cs" />
+    <Compile Include="Shared\sthvMapModel.cs" />
     <Compile Include="Spawn\SpawnNuiController.cs" />
     <Compile Include="fetch\sthvFetch.cs" />
     <Compile Include="sthvGameoverHandler.cs" />

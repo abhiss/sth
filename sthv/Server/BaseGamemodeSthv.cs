@@ -22,14 +22,15 @@ namespace sthvServer
 		public bool isGameloopActive = false;
 		private uint timeleft;
 		private uint timeSecondsSinceRoundStart;
+		public Shared.Gamemode GamemodeId;
 
 		public uint TimeLeft { get { return timeleft; } }
 		public uint TimeSinceRoundStart { get { return timeSecondsSinceRoundStart; } }
-		internal BaseGamemodeSthv(string gamemodeName, uint gameLengthInSeconds, int minimumNumberOfPlayers, int numberOfTeams)
+		internal BaseGamemodeSthv(string gamemodeName, Shared.Gamemode GamemodeId, uint gameLengthInSeconds, int minimumNumberOfPlayers, int numberOfTeams)
 		{
 			Name = gamemodeName;
 			this.GameLengthInSeconds = gameLengthInSeconds;
-
+			this.GamemodeId = GamemodeId; 
 			Debug.WriteLine("^1Message from BaseGamemodeSthv. Triggered by " + gamemodeName + ".");
 			sthvLobbyManager.setAllActiveToWaiting();
 		}
@@ -41,15 +42,18 @@ namespace sthvServer
 
 		public async Task AwaitStartConditions()
 		{
-
+			
 		}
 
 		/// <summary>
-		/// Starts the gamemode! 
+		/// Starts the gamemode!
 		/// </summary>
 		public async Task<(string, string)> Run()
 		{
-			int playerCount = 0;
+			Server.GamemodeId = this.GamemodeId;
+			TriggerClientEvent("sth:setgamemodeid", this.GamemodeId);
+
+			int playerCount;
 			while (true)
 			{
 				//alive and dead players are "ready" for next hunt since it means they're done loading
@@ -63,11 +67,10 @@ namespace sthvServer
 					Server.SendChatMessage("hunt", "waiting for 2 people before hunt starts", 105, 0, 225);
 					Server.SendToastNotif("Waiting for 2 players before the hunt starts.", 2000);
 
-					Debug.WriteLine("^8 Not enough players to start gamemode^7 " + playerCount);
+					Debug.WriteLine("^9Not enough players to start gamemode (held in BaseGamemodeSthv.Run())^7 " + playerCount);
 					await Delay(5000);
 				}
 			}
-
 
 			Debug.WriteLine($"Starting gamemode {Name} with {sthvLobbyManager.GetPlayersOfState(playerState.ready).Count} players.");
 			
@@ -105,9 +108,10 @@ namespace sthvServer
 			 * Clean up
 			 */
 			Finalizer.Invoke(); //from AddFinalizerEvent
+			TriggerClientEvent("sth:starttimer", 0);
 
 			//remove player teams
-			foreach( var p in sthvLobbyManager.GetAllPlayers())
+			foreach ( var p in sthvLobbyManager.GetAllPlayers())
 			{
 				p.teamname = null;
 			}

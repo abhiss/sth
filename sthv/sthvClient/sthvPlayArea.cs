@@ -26,13 +26,15 @@ namespace sthv
 		void command_playareainfo()
 		{
 			Debug.WriteLine(playAreaCenter.X + " " + playAreaCenter.Y);
-			Debug.WriteLine($"IsHuntActive: {sthvPlayerCache.isHuntActive} distance: {Vector2.Distance(playAreaCenter, new Vector2(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y))}");
+			Debug.WriteLine($"gamemode: {client.GamemodeId} | IsHuntActive: {sthvPlayerCache.isHuntActive} | distance: {Vector2.Distance(playAreaCenter, new Vector2(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y))}");
 		}
 
 		public async Task GetDistance()
 		{
+			//only classic hunt uses play areas like this.
+			if (client.GamemodeId != Shared.Gamemode.ClassicHunt) return;
+
 			float distance = Vector2.Distance(playAreaCenter, new Vector2(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y)); //get horizontal distance between player and playAreaCenter
-			//Debug.WriteLine("^3distance from playareacenter: " + distance.ToString());
 			if ((sthv.sthvPlayerCache.isHuntActive) && (Game.PlayerPed.IsAlive) && (distance > Radius) && (distance != 0))
 			{
 				API.ApplyDamageToPed(API.PlayerPedId(), 8, true);
@@ -43,8 +45,6 @@ namespace sthv
 			{
 				API.SetPedIsDrunk(sthvPlayerCache.playerpedid, false);
 			}
-
-			//Debug.WriteLine($"1");
 			await BaseScript.Delay(1000);
 		}
 		public static void SetPlayarea(float radius, float x, float y)
@@ -57,6 +57,11 @@ namespace sthv
 			playarea = new Blip(API.AddBlipForRadius(x, y, 130, radius));
 			playarea.Color = BlipColor.Blue;
 			playarea.Alpha = 60;
+		}
+		public static void RemovePlayarea()
+		{
+			playarea.Delete();
+			playarea = null;
 		}
 	}
 }

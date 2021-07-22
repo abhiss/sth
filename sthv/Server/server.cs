@@ -7,6 +7,8 @@ using CitizenFX.Core.Native;
 using System.IO;
 using Newtonsoft.Json;
 
+using Shared;
+
 namespace sthvServer
 {
 
@@ -19,8 +21,12 @@ namespace sthvServer
 		List<Player> AlivePlayerList = new List<Player>();
 		static public bool isHuntOver = true;
 		public static bool TestMode { get; set; } = false;
-		public static Shared.sthvMapModel currentMap;
-
+		public static sthvMapModel currentMap;
+		
+		/// <summary>
+		/// Set by BaseGamemode when a new gamemode starts.
+		/// </summary>
+		public static Gamemode GamemodeId = Gamemode.None; 
 		public static bool IsDiscordServerOnline { get; set; } = false;
 		public bool AutoHunt { get; set; } = false;
 
@@ -62,7 +68,8 @@ namespace sthvServer
 					isInSTHGuild = false,
 					isInVc = false,
 					runnerServerId = runnerHandle,
-					isAllowedHostMenu = API.IsPlayerAceAllowed(source.Handle, "sthv.host")
+					isAllowedHostMenu = API.IsPlayerAceAllowed(source.Handle, "sthv.host"),
+					gamemodeId = Server.GamemodeId
 				});
 
 			}));
@@ -194,263 +201,7 @@ namespace sthvServer
 			NextRunnerQueue.Add(source);
 			Debug.WriteLine(source.Name + " opted to run");
 		}
-		/// <summary>
-		/// runner defaults to -1 which randomly chooses a player to run
-		/// </summary>
-		/// <param name="timeInMinutes"></param>
-		/// <param name="playarea"></param>
-		/// <param name="runnerID"></param>
-		async void StartHunt(int timeInMinutes, int playarea = -1, int runnerID = -1)
-		{
-			throw new NotImplementedException("StartHunt shouldn't be used!");
-			return;
-			if (isHuntOver)
-			{
-				//try
-				{
-					if (Players.Count() < 2 && !(TestMode && Players.Count() == 1))
-					{
-						Console.WriteLine("not enough players to start hunt, waiting till more join");
-						SendChatMessage("hunt-error", "not enough players to start hunt, waiting till more join");
 
-						while ((Players.Count() < 2) && !(TestMode && Players.Count() == 1))
-						{
-							SendChatMessage("hunt", "waiting for 2 people before we start", 105, 0, 225);
-							SendToastNotif("Waiting for 2 players before the hunt starts.");
-
-							Debug.WriteLine("^1 Not enough players to start^7");
-							await Delay(15000);
-						}
-					}
-					resetVars();
-
-					TriggerClientEvent("sthv:sendChosenMap", playarea);
-					//currentplayarea = playarea;
-					int totalTimeSecs = timeInMinutes * 60;
-					TriggerClientEvent("sth:starttimer", totalTimeSecs);
-					Debug.WriteLine("runner id: " + runnerID);
-					if (runnerID < 0) //picks random player from queue
-					{
-						foreach (Player p in Players) //hunters can spawn after opting
-						{
-							if (int.Parse(p.Handle) != runnerHandle)
-							{
-								p.TriggerEvent("AskRunnerOpt");
-							}
-						}
-						await Delay(8000);
-						foreach (Player p in NextRunnerQueue)
-						{
-							Debug.WriteLine($"^3players in list: {p.Name}^7");
-						}
-						Random rand = new Random();
-						NextRunnerQueue.RemoveAll(item => !Players.Contains(item)); //needs to be tested
-						if (NextRunnerQueue.Count > 0)
-						{
-							int randIndex = rand.Next(0, NextRunnerQueue.Count());
-							try
-							{
-								runnerID = runnerHandle = int.Parse(NextRunnerQueue.ToArray()[randIndex].Handle); //runnerid and runnerhandle should be the same
-							}
-							catch (Exception ex)
-							{
-								Debug.WriteLine("exception caughtsds: " + ex);
-							}
-							runner = GetPlayerFromHandle(runnerHandle);
-
-							Debug.WriteLine($"^4 playerchosen {randIndex} out of {NextRunnerQueue.Count() } options, handle: {runnerHandle}^7");
-						}
-						else
-						{
-							try
-							{
-								int randIndex = rand.Next(0, Players.Count());
-								Debug.WriteLine("randIndex: " + randIndex);
-								runnerID = runnerHandle = int.Parse(Players.ToArray()[randIndex].Handle);
-								runner = GetPlayerFromHandle(runnerHandle);
-								Debug.WriteLine($"^3Noone wanted to be runner so a random one was chosen. new runnerid: {runnerID}");
-								SendChatMessage($"^1HUNT", $"Noone wanted to be runner so {runner.Name} was randomly chosen");
-								SendToastNotif($"Noone wanted to be runner so {runner.Name} was randomly chosen", 3000);
-							}
-							catch (Exception ex)
-							{
-								Debug.WriteLine("^1E394 exception caught: ^7" + ex);
-							}
-						}
-					}
-					else
-					{
-						try
-						{
-							runnerHandle = runnerID;
-							runner = GetPlayerFromHandle(runnerHandle);
-						}
-						catch (Exception ex)
-						{
-							Debug.WriteLine($"^1ERROR at assigning runner: {ex}");
-						}
-					}
-					Debug.WriteLine("0b0");
-
-
-					//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-					sthvLobbyManager.setAllActiveToWaiting();
-					Debug.WriteLine("0b1");
-
-					Debug.WriteLine("^1Invariant: all players should be inactive or waiting. ");
-
-					//#remove inactive from list and handle else
-					//foreach (var p in sthvLobbyManager.GetPlayersOfState(SthvPlayer.stateEnum.alive, SthvPlayer.stateEnum.inactive, SthvPlayer.stateEnum.ready, SthvPlayer.stateEnum.dead))
-					//{
-					//	Debug.WriteLine(p.player.Name + " is in state " + p.State.ToString());
-					//}
-					//Debug.WriteLine("0b2");
-
-
-					Debug.WriteLine("\n\n^7");
-
-					Debug.WriteLine($"^2runner handle is now: {runnerHandle}^7");
-					TriggerClientEvent("sth:updateRunnerHandle", runnerHandle);
-
-					//place blip
-
-					SendChatMessage("^2HUNT", $"Runner is:{runner.Name}", 255, 255, 255);
-					SendToastNotif($"Hunt starting with runner: {runner.Name}", 3000);
-
-					await Delay(100);
-
-					var runnerSthvPlayer = sthvLobbyManager.getPlayerByLicense(runner.getLicense());
-					//sthvLobbyManager.SetPlayerTeam(runner, "runner");
-					//sthvLobbyManager.MarkPlayerAlive(runner);
-
-					NextRunnerQueue = new List<Player>(); //resets the list after runner spawns while hunters wait
-														  //freezehunters, remveh, 
-
-
-					//offer hunters to opt into runner ?
-					TriggerClientEvent("removeveh");
-					await Delay(500);
-					//Players.First().TriggerEvent("sthv:spawnhuntercars"); doesn't work now
-
-					runner.TriggerEvent("sthv:spectate", false);
-					refreshscoreboard();
-					var HavePlayersGottenGuns = false;
-
-
-
-					await Delay(1000);
-					for (int timeleft = totalTimeSecs; timeleft > 0; --timeleft) //hunt event loop
-					{
-						if (!isHuntOver)
-						{
-							if (!hasHuntStarted && (totalTimeSecs - timeleft > 15))
-							{
-								SendChatMessage("^5HUNT", "Hunt started!", 255, 255, 255);
-								SendToastNotif("Spawning hunters! Weapons are given 30 seconds from now.", 10000);
-								hasHuntStarted = true;
-								foreach (Player p in Players)
-								{
-									AlivePlayerList.Add(p);
-									if (int.Parse(p.Handle) != runnerHandle)
-									{
-										sthvLobbyManager.SetPlayerTeam(p, "hunter");
-
-										if (IsDiscordServerOnline) discord.MovePlayerToVc(p.getDiscordId(), discord.fivemHunters);
-
-									}
-									else //if runner
-									{
-										if (IsDiscordServerOnline) discord.MovePlayerToVc(p.getDiscordId(), discord.fivemRunner);
-									}
-								}
-							}
-							if (!HavePlayersGottenGuns && (totalTimeSecs - timeleft > 60))
-							{
-								runner.TriggerEvent("sth:updateRunnerHandle", runnerHandle);
-
-								TriggerClientEvent("sth:setguns", true);
-								HavePlayersGottenGuns = true;
-								SendChatMessage("^5HUNT", "You now have guns");
-								SendToastNotif("You now have weapons!");
-
-							}
-							if ((timeleft % 10) == 0)
-							{
-								Debug.WriteLine($"timeleft: {timeleft}");
-								TriggerClientEvent("sth:starttimer", timeleft);
-							}
-							await Delay(1000);
-						}
-						else
-						{
-							TriggerClientEvent("sth:setguns", false);
-							SendChatMessage("^5HUNT", $"Runner {runner.Name} lost with {timeleft} seconds remaining");
-							TriggerClientEvent("sth:starttimer", 0);
-							break;
-						}
-					}
-					onHuntOver();
-				}
-				//catch (Exception ex)
-				//{
-				//	Debug.WriteLine($"^2ERROR in StartHunt: {ex}^7");
-				//	isHuntOver = true;
-				//	onHuntOver();
-				//}
-			}
-			else
-			{
-				Debug.WriteLine("^1ERORR: A HUNT IS ALREADY IN PROGRESS");
-			}
-		}
-		async Task OntickCheckPlayers()
-		{
-			foreach (Player p in AlivePlayerList)
-			{
-				Debug.WriteLine($"alive players: {p.Name}");
-			}
-			await BaseScript.Delay(5000);
-		}
-		async void onHuntOver() //happens once on hunt over
-		{
-			if (IsDiscordServerOnline)
-			{
-				foreach (Player p in Players)
-				{
-					discord.MovePlayerToVc(p.getDiscordId(), discord.pcVoice);
-				}
-			}
-			TriggerClientEvent("sthv:spectate", false);
-			playersInHeliServerid = new List<int>();
-			TriggerClientEvent("removeveh");
-			runnerHandle = -1;
-			TriggerClientEvent("sth:updateRunnerHandle", -1);
-			TriggerClientEvent("sth:starttimer", 0);
-			isHuntOver = true;
-			refreshscoreboard();
-			if (AutoHunt) Debug.WriteLine("hunt over. Starting another in 10 seconds.");
-			await Delay(10000);
-			if (AutoHunt)
-			{
-				StartHunt(25);
-			}
-			else
-			{
-				SendChatMessage("hunt", "autohunt is off");
-				Debug.WriteLine("Autohunt is off.");
-			}
-
-		}
-		void resetVars()
-		{
-			#region resetVariables
-			runnerHandle = -1;
-			runner = null;
-			hasHuntStarted = false; //
-			AlivePlayerList = new List<Player>();
-			isHuntOver = false;
-			#endregion
-		}
 		/// <summary>
 		/// check for null return
 		/// </summary>

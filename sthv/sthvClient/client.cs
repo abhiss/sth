@@ -12,6 +12,7 @@ namespace sthv
 {
 	public class client : BaseScript
 	{
+		public static Shared.Gamemode GamemodeId;
 		public static bool IsRunner { get; set; }
 		int MyServerId { get; } = Game.Player.ServerId;
 		static public int RunnerServerId { get; set; }
@@ -22,7 +23,13 @@ namespace sthv
 
 		public client()
 		{
-			//set props
+			//create checkpoint gamemode
+			var cphunt = new Gamemodes.CheckpointHunt();
+			
+			foreach (var cpevent in cphunt.GetEventHandlers())
+			{
+				EventHandlers[cpevent.Name] += cpevent.Handler;
+			}
 
 			TriggerServerEvent("sth:NeedLicense");//so player gets license on resource restarting
 			int _ped = Game.Player.Character.Handle;
@@ -140,17 +147,14 @@ namespace sthv
 		
 			RunnerHandleUpdate(res.runnerServerId);
 
-			if (res.isInSTHGuild || !res.isDiscordServerOnline)
-			{
-				spawnnuicontroller.isSpawnAllowed = true;
-			}
-			else
-			{
-				spawnnuicontroller.isSpawnAllowed = false;
-			}
-			Debug.WriteLine($"^2 serverid recieved, mine: {MyServerId} runner: {RunnerServerId}^7");
-		}
+			client.GamemodeId = res.gamemodeId;
 
+			Debug.WriteLine($"^2 serverid recieved, mine: {MyServerId} runner: {RunnerServerId} gamemode: {GamemodeId}^7");
+		}
+		[EventHandler("sth:setgamemodeid")]
+		void setGamemodeIdHandler(Shared.Gamemode id) {
+			client.GamemodeId = id;
+		}
 		[EventHandler("sth:spawn")]
 		async void Spawn(Vector4 location, string pedSkin)
 		{

@@ -188,7 +188,7 @@ namespace sthv
 				//veh.Speed = 100f;
 			}
 
-			//check for unallowed weapons
+			//check for disallowed weapons
 			foreach (WeaponHash w in Enum.GetValues(typeof(WeaponHash)))
 			{
 				if (!AllowedWeapons.Contains(w) && Game.PlayerPed.Weapons.HasWeapon(w))

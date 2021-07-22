@@ -45,7 +45,11 @@ namespace sthv
 
 		public static void SetMap(int mapNumber)
 		{
-			Debug.WriteLine("##!!!!!!!!!!!!###########");
+			if(mapNumber < 0)
+			{
+				//don't need a playarea naymore
+				sthvPlayArea.RemovePlayarea();
+			}
 			client.CurrentMap = sthvMaps.Maps[mapNumber];
 			sthvPlayArea.SetPlayarea(client.CurrentMap.Radius, client.CurrentMap.AreaCenter.X, client.CurrentMap.AreaCenter.Y);
 		}

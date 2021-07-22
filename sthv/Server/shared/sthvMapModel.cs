@@ -32,7 +32,7 @@ namespace Shared
 				},
 				AreaCenter = new Vector2(-224, -257),
 				HeliSpawnPoints = new Vector4[] { new Vector4(-224.8281f, -257.2638f, 50.8281f, 106.893f) },
-				Radius = 640f,
+				Radius = 840f,
 				HunterSpawn = new Vector4(-237.2401f, -273.996f, 48f, 327.2174f),
 				RunnerSpawn = new Vector4(7.744703f, -404.0017f, 41f, 0.01032947f),
 			},
@@ -54,7 +54,7 @@ namespace Shared
 				},
 				HunterSpawn = new Vector4(237.0703f, -762.7197f, 30.64096f, 148.2011f),
 				AreaCenter = new Vector2(237.0703f, -762.7197f),
-				Radius = 600,
+				Radius = 800,
 				RunnerSpawn = new Vector4(363.9641f, -611.2357f, 28.50907f, 190.5318f)
 			},
 			new sthvMapModel //3
@@ -76,7 +76,7 @@ namespace Shared
 				},
 				HunterSpawn = new Vector4(362f, -1705f, 48.3f, 300f),
 				AreaCenter = new Vector2(100f, -1740f),
-				Radius = 600f,
+				Radius = 800f,
 				RunnerSpawn = new Vector4(432f, -1392f, 29.4f, 0f),
 			},
 			new sthvMapModel //4
@@ -99,7 +99,7 @@ namespace Shared
 				},
 				HunterSpawn = new Vector4(893.8325f, -2543.536f, 28.12187f, 119.611f),
 				AreaCenter = new Vector2(893f, -2500f),
-				Radius = 660f,
+				Radius = 860f,
 				RunnerSpawn = new Vector4(673.1105f, -2793.576f, 5.374936f, 350.4134f),
 			},
 			new sthvMapModel //5
@@ -122,7 +122,7 @@ namespace Shared
 				},
 				HunterSpawn = new Vector4(2117.036f, 4825.369f, 40.73993f, 169.3433f),
 				AreaCenter = new Vector2(2200f, 4700f),
-				Radius = 650f,
+				Radius = 850f,
 				RunnerSpawn = new Vector4(2283.709f, 5179.707f, 59.36262f, 281.0421f),
 			},
 			new sthvMapModel //6
@@ -143,7 +143,7 @@ namespace Shared
 				},
 				HunterSpawn = new Vector4(-1551.616f, -1006.091f, 12.40018f, 314.1805f),
 				AreaCenter = new Vector2(-1351, -1000),
-				Radius =  660,
+				Radius =  860,
 				RunnerSpawn =  new Vector4(-844.9528f, -752.9533f, 22.1606f, 91.61478f),
 			}
 
