@@ -39,11 +39,9 @@ namespace sthvServer
 
 			fetchHandler.addHandler<Shared.PlayerJoinInfo>(new Func<Player, Shared.BaseFetchClass>(source =>
 			{
-				//retry loop incase of connection issues
 
 				Debug.WriteLine($"^3 player: {source.Name} Triggered PlayerJoinInfo handler.^7");
 				string licenseId = source.Handle;
-				var discordid = source.getDiscordId();
 				source.TriggerEvent("sth:updateRunnerHandle", runnerHandle);
 				sthvLobbyManager.getPlayerByLicense(source.getLicense()).Spawn(currentMap.HunterSpawn, false, playerState.ready); //defaults to hunter spawn
 				refreshscoreboard();
@@ -160,7 +158,7 @@ namespace sthvServer
 
 			while (true)
 			{
-				if (Players.Count() < 1)
+				if (Players.Count() < 2)
 				{
 					await Delay(5000);
 					Debug.WriteLine("^8waiting for more players^7");
@@ -169,6 +167,8 @@ namespace sthvServer
 
 				//$ select gamemode based on player count
 				gamemode = new sthvGamemodes.ClassicHunt();
+				gamemode.CreateEvents();
+
 				Debug.WriteLine("Instantiating gamemode " + gamemode.Name + ".");
 
 				Debug.WriteLine("^4Registering gamemode script.^7");

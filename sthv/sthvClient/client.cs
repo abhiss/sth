@@ -34,9 +34,7 @@ namespace sthv
 
 			API.RegisterCommand("test", new Action<int, List<object>, string>(async (src, args, raw) =>
 			{
-				//var pingRes = await sthvFetch.Get<Shared.Ping>("ping");
-				Debug.WriteLine("Hide cursor");
-				API.SetNuiFocus(true, true);
+				
 			}), false);
 
 			_thisPed = Game.PlayerPed;
@@ -49,9 +47,7 @@ namespace sthv
 			EventHandlers["sthv:spawnhuntercars"] += new Action<int>((mapid) => { sthvHuntStart.HunterVehicles(mapid); });
 			EventHandlers["sthv:sendChosenMap"] += new Action<int>(i => {
 				sthvHuntStart.SetMap(i);
-				});
-
-
+			});
 
 			//Killfeed stuff:
 			EventHandlers["baseevents:onPlayerKilled"] += new Action<int, ExpandoObject>(OnPlayerKilled);
@@ -66,8 +62,6 @@ namespace sthv
 					EventData = new sthv.NuiModels.NuiTimerMessageModel { Message = "", Seconds = timeInSecs }
 				}));
 			});
-
-			
 
 			EventHandlers["sthv:showToastNotification"] += new Action<string, int>((message, timeInSeconds) => //time_delay in ms
 			{

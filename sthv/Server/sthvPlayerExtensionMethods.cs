@@ -13,8 +13,8 @@ namespace sthvServer
 		}
 		public static string getLicense(this Player player)
 		{
-			//return player.Name; //to run 2 clients on same machine.
-			return player.Identifiers["license"];
+			return player.Name; //to run 2 clients on same machine.
+			//return player.Identifiers["license"];
 		}
 	}
 }

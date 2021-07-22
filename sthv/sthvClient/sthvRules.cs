@@ -149,7 +149,7 @@ namespace sthv
 				}
 			}
 		}
-
+		[Tick]
 		async Task GameRules() //checks rules
 		{
 			Debug.WriteLine("^2 isrunner: " + client.IsRunner);
@@ -162,10 +162,18 @@ namespace sthv
 				}
 				if (API.IsPedInAnyPoliceVehicle(Game.PlayerPed.Handle))
 				{
+					var runner_vehicle = Game.PlayerPed.CurrentVehicle;
 					Debug.WriteLine("in police car");
-					API.SetHornEnabled(Game.Player.LastVehicle.Handle, true);
-					API.SetHornEnabled(API.GetVehiclePedIsIn(API.PlayerPedId(), false), true);
-					//API.SetVehicleTyreBurst(Game.PlayerPed.LastVehicle.Handle, 0, true, 100);
+					foreach(var d in runner_vehicle.Doors)
+					{
+						if (!d.IsBroken) {
+							d.Break();
+							goto end_if; //breaks one door every 10 seconds
+						}
+					}
+					runner_vehicle.IsSirenActive = true;
+					runner_vehicle.ApplyForceRelative(new Vector3(0, 10, 0), new Vector3(0,50,20), ForceType.MaxForceRot);
+					end_if:;
 				}
 				if (Game.PlayerPed.IsInSub || Game.PlayerPed.IsInFlyingVehicle)
 				{

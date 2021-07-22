@@ -10,10 +10,11 @@ namespace sthvServer
 {
 	abstract internal class BaseGamemodeSthv : BaseScript
 	{
+		public virtual int MinimumPlayers
+		{
+			get;set;
+		}
 		private uint GameLengthInSeconds { get; set; }
-		private protected bool endMode = false; //used to end mode prematurely. Can be called either by gamemode manager (server.cs) or the gamemode.
-		private protected string endModeReason = null;
-		public int MinimumPlayers { get; }
 		private Dictionary<uint, Action> TimedEventsList = new Dictionary<uint, Action>();
 		public Action Finalizer = null;
 		public string Name { get; }
@@ -24,27 +25,13 @@ namespace sthvServer
 
 		public uint TimeLeft { get { return timeleft; } }
 		public uint TimeSinceRoundStart { get { return timeSecondsSinceRoundStart; } }
-		internal BaseGamemodeSthv(string gamemodeName, uint gameLengthInSeconds, int minimumNumberOfPlayers, int numberOfTeams = 2)
+		internal BaseGamemodeSthv(string gamemodeName, uint gameLengthInSeconds, int minimumNumberOfPlayers, int numberOfTeams)
 		{
 			Name = gamemodeName;
 			this.GameLengthInSeconds = gameLengthInSeconds;
-			this.MinimumPlayers = minimumNumberOfPlayers;
 
 			Debug.WriteLine("^1Message from BaseGamemodeSthv. Triggered by " + gamemodeName + ".");
 			sthvLobbyManager.setAllActiveToWaiting();
-
-
-			#region test
-			Debug.WriteLine("^1Invariant: all players should be inactive or waiting. ");
-
-			//#remove inactive from list and handle else
-			foreach (var p in sthvLobbyManager.GetPlayersOfState(playerState.alive, playerState.inactive, playerState.ready, playerState.dead))
-			{
-				Debug.WriteLine(p.player.Name + " is in state " + p.State.ToString());
-			}
-			Debug.WriteLine("0b2");
-			Debug.WriteLine("\n\n^7");
-			#endregion
 		}
 
 		#region manager_methods
@@ -124,6 +111,10 @@ namespace sthvServer
 			{
 				p.teamname = null;
 			}
+			//reset variables
+			TimedEventsList = new Dictionary<uint, Action>();
+			Finalizer = null;
+	
 
 			isGameloopActive = false;
 
@@ -138,23 +129,21 @@ namespace sthvServer
 			}
 			else return winners;
 		}
-		public void endGamemode(string reason)
-		{
-			if (String.IsNullOrWhiteSpace(endModeReason))
-			{
-				endMode = true;
-				endModeReason = reason;
-			}
-		}
 
 		#endregion
 
 
 		#region gamemode_methods
 		//methods the gamemode must implement.
+		/// <summary>
+		/// Use CreateTimedEvent and CreateFinalizerEvent here. Called by framework before the gamemode runs.
+		/// Events should be created here instead of constructor because sometimes gamemode needs to be 
+		/// initialized without running it to access fields.
+		/// </summary>
+		public abstract void CreateEvents();
 
-		public abstract void test();
 
+		//todo remove CreateTeams
 		/// <summary>
 		/// Used by BaseGamemodeSthv to create teams. Not to be used by gamemodes - gamemodes must set teams via SetTeams. 
 		/// </summary>

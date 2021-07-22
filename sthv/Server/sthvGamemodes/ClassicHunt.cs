@@ -18,9 +18,12 @@ namespace sthvServer.sthvGamemodes
 
 		int currentmapid = 0;
 
-		internal ClassicHunt() : base(gamemodeName: "ClassicHunt", gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 1)
+		internal ClassicHunt() : base(gamemodeName: "ClassicHunt", gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 1, numberOfTeams: 2)
 		{
 
+		}
+		public override void CreateEvents()
+		{
 			AddTimeEvent(0, new Action(async () =>
 			{
 				Tick += runnerHintHandler;
@@ -45,13 +48,13 @@ namespace sthvServer.sthvGamemodes
 				log(readyPlayers.Count + " ready players in this hunt.");
 
 				//picking and assigning runner
-				int runnerindex = rand.Next(0, readyPlayers.Count);
+				int runnerindex = rand.Next(0, readyPlayers.Count-1);
 				readyPlayers[runnerindex].teamname = TRunner;
-				
+
 				//assigning everyone else hunter team
-				foreach(var p in readyPlayers)
+				foreach (var p in readyPlayers)
 				{
-					if(p.teamname != TRunner)
+					if (p.teamname != TRunner)
 					{
 						p.teamname = THunter;
 					}
@@ -116,19 +119,7 @@ namespace sthvServer.sthvGamemodes
 				TriggerClientEvent("removeveh");
 				Tick -= runnerHintHandler;
 			}));
-
 		}
-		public override void test()
-		{
-			Debug.WriteLine("Here is a test message!!");
-		}
-		//public override sthvGamemodeTeam[] SetTeams()
-		//{
-		//	sthvGamemodeTeam[] teams = {
-		//		new sthvGamemodeTeam { Name = TRunner, MaximumPlayers = 1, MinimumPlayers = 1 },
-		//		new sthvGamemodeTeam { Name = THunter, MaximumPlayers = 99, MinimumPlayers = 0 } };
-		//	return teams;
-		//}
 
 		[EventHandler("gamemode::player_killed")]
 		void playerKilledHandler(string killerLicense, string killedLicense)
