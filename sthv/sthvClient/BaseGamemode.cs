@@ -19,16 +19,18 @@ namespace sthv
 		/// <summary>
 		/// Ticks added to client for corresponding gamemode.
 		/// </summary>
-		private List<Task> GMTicks = new List<Task>();
+		private List<Func<Task>> GMTicks = new List<Func<Task>>();
 
 		/// <summary>
 		/// Automatically adds eventhandlers to client script prefixed by sth:[gamemodename].
 		/// </summary>
 		protected void AddEventHandler(string name, Delegate eventhandler)
 		{
+			//todo predix gamemode events 
+			var _newname = "sth:GM_" + gamemodeid + ":" + name;
 			GMEventHandlers.Add(new NamedEvent()
 			{
-				Name = "sth:GM_"+gamemodeid+":"+name,
+				Name = name,
 				Handler = eventhandler
 			});
 		}
@@ -36,16 +38,16 @@ namespace sthv
 		/// <summary>
 		/// Automatically adds Ticks to client script.
 		/// </summary>
-		protected void AddTick(Task task)
+		protected void AddTick(Func<Task> act)
 		{
-			GMTicks.Add(task);
+			GMTicks.Add(act);
 		}
 
 		public List<NamedEvent>GetEventHandlers()
 		{
 			return GMEventHandlers;
 		}
-		public List<Task> GetTicks()
+		public List<Func<Task>> GetTicks()
 		{
 			return GMTicks;
 		}

@@ -21,16 +21,9 @@ namespace sthv
 		public Ped _thisPed { get; set; }
 		private SpawnNuiController spawnnuicontroller { get; set; } = new SpawnNuiController();
 
+
 		public client()
 		{
-			//create checkpoint gamemode
-			var cphunt = new Gamemodes.CheckpointHunt();
-			
-			foreach (var cpevent in cphunt.GetEventHandlers())
-			{
-				EventHandlers[cpevent.Name] += cpevent.Handler;
-			}
-
 			TriggerServerEvent("sth:NeedLicense");//so player gets license on resource restarting
 			int _ped = Game.Player.Character.Handle;
 			//test 		
@@ -39,12 +32,17 @@ namespace sthv
 				TriggerServerEvent("sth:sendServerDebug", $"{Game.PlayerPed.CurrentVehicle.Position.X}f, {Game.PlayerPed.CurrentVehicle.Position.Y}f, {Game.PlayerPed.CurrentVehicle.Position.Z}f");
 			}), false);
 
-			API.RegisterCommand("test", new Action<int, List<object>, string>(async (src, args, raw) =>
+			API.RegisterCommand("test", new Action<int, List<object>, string>((src, args, raw) =>
 			{
-				
+				var pos = Game.PlayerPed.Position; var radius = 10f;
+				API.CreateCheckpoint(45, pos.X, pos.Y, pos.Z, 0, 0, 0, radius, 225, 0, 0, 80, 0); //red
+				API.CreateCheckpoint(45, pos.X, pos.Y, pos.Z, 0, 0, 0, radius * 2, 0, 225, 0, 80, 0); //green
+				API.AddBlipForRadius(pos.X, pos.Y, pos.Z, radius);
+				Game.PlayerPed.Position = pos + new Vector3(0, radius, 0);
+
 			}), false);
 
-			_thisPed = Game.PlayerPed;
+
 			var playArea = new sthv.sthvPlayArea();
 			Tick += playArea.GetDistance;
 			var rules = new sthv.sthvRules();
@@ -52,7 +50,8 @@ namespace sthv
 
 			EventHandlers["removeveh"] += new Action(async () => { await sthv.sthvHuntStart.RemoveAllVehicles(true); });
 			EventHandlers["sthv:spawnhuntercars"] += new Action<int>((mapid) => { sthvHuntStart.HunterVehicles(mapid); });
-			EventHandlers["sthv:sendChosenMap"] += new Action<int>(i => {
+			EventHandlers["sthv:sendChosenMap"] += new Action<int>(i =>
+			{
 				sthvHuntStart.SetMap(i);
 			});
 
@@ -86,7 +85,7 @@ namespace sthv
 				if (shouldgivegun)
 				{
 					//AllowedWeapons[0] is a placeholder till HostMenu apis are in place
-					foreach(var i in sthvRules.AllowedWeapons)
+					foreach (var i in sthvRules.AllowedWeapons)
 					{
 						Game.PlayerPed.Weapons.Give(i, 500, true, true);
 					}
@@ -97,7 +96,7 @@ namespace sthv
 				}
 			});
 			#region commands
-			API.RegisterCommand("test2", new Action<int, List<object>, string>(async(src, args, raw) =>
+			API.RegisterCommand("test2", new Action<int, List<object>, string>(async (src, args, raw) =>
 		   {
 			   API.SetPedRandomComponentVariation(Game.Player.Character.Handle, false);
 		   }), false);
@@ -135,7 +134,7 @@ namespace sthv
 		{
 			Tick -= FirstTick;
 
-			
+			_thisPed = Game.PlayerPed;
 
 			API.SetManualShutdownLoadingScreenNui(true);
 			Debug.WriteLine("STHV First Tick");
@@ -144,7 +143,7 @@ namespace sthv
 
 			SpawnNuiController.IsAllowedHostMenu = res.isAllowedHostMenu;
 			Debug.WriteLine("host menu allowed: " + res.isAllowedHostMenu);
-		
+
 			RunnerHandleUpdate(res.runnerServerId);
 
 			client.GamemodeId = res.gamemodeId;
@@ -152,8 +151,37 @@ namespace sthv
 			Debug.WriteLine($"^2 serverid recieved, mine: {MyServerId} runner: {RunnerServerId} gamemode: {GamemodeId}^7");
 		}
 		[EventHandler("sth:setgamemodeid")]
-		void setGamemodeIdHandler(Shared.Gamemode id) {
+		void setGamemodeIdHandler(int id_int)
+		{
+			var id = (Shared.Gamemode)id_int;
 			client.GamemodeId = id;
+
+			Debug.WriteLine("Gamemode set to " + id);
+			switch (id)
+			{
+				case Shared.Gamemode.None:
+					break;
+				case Shared.Gamemode.ClassicHunt:
+					break;
+				case Shared.Gamemode.CheckpointHunt:
+					{
+						//create checkpoint gamemode
+						var cphunt = new Gamemodes.CheckpointHunt();
+
+						Debug.WriteLine(cphunt.GetTicks().Count() + " ticks initialized.");
+						foreach (var cpevent in cphunt.GetEventHandlers())
+						{
+							EventHandlers[cpevent.Name] += cpevent.Handler;
+						}
+						foreach (var act in cphunt.GetTicks())
+						{
+							Tick += act;
+						}
+					}
+					break;
+				default:
+					break;
+			}
 		}
 		[EventHandler("sth:spawn")]
 		async void Spawn(Vector4 location, string pedSkin)
@@ -182,7 +210,7 @@ namespace sthv
 
 			Debug.WriteLine($"showing runner {_runner.Name} on map");
 
-			var RunnerRadiusBlip = new Blip(API.AddBlipForRadius(_runner.Character.Position.X + x_offset, _runner.Character.Position.Y + y_offset, _runner.Character.Position.Z, radius ));
+			var RunnerRadiusBlip = new Blip(API.AddBlipForRadius(_runner.Character.Position.X + x_offset, _runner.Character.Position.Y + y_offset, _runner.Character.Position.Z, radius));
 
 			RunnerRadiusBlip.Color = BlipColor.Red;
 			RunnerRadiusBlip.Alpha = 80;
@@ -225,7 +253,7 @@ namespace sthv
 			if (MyServerId == RunnerServerId) //update runner weapon/ outfit
 			{
 				IsRunner = true;
-					API.SetPedRandomComponentVariation(Game.Player.Character.Handle, false);
+				API.SetPedRandomComponentVariation(Game.Player.Character.Handle, false);
 			}
 			else if (MyServerId != RunnerServerId)
 			{

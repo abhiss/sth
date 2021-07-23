@@ -17,6 +17,7 @@ namespace sthvServer
 		{
 			API.RegisterCommand("mped", new Action<int, List<object>, string>((src, args, raw) =>
 			{
+				
 				ActivateMissionPed();
 				Debug.WriteLine("mped mission started");
 			}), true);

@@ -36,6 +36,10 @@ namespace sthvServer
 
 		public static List<int> playersInHeliServerid { get; set; } = new List<int>();
 
+		[Command("test")]
+		void t()
+		{
+		}
 		public Server()
 		{
 			discord = new sthvDiscordController();
@@ -57,7 +61,7 @@ namespace sthvServer
 				{
 					await Delay(5000);
 					refreshscoreboard();
-					Debug.WriteLine("Trying scoreboard again_________________________________----------we0dsidi");
+					Debug.WriteLine("Trying scoreboard again_________________________________----------www");
 				});
 				send_sb_later();
 				//todo isAllowedHostMenu should use database or something instead of ace perms.
@@ -114,7 +118,7 @@ namespace sthvServer
 			}), true);
 			//test 
 
-			EventHandlers["logCoords"] += new Action<List<dynamic>>((coordlist) =>
+			EventHandlers["logCoords"] += new Action<List<Vector3>>((coordlist) =>
 			{
 				Debug.WriteLine("triggered log");
 				if (coordlist.Count > 0)
@@ -129,12 +133,12 @@ namespace sthvServer
 						using (var file = File.CreateText(userpath))
 						{
 
-							//foreach (var i in coordlist)
-							//{
-							//	file.WriteLine($"new Vector4({i.X}f, {i.Y}f, {i.Z}f, {i.W}f),");
-							//	Console.WriteLine($"new Vector4({i.X}f, {i.Y}f, {i.Z}f, {i.W}f),");
+							foreach (var i in coordlist)
+							{
+								//file.WriteLine($"new Vector4({i.X}f, {i.Y}f, {i.Z}f),");
+								//Debug.WriteLine($"new Vector4({i.X}f, {i.Y}f, {i.Z}f,");
 
-							//}
+							}
 							file.Flush();
 						}
 					}
@@ -165,15 +169,15 @@ namespace sthvServer
 
 			while (true)
 			{
-				if (Players.Count() < 2)
+				if (Players.Count() < 2 && !TestMode)
 				{
 					await Delay(5000);
-					Debug.WriteLine("^8waiting for more players^7");
+					Debug.WriteLine("^8waiting for more players!^7");
 					continue;
 				}
 
 				//$ select gamemode based on player count
-				gamemode = new sthvGamemodes.ClassicHunt();
+				gamemode = new sthvGamemodes.CheckpointHunt();
 				gamemode.CreateEvents();
 
 				Debug.WriteLine("Instantiating gamemode " + gamemode.Name + ".");

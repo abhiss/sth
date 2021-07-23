@@ -17,9 +17,11 @@ namespace sthvServer.sthvGamemodes
 		Shared.sthvMapModel map = Shared.sthvMaps.Maps[2];
 		const string TRunner = "runner";
 		const string THunter = "hunter";
+		readonly float check_radius = 45;
 
-		int currentmapid = 0;
+		int checkpointsGotten = 0;
 
+		int currentmapid;
 		internal CheckpointHunt() : base(gamemodeName: "CheckpointHunt", GamemodeId: Gamemode.CheckpointHunt, gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 1, numberOfTeams: 2)
 		{
 		}
@@ -28,21 +30,12 @@ namespace sthvServer.sthvGamemodes
 
 			AddTimeEvent(0, new Action(async () =>
 			{
-				Tick += runnerHintHandler;
+				Tick += CheckpointHandler;
+
 				Random rand = new Random();
-				if (GamemodeConfig.huntNextMapIndex > 0)
-				{
-					currentmapid = GamemodeConfig.huntNextMapIndex;
-				}
-				else
-				{
-					//pick random playarea 
-					currentmapid = rand.Next(0, Shared.sthvMaps.Maps.Length);
-				}
-				Server.currentMap = Shared.sthvMaps.Maps[currentmapid];
-				map = Shared.sthvMaps.Maps[currentmapid];
-				TriggerClientEvent("sthv:sendChosenMap", currentmapid);
-				log("current map index: " + currentmapid);
+				var cpoint_index = rand.Next(0, checkpointPositions.Length - 1);
+				var pos = checkpointPositions[cpoint_index];
+				TriggerClientEvent("createcheckpoint", cpoint_index, check_radius, pos);
 
 				//Assigning teams.
 				//Framework assures all dead players are ready for next hunt. Non-ready players could be loading, not authenticated, etc.
@@ -75,7 +68,6 @@ namespace sthvServer.sthvGamemodes
 				await Delay(100);
 
 				runner.Spawn(map.RunnerSpawn, true, playerState.alive);
-
 
 				//offer hunters to opt into runner ?
 				TriggerClientEvent("removeveh");
@@ -118,7 +110,7 @@ namespace sthvServer.sthvGamemodes
 				}
 
 				TriggerClientEvent("removeveh");
-				Tick -= runnerHintHandler;
+				Tick -= CheckpointHandler;
 			}));
 		}
 
@@ -167,6 +159,7 @@ namespace sthvServer.sthvGamemodes
 				}));
 			}
 		}
+
 		[EventHandler("admin_menu_save_request")]
 		void adminMenuSaveHandler([FromSource] Player source, string jsonData)
 		{
@@ -220,10 +213,52 @@ namespace sthvServer.sthvGamemodes
 				source.Drop("Permission denied: Host Menu. Contact server owner if you think this is a mistake.");
 			}
 		}
-		async Task runnerHintHandler()
+		
+		[EventHandler("tookcheckpoint")]
+		void takenCheckpointHandler(int _checkpointId)
 		{
-			TriggerClientEvent("sthv:showRunnerOnMap", int.Parse(runner.player.Handle));
-			await Delay((int)GamemodeConfig.secondsBetweenHints * 1000);
+			TriggerClientEvent("removecheckpoint", _checkpointId);
+			++_checkpointId;
+			TriggerClientEvent("createcheckpoint", _checkpointId , check_radius, checkpointPositions[_checkpointId]);
 		}
+
+		async Task CheckpointHandler()
+		{
+
+			await Delay(10000);
+		}
+		Vector3[] checkpointPositions = {
+			new Vector3(637.8491f, -1437.132f, 29.70673f),
+			new Vector3(466.6298f, -1175.656f, 40.5019f),
+			new Vector3(-110.492f, -1044.861f, 26.27357f),
+			new Vector3(68.3438f, -673.9508f, 43.3111f),
+			new Vector3(148.1946f, -568.7192f, 42.88696f),
+			new Vector3(145.5018f, -355.9124f, 42.30743f),
+			new Vector3(-233.0494f, -212.1216f, 48.1279f),
+			new Vector3(-777.076f, -85.77178f, 36.79874f),
+			new Vector3(-1951.711f, -338.5465f, 44.9702f),
+			new Vector3(-1482.905f, -807.0694f, 22.80004f),
+			new Vector3(-1335.343f, -1469.028f, 3.313878f),
+			new Vector3(-724.3319f, -1411.443f, 4.000523f),
+			new Vector3(-610.2518f, -2028.66f, 16.21686f),
+			new Vector3(-601.7064f, -2011.402f, 28.27418f),
+			new Vector3(-617.6996f, -2052.146f, 26.32173f),
+			new Vector3(-796.9703f, -2500.618f, 12.75971f),
+			new Vector3(201.8326f, -2577.078f, 5.20483f),
+			new Vector3(1380.117f, -2341.818f, 60.47023f),
+			new Vector3(1082.611f, -1188.037f, 45.92384f),
+			new Vector3(-217.6544f, 261.0845f, 91.08981f),
+			new Vector3(565.9612f, -1218.734f, 8.899653f),
+			new Vector3(1021.131f, -352.4419f, 47.23037f),
+			new Vector3(1882.359f, -1878.276f, 191.0228f),
+			new Vector3(1400.738f, -1522.626f, 57.19899f),
+			new Vector3(899.2529f, -2453.76f, 27.40315f),
+			new Vector3(731.9427f, -2642.001f, 14.45242f),
+			new Vector3(719.0999f, -3063.99f, 12.31112f),
+			new Vector3(1020.065f, -3155.32f, 4.900775f),
+			new Vector3(441.5827f, -1399.592f, 28.31816f),
+			new Vector3(-528.8695f, 663.2872f, 140.4203f),
+			new Vector3(-632.6037f, -354.9757f, 33.82269f)};
 	}
+
 }

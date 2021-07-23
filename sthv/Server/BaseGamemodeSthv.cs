@@ -51,7 +51,7 @@ namespace sthvServer
 		public async Task<(string, string)> Run()
 		{
 			Server.GamemodeId = this.GamemodeId;
-			TriggerClientEvent("sth:setgamemodeid", this.GamemodeId);
+			TriggerClientEvent("sth:setgamemodeid", (int)this.GamemodeId);
 
 			int playerCount;
 			while (true)
@@ -274,7 +274,7 @@ namespace sthvServer
 		{
 			p.TriggerEvent("_" + Name + "_" + eventName, args);
 		}
-		internal void log(string i) { Debug.WriteLine("^3[" + Name + "] " + i + "^7"); }
+		internal void log(string i) { Debug.WriteLine("^3[" + GamemodeId + "] " + i + "^7"); }
 
 		#endregion
 

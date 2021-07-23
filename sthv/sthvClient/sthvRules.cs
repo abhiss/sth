@@ -59,6 +59,23 @@ namespace sthv
 			//sthvClient.client.eventhandlers			
 			Game.PlayerPed.IsInvincible = true;
 
+
+			//enable trains
+			API.SwitchTrainTrack(0, true); //enables main train loop
+			API.SwitchTrainTrack(3, true); //enables metro/subway
+			API.SetTrainTrackSpawnFrequency(0, 120000);
+			API.SetRandomTrains(true);
+
+			//enable random boats spawning
+			API.SetRandomBoats(true);
+
+			//enable planes and stuff
+			API.SetScenarioGroupEnabled("LSA_Planes", true);
+			//API.SetScenarioGroupEnabled("LSA_Planes", true);
+
+
+
+
 			EventHandlers["sthv:updatepednetid"] += new Action<int>(netid =>
 			{
 				missionPedNetID = netid;
@@ -164,15 +181,16 @@ namespace sthv
 				{
 					var runner_vehicle = Game.PlayerPed.CurrentVehicle;
 					Debug.WriteLine("in police car");
-					foreach(var d in runner_vehicle.Doors)
+					foreach (var d in runner_vehicle.Doors)
 					{
-						if (!d.IsBroken) {
+						if (!d.IsBroken)
+						{
 							d.Break();
 							goto end_if; //breaks one door every 10 seconds
 						}
 					}
 					runner_vehicle.IsSirenActive = true;
-					runner_vehicle.ApplyForceRelative(new Vector3(0, 10, 0), new Vector3(0,50,20), ForceType.MaxForceRot);
+					runner_vehicle.ApplyForceRelative(new Vector3(0, 10, 0), new Vector3(0, 50, 20), ForceType.MaxForceRot);
 					end_if:;
 				}
 				if (Game.PlayerPed.IsInSub || Game.PlayerPed.IsInFlyingVehicle)
