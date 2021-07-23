@@ -156,6 +156,9 @@ namespace sthv
 			var id = (Shared.Gamemode)id_int;
 			client.GamemodeId = id;
 
+			//random cleanup
+			sthvPlayArea.RemovePlayarea();
+
 			Debug.WriteLine("Gamemode set to " + id);
 			switch (id)
 			{

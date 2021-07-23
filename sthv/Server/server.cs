@@ -166,7 +166,7 @@ namespace sthvServer
 
 			//wait for atleast 1 player
 			//while (Players.Count() < 1) await Delay(1000);
-
+			bool toggle = true;
 			while (true)
 			{
 				if (Players.Count() < 2 && !TestMode)
@@ -177,7 +177,16 @@ namespace sthvServer
 				}
 
 				//$ select gamemode based on player count
-				gamemode = new sthvGamemodes.CheckpointHunt();
+				if (toggle)
+				{
+					gamemode = new sthvGamemodes.CheckpointHunt();
+				}
+				else
+				{
+					gamemode = new sthvGamemodes.ClassicHunt();
+				}
+				toggle = !toggle;
+
 				gamemode.CreateEvents();
 
 				Debug.WriteLine("Instantiating gamemode " + gamemode.Name + ".");

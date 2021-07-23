@@ -17,7 +17,7 @@ namespace sthvServer.sthvGamemodes
 		Shared.sthvMapModel map = Shared.sthvMaps.Maps[2];
 		const string TRunner = "runner";
 		const string THunter = "hunter";
-		readonly float check_radius = 45;
+		readonly float check_radius = 15;
 
 		int checkpointsGotten = 0;
 

@@ -24,7 +24,7 @@ namespace sthv.Gamemodes
 				var check_id = API.CreateCheckpoint(45, pos.X, pos.Y, pos.Z - Game.PlayerPed.HeightAboveGround, 0, 0, 0, radius*2, 225, 0, 225, 90, 0);
 				var check = new Checkpoint(check_id);
 
-				var blip = new Blip(API.AddBlipForRadius(pos.X, pos.Y, pos.Z, Radius));
+				var blip = new Blip(API.AddBlipForCoord(pos.X, pos.Y, pos.Z));
 				blip.Color = BlipColor.Red;
 				blip.Alpha = 80;
 				blip.ShowRoute = true;
@@ -46,6 +46,8 @@ namespace sthv.Gamemodes
 				CheckpointMarkers.RemoveAll(p => p.Item3 == checkpointid);
 			}));
 
+			
+
 			AddTick(CheckpointChecker);
 		}
 		async Task CheckpointChecker()
@@ -61,7 +63,7 @@ namespace sthv.Gamemodes
 						Debug.WriteLine("blips: " + b.Position.X + " " + b.Position.Y + " mine: " + me.Position.X + " " + me.Position.Y);
 						var distance = Vector2.Distance(new Vector2(b.Position.X, b.Position.Y), new Vector2(me.Position.X, me.Position.Y));
 						Debug.WriteLine(distance.ToString());
-						if (distance < Radius)
+						if (distance < Radius && (me.Position.Z - b.Position.Z) > 0 && (me.Position.Z - b.Position.Z - 2) < 15)
 						{
 							Debug.WriteLine("Taken checkpoint");
 							BaseScript.TriggerServerEvent("tookcheckpoint", mark.Item3);
@@ -72,5 +74,21 @@ namespace sthv.Gamemodes
 			}
 		}
 
+
+		~CheckpointHunt()
+		{
+			foreach(var marker in CheckpointMarkers)
+			{
+			
+					Blip b = marker.Item1;
+					b.Delete();
+
+					Checkpoint c = marker.Item2;
+					c.Delete();
+				
+			}
+			CheckpointMarkers.Clear();
+
+		}
 	}
 }
