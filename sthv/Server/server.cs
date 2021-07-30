@@ -172,7 +172,9 @@ namespace sthvServer
 				if (Players.Count() < 2 && !TestMode)
 				{
 					await Delay(5000);
+#if DEBUG
 					Debug.WriteLine("^8waiting for more players!^7");
+#endif
 					continue;
 				}
 

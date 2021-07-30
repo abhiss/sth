@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
@@ -53,7 +51,6 @@ namespace sthv.Gamemodes
 		async Task CheckpointChecker()
 		{
 			{
-				Debug.WriteLine("CHECK");
 				if (client.IsRunner)
 				{
 					foreach (var mark in CheckpointMarkers)

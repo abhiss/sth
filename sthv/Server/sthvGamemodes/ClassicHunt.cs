@@ -20,6 +20,7 @@ namespace sthvServer.sthvGamemodes
 
 		internal ClassicHunt() : base(gamemodeName: "ClassicHunt", GamemodeId: Shared.Gamemode.ClassicHunt, gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 1, numberOfTeams: 2)
 		{
+			//Empty constructor so gamemode manager can cheaply loop over gamemodes to get metadata.
 		}
 		public override void CreateEvents()
 		{
@@ -102,7 +103,6 @@ namespace sthvServer.sthvGamemodes
 				TriggerClientEvent("sth:setcops", GamemodeConfig.isPoliceEnabled);
 
 				Server.SendChatMessage("^5HUNT", "You now have guns");
-				Server.SendToastNotif("You now have weapons!");
 				Server.SendToastNotif("You now have weapons!");
 			}));
 

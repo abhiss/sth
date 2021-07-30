@@ -18,11 +18,13 @@ namespace sthvServer.sthvGamemodes
 		const string TRunner = "runner";
 		const string THunter = "hunter";
 		readonly float check_radius = 15;
+		Random rand = new Random();
 
 		int checkpointsGotten = 0;
 
 		int currentmapid;
-		internal CheckpointHunt() : base(gamemodeName: "CheckpointHunt", GamemodeId: Gamemode.CheckpointHunt, gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 1, numberOfTeams: 2)
+		List<Vector3> UncapturedCheckpoints = new List<Vector3>();
+		internal CheckpointHunt() : base(gamemodeName: "CheckpointHunt", GamemodeId: Gamemode.CheckpointHunt, gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 2, numberOfTeams: 2)
 		{
 		}
 		public override void CreateEvents()
@@ -32,9 +34,9 @@ namespace sthvServer.sthvGamemodes
 			{
 				Tick += CheckpointHandler;
 
-				Random rand = new Random();
-				var cpoint_index = rand.Next(0, checkpointPositions.Length - 1);
-				var pos = checkpointPositions[cpoint_index];
+				UncapturedCheckpoints.AddRange(checkpointPositions);
+				var cpoint_index = rand.Next(0, UncapturedCheckpoints.Count);
+				var pos = UncapturedCheckpoints[cpoint_index];
 				TriggerClientEvent("createcheckpoint", cpoint_index, check_radius, pos);
 
 				//Assigning teams.
@@ -43,7 +45,7 @@ namespace sthvServer.sthvGamemodes
 				log(readyPlayers.Count + " ready players in this hunt.");
 
 				//picking and assigning runner
-				int runnerindex = rand.Next(0, readyPlayers.Count - 1);
+				int runnerindex = rand.Next(0, readyPlayers.Count);
 				readyPlayers[runnerindex].teamname = TRunner;
 				//assigning everyone else hunter team
 				foreach (var p in readyPlayers)
@@ -85,7 +87,6 @@ namespace sthvServer.sthvGamemodes
 				{
 					h.Spawn(map.HunterSpawn, false, playerState.alive);
 				}
-
 			}));
 			AddTimeEvent(30, new Action(() =>
 			{
@@ -108,6 +109,7 @@ namespace sthvServer.sthvGamemodes
 				{
 					p.Spawn(map.HunterSpawn, true, playerState.ready);
 				}
+				UncapturedCheckpoints.Clear();
 
 				TriggerClientEvent("removeveh");
 				Tick -= CheckpointHandler;
@@ -217,9 +219,20 @@ namespace sthvServer.sthvGamemodes
 		[EventHandler("tookcheckpoint")]
 		void takenCheckpointHandler(int _checkpointId)
 		{
+			if(_checkpointId >= UncapturedCheckpoints.Count)
+			{
+				log("Error in takenCheckpointHandler, _checkpointId >= UncapturedCheckpoints.Count");
+				
+				//todo: remove exception after testing and handle more gracefully. Can be abused cheaters. 
+				throw new Exception("Error in takenCheckpointHandler, _checkpointId >= UncapturedCheckpoints.Count");
+			}
+			UncapturedCheckpoints.RemoveAt(_checkpointId);
 			TriggerClientEvent("removecheckpoint", _checkpointId);
-			++_checkpointId;
-			TriggerClientEvent("createcheckpoint", _checkpointId , check_radius, checkpointPositions[_checkpointId]);
+
+			var cpoint_index = rand.Next(0, UncapturedCheckpoints.Count);
+			var pos = UncapturedCheckpoints[cpoint_index];
+			TriggerClientEvent("createcheckpoint", cpoint_index, check_radius, pos);
+
 		}
 
 		async Task CheckpointHandler()
@@ -227,7 +240,7 @@ namespace sthvServer.sthvGamemodes
 
 			await Delay(10000);
 		}
-		Vector3[] checkpointPositions = {
+		private readonly Vector3[] checkpointPositions = {
 			new Vector3(637.8491f, -1437.132f, 29.70673f),
 			new Vector3(466.6298f, -1175.656f, 40.5019f),
 			new Vector3(-110.492f, -1044.861f, 26.27357f),
