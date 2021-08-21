@@ -191,7 +191,7 @@ namespace sthvServer
 
 				gamemode.CreateEvents();
 
-				Debug.WriteLine("Instantiating gamemode " + gamemode.Name + ".");
+				Debug.WriteLine("Instantiating gamemode " + gamemode.GamemodeId + ".");
 
 				Debug.WriteLine("^4Registering gamemode script.^7");
 				RegisterScript(gamemode);

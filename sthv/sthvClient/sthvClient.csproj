@@ -36,7 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CitizenFX.Core.Client, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CitizenFX.Core.Client.1.0.2104\lib\net45\CitizenFX.Core.Client.dll</HintPath>
+      <HintPath>..\packages\CitizenFX.Core.Client.1.0.4340\lib\net45\CitizenFX.Core.Client.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -63,6 +63,7 @@
     <Compile Include="BaseGamemode.cs" />
     <Compile Include="client.cs" />
     <Compile Include="Gamemodes\CheckpointHunt.cs" />
+    <Compile Include="Gamemodes\TerrorTag.cs" />
     <Compile Include="GamemodeUtilities.cs" />
     <Compile Include="NuiEventModel.cs" />
     <Compile Include="Shared\sthvMapModel.cs" />
@@ -103,6 +104,7 @@
     <Content Include="ui\assets\target.png" />
     <Content Include="ui\index.html" />
     <Content Include="ui\modules\AdminMenu.js" />
+    <Content Include="ui\modules\MapMakerMenu.js" />
     <Content Include="ui\modules\toastNotify.js" />
     <Content Include="ui\script.js" />
     <Content Include="ui\style.css" />

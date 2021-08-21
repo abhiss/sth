@@ -24,7 +24,7 @@ namespace sthvServer.sthvGamemodes
 
 		int currentmapid;
 		List<Vector3> UncapturedCheckpoints = new List<Vector3>();
-		internal CheckpointHunt() : base(gamemodeName: "CheckpointHunt", GamemodeId: Gamemode.CheckpointHunt, gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 2, numberOfTeams: 2)
+		internal CheckpointHunt() : base(GamemodeId: Gamemode.CheckpointHunt, gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 2, numberOfTeams: 2)
 		{
 		}
 		public override void CreateEvents()

@@ -26,8 +26,8 @@ namespace sthv
 		/// </summary>
 		protected void AddEventHandler(string name, Delegate eventhandler)
 		{
-			//todo predix gamemode events 
-			var _newname = "sth:GM_" + gamemodeid + ":" + name;
+			//todo prefix gamemode events 
+			//var _newname = "sth:GM_" + gamemodeid + ":" + name;
 			GMEventHandlers.Add(new NamedEvent()
 			{
 				Name = name,

@@ -1,5 +1,6 @@
 import { ModuleLoadTest, addToastNotification } from "./modules/toastNotify.js";
-import { OpenMenu, CloseMenu } from "./modules/AdminMenu.js";
+import { OpenAdminMenu, CloseMenu } from "./modules/AdminMenu.js";
+import { OpenMapMakerMenu } from "./modules/MapMenu.js";
 
 console.log(ModuleLoadTest);
 
@@ -55,8 +56,11 @@ $(document).ready(function () {
 			else addToastNotification(item.message);
 		}
 		if (event.EventName == "sthv:toggleHostMenu") {
-			OpenMenu();
-			console.log("lsthv:toggleHostMenu")
+			OpenAdminMenu();
+			console.log("sthv:toggleHostMenu")
+		}
+		if(event.EventName == "sthv:map_maker_open_car_label_menu"){
+			OpenMapMakerMenu();
 		}
 
 		if (event.EventName === "sthv:runneropt") {

@@ -18,7 +18,7 @@ namespace sthvServer.sthvGamemodes
 		
 		int currentmapid = 0;
 
-		internal ClassicHunt() : base(gamemodeName: "ClassicHunt", GamemodeId: Shared.Gamemode.ClassicHunt, gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 1, numberOfTeams: 2)
+		internal ClassicHunt() : base(GamemodeId: Shared.Gamemode.ClassicHunt, gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 1, numberOfTeams: 2)
 		{
 			//Empty constructor so gamemode manager can cheaply loop over gamemodes to get metadata.
 		}

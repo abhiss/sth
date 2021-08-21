@@ -144,6 +144,9 @@ namespace sthv
 			if (API.IsControlJustReleased(0, 86))
 			{
 				Debug.WriteLine("show me on map");
+#if DEBUG
+				client.TriggerNuiEvent("sthv:map_maker_open_car_label_menu");
+#endif
 			}
 			if (API.IsControlJustPressed(0, 171))
 			{

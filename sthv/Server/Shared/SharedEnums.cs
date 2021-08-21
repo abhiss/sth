@@ -8,6 +8,7 @@ namespace Shared
 	{
 		None,
 		ClassicHunt, 
-		CheckpointHunt
+		CheckpointHunt,
+		TerrorTag
 	}
 }

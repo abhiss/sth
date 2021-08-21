@@ -6,7 +6,7 @@ let Menu = {
         saveButton.style.borderColor = 'white';
     }
 }
-export function OpenMenu() {
+export function OpenAdminMenu() {
     var x = document.getElementById("admin_menu_wrapper");
         x.style.display = "grid";
     

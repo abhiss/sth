@@ -17,7 +17,6 @@ namespace sthvServer
 		private uint GameLengthInSeconds { get; set; }
 		private Dictionary<uint, Action> TimedEventsList = new Dictionary<uint, Action>();
 		public Action Finalizer = null;
-		public string Name { get; }
 		private sthvGamemodeTeam[] gamemodeTeams;
 		public bool isGameloopActive = false;
 		private uint timeleft;
@@ -26,12 +25,11 @@ namespace sthvServer
 
 		public uint TimeLeft { get { return timeleft; } }
 		public uint TimeSinceRoundStart { get { return timeSecondsSinceRoundStart; } }
-		internal BaseGamemodeSthv(string gamemodeName, Shared.Gamemode GamemodeId, uint gameLengthInSeconds, int minimumNumberOfPlayers, int numberOfTeams)
+		internal BaseGamemodeSthv(Shared.Gamemode GamemodeId, uint gameLengthInSeconds, int minimumNumberOfPlayers, int numberOfTeams)
 		{
-			Name = gamemodeName;
 			this.GameLengthInSeconds = gameLengthInSeconds;
 			this.GamemodeId = GamemodeId; 
-			Debug.WriteLine("^1Message from BaseGamemodeSthv. Triggered by " + gamemodeName + ".");
+			Debug.WriteLine("^1Message from BaseGamemodeSthv. Triggered by " + GamemodeId + ".");
 			sthvLobbyManager.setAllActiveToWaiting();
 		}
 
@@ -72,7 +70,7 @@ namespace sthvServer
 				}
 			}
 
-			Debug.WriteLine($"Starting gamemode {Name} with {sthvLobbyManager.GetPlayersOfState(playerState.ready).Count} players.");
+			Debug.WriteLine($"Starting gamemode {GamemodeId} with {sthvLobbyManager.GetPlayersOfState(playerState.ready).Count} players.");
 			
 			timeSecondsSinceRoundStart = 0;
 			uint accuracy = 1; //second
@@ -163,7 +161,7 @@ namespace sthvServer
 			{
 				players = sthvLobbyManager.GetPlayersOfState(playerState.ready);
 			}
-			if (Name == "ClassicHunt" && GamemodeConfig.huntNextRunnerServerId != null)
+			if (GamemodeId == Shared.Gamemode.ClassicHunt && GamemodeConfig.huntNextRunnerServerId != null)
 			{
 				foreach (var p in players)
 				{
@@ -267,12 +265,12 @@ namespace sthvServer
 		{
 			foreach (var sthvPlayer in team.TeamPlayers)
 			{
-				sthvPlayer.player.TriggerEvent("_" + Name + "_" + eventName, args);
+				sthvPlayer.player.TriggerEvent("_" + GamemodeId + "_" + eventName, args);
 			}
 		}
 		public void sthvTriggerClientEvent(Player p, string eventName, params object[] args)
 		{
-			p.TriggerEvent("_" + Name + "_" + eventName, args);
+			p.TriggerEvent("_" + GamemodeId + "_" + eventName, args);
 		}
 		internal void log(string i) { Debug.WriteLine("^3[" + GamemodeId + "] " + i + "^7"); }
 

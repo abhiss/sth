@@ -32,13 +32,15 @@ namespace sthv
 				TriggerServerEvent("sth:sendServerDebug", $"{Game.PlayerPed.CurrentVehicle.Position.X}f, {Game.PlayerPed.CurrentVehicle.Position.Y}f, {Game.PlayerPed.CurrentVehicle.Position.Z}f");
 			}), false);
 
-			API.RegisterCommand("test", new Action<int, List<object>, string>((src, args, raw) =>
+			API.RegisterCommand("test", new Action<int, List<object>, string>(async (src, args, raw) =>
 			{
-				var pos = Game.PlayerPed.Position; var radius = 10f;
-				API.CreateCheckpoint(45, pos.X, pos.Y, pos.Z, 0, 0, 0, radius, 225, 0, 0, 80, 0); //red
-				API.CreateCheckpoint(45, pos.X, pos.Y, pos.Z, 0, 0, 0, radius * 2, 0, 225, 0, 80, 0); //green
-				API.AddBlipForRadius(pos.X, pos.Y, pos.Z, radius);
-				Game.PlayerPed.Position = pos + new Vector3(0, radius, 0);
+				//var pos = Game.PlayerPed.Position; var radius = 10f;
+				//API.CreateCheckpoint(45, pos.X, pos.Y, pos.Z, 0, 0, 0, radius, 225, 0, 0, 80, 0); //red
+				//API.CreateCheckpoint(45, pos.X, pos.Y, pos.Z, 0, 0, 0, radius * 2, 0, 225, 0, 80, 0); //green
+				//API.AddBlipForRadius(pos.X, pos.Y, pos.Z, radius);
+				//Game.PlayerPed.Position = pos + new Vector3(0, radius, 0);
+
+				await World.CreateVehicle(new Model((VehicleHash)3162245632u), Game.PlayerPed.Position, 0);
 
 			}), false);
 
@@ -156,10 +158,12 @@ namespace sthv
 			var id = (Shared.Gamemode)id_int;
 			client.GamemodeId = id;
 
-			//random cleanup
+			//random cleanup from ClassicHunt
 			sthvPlayArea.RemovePlayarea();
 
 			Debug.WriteLine("Gamemode set to " + id);
+			BaseGamemode gamemode = null;
+
 			switch (id)
 			{
 				case Shared.Gamemode.None:
@@ -169,21 +173,27 @@ namespace sthv
 				case Shared.Gamemode.CheckpointHunt:
 					{
 						//create checkpoint gamemode
-						var cphunt = new Gamemodes.CheckpointHunt();
-
-						Debug.WriteLine(cphunt.GetTicks().Count() + " ticks initialized.");
-						foreach (var cpevent in cphunt.GetEventHandlers())
-						{
-							EventHandlers[cpevent.Name] += cpevent.Handler;
-						}
-						foreach (var act in cphunt.GetTicks())
-						{
-							Tick += act;
-						}
+						gamemode = new Gamemodes.CheckpointHunt();
 					}
+					break;
+				case Shared.Gamemode.TerrorTag:
+					{
+						gamemode = new Gamemodes.TerrorTag();
+					}	
+					
 					break;
 				default:
 					break;
+			}
+
+			Debug.WriteLine($"Gamemode {gamemode.GetType()} initialized with {gamemode.GetTicks().Count()} ticks.");
+			foreach (var cpevent in gamemode.GetEventHandlers())
+			{
+				EventHandlers[cpevent.Name] += cpevent.Handler;
+			}
+			foreach (var act in gamemode.GetTicks())
+			{
+				Tick += act;
 			}
 		}
 		[EventHandler("sth:spawn")]
@@ -298,7 +308,7 @@ namespace sthv
 		}
 
 
-		public void TriggerNuiEvent(string eventName, dynamic data = null)
+		public static void TriggerNuiEvent(string eventName, dynamic data = null)
 		{
 			API.SendNuiMessage(JsonConvert.SerializeObject(new sthv.NuiModels.NuiEventModel
 			{

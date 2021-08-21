@@ -71,7 +71,6 @@ namespace sthv.Gamemodes
 			}
 		}
 
-
 		~CheckpointHunt()
 		{
 			foreach(var marker in CheckpointMarkers)

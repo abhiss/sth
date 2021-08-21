@@ -50,20 +50,66 @@
             <div id="toast_message_text">This is a message.</div>
         </div>
     </div>
+    <!-- map maker menu -->
+    <div id="map_maker_wrapper">
+        <div id="map_maker_container">
+            <div class="input_label">Tag
+                <input id="map_maker_car_tag"></input>
+            </div>
+            <div class="input_label">Team
+                <input id="map_maker_car_team"></input>
+            </div>
+            <button id="map_maker_save_button">Save</button>
+        </div>
+        <style>
+            #map_maker_wrapper {
+                width: 100vw;
+                height: 100vh;
+                display: grid;
+                place-items: center;
+            }
 
+            #map_maker_container {
+                background-color: black;
+                height: 60vh;
+                width: 50vw;
+                display: flex;
+                align-items: center;
+                flex-direction: column;
+                z-index: 2;
+            }
+            #map_maker_container input {
+                height: 2em;
+            }
+            #map_maker_container button{
+                margin-top: 5em;
+                width: 7em;
+                height: 2em;
+            }
+            .input_label {
+                color: white;
+                margin: 0.25em 1em;
+                font-weight: 200;
+            }
+        </style>
+    </div>
+
+
+
+    <!-- admin menu -->
     <div id="admin_menu_wrapper">
         <div id="admin_menu">
             <div id="admin_menu_title">STHV Host Menu</div>
-            <div class="admin_menu_item">Respawn Time (seconds) <input id="respawn_time"  type="number" min="0"  
+            <div class="admin_menu_item">Respawn Time (seconds) <input id="respawn_time" type="number" min="0"
                     name="Time in Seconds"> </div>
             <div class="admin_menu_item">Next Runner (server id) <input id="next_runner" type="number" min="0"
                     name="next runner serverid" id=""> </div>
             <div class="admin_menu_item">Next Hunt Length (minutes) <input id="hunt_length" type="number" min="0"
                     name="next hunt length" id=""> </div>
-            <div class="admin_menu_item">Next Map (map id: 0-5 inclusive) <input id="next_map" type="number" max="6" min="0"
-                    name="next map" id=""> </div>
-            <div class="admin_menu_item">Time Between Hints (seconds)<input id="hints_interval" type="number" max="6" min="0"
-                    name="hints interval" id=""></div>
+            <div class="admin_menu_item">Next Map (map id: 0-5 inclusive) <input id="next_map" type="number" max="6"
+                    min="0" name="next map" id=""> </div>
+            <div class="admin_menu_item">Time Between Hints (seconds)<input id="hints_interval" type="number" max="6"
+                    min="0" name="hints interval" id=""></div>
             <div class="admin_menu_item">
                 Friendly Fire
                 <select name="friendly fire" id="friendly_fire">
@@ -111,7 +157,7 @@
 
         .admin_menu_item {
             font-size: 1vw;
-            
+
             margin: 1em 2em;
             height: 1.5em;
             font-weight: 500;
