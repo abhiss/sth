@@ -8,7 +8,7 @@ namespace sthvServer.sthvGamemodes
 {
 	class TerrorTag : BaseGamemodeSthv
 	{
-		public TerrorTag() : base(Shared.Gamemode.TerrorTag, gameLengthInSeconds: 60 * 25, minimumNumberOfPlayers: 2, numberOfTeams: 2)
+		internal TerrorTag() : base(Shared.Gamemode.TerrorTag, gameLengthInSeconds: 60 * 25, minimumNumberOfPlayers: 2, numberOfTeams: 2)
 		{}
 
 		public override void CreateEvents()

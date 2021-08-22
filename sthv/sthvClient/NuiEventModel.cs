@@ -51,4 +51,10 @@ namespace sthv.NuiModels
 	{
 		public int nui_HandleOfSpectatedPlayer { get; set; }
 	}
+
+	public class NuiTaggedCarModel
+	{
+		public string tag { get; set; }
+		public string team { get; set; }
+	}
 }

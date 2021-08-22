@@ -100,7 +100,8 @@ namespace sthv
 			#region commands
 			API.RegisterCommand("test2", new Action<int, List<object>, string>(async (src, args, raw) =>
 		   {
-			   API.SetPedRandomComponentVariation(Game.Player.Character.Handle, false);
+			   API.SetNuiFocus(true, true);
+			   //API.SetPedRandomComponentVariation(Game.Player.Character.Handle, false);
 		   }), false);
 
 			API.RegisterCommand("checkrunner", new Action<int, List<object>, string>((src, args, raw) =>

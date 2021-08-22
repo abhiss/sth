@@ -104,7 +104,7 @@
     <Content Include="ui\assets\target.png" />
     <Content Include="ui\index.html" />
     <Content Include="ui\modules\AdminMenu.js" />
-    <Content Include="ui\modules\MapMakerMenu.js" />
+    <Content Include="ui\modules\MapMenu.js" />
     <Content Include="ui\modules\toastNotify.js" />
     <Content Include="ui\script.js" />
     <Content Include="ui\style.css" />

@@ -57,15 +57,21 @@
                 <input id="map_maker_car_tag"></input>
             </div>
             <div class="input_label">Team
-                <input id="map_maker_car_team"></input>
+                <input type="text" id="map_maker_car_team"></input>
             </div>
             <button id="map_maker_save_button">Save</button>
+            <button id="map_maker_save_all_button">Save All</button>
+            <button id="map_maker_close_button">Close</button>
+
+
         </div>
         <style>
             #map_maker_wrapper {
                 width: 100vw;
                 height: 100vh;
-                display: grid;
+
+                /*none to hide on startup, grid to show*/
+                display: none;
                 place-items: center;
             }
 

@@ -9,6 +9,7 @@ namespace Shared
 		None,
 		ClassicHunt, 
 		CheckpointHunt,
-		TerrorTag
+		TerrorTag,
+		MapMaker
 	}
 }

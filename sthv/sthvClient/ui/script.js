@@ -22,9 +22,6 @@ $(document).ready(function () {
 	};
 	
 	addToastNotification("Welcome to Survive the Hunt.", 2000);
-	// var tl = gsap.timeline({onComplete: ()=> {t1.reverse()}});
-	// tl.to("#toast_message_wrapper", {opacity: 100, duration: 1000}, '+=1');
-	//t1.play();
 
 	window.setInterval(function () {
 		var countdown = $('#countdown');
@@ -62,7 +59,7 @@ $(document).ready(function () {
 		if(event.EventName == "sthv:map_maker_open_car_label_menu"){
 			OpenMapMakerMenu();
 		}
-
+		
 		if (event.EventName === "sthv:runneropt") {
 			console.log("show: " + item)
 			if (item) {
@@ -215,6 +212,5 @@ function addPosPercentToTween(originalTween, addend, isX) {
 		console.log(i)
 		return i
 	}
-
 
 }
