@@ -5,6 +5,7 @@ html, body {
     margin: 0;
     padding: 0;
 }
+
 .startscreen {
     /* background-color: aquamarine; */
     /* margin: 0px 40%; */
@@ -155,8 +156,12 @@ td {
     height: 1em;
 }
 
-.intro-g2 {
-    /* background: linear-gradient(to top, rgba(0, 174, 255, 0.377), rgba(30, 255, 0, 0.37)); */
+
+/* TEMPORARILY HIDDEN */
+/* shows the navbar-like list of options on the left */
+ .intro-g2 {
+    visibility: hidden;
+
     background: radial-gradient(circle, rgba(255, 255, 255, 0.883) 0%, rgba(0, 217, 255, 0) 65%);
     width: max-content;
     color: grey;
@@ -167,7 +172,8 @@ td {
     grid-template-rows: 1fr 1fr 1fr 1fr;
     border-radius: 1vh;
     user-select: none;
-}
+} 
+
 
 .intro-g2 p {
     text-align: center;

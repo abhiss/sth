@@ -1,12 +1,6 @@
-# Survive the Hunt FiveM
+# STHV - Survive the Hunt FiveM
 A FiveM gamemode based on Surive the Hunt by FailRace.\
-To play or get build support join
+To play or for questions join the Survive the Hunt discord
 discord.gg/HygTs4s
 
-
-**Commands:**\
-`hunt` does a hunt\
-`endhunt` ends a hunt\
-`remveh` removes all vehicles
-
-
+This is the repository for the STHV resource. STHV was created for the STH Discord server to allow us to easily play hunts without cheaters and the typical GTA Online distruptions. Currently, we are in the process of modularizing the resource to allow for different "gamemodes" which will be variations of the classic STH mode. 

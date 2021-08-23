@@ -11,12 +11,13 @@ namespace sthvServer
 	{
 		static public bool isMissionPedActive { get; set; }
 		public Vector3 pedmissionpos { get; set; }
-		int pedmissionhealth { get;set; }
+		int pedmissionhealth { get; set; }
 		public int currentMpedNetId { get; set; } = 0; //netid of 0 means mission is over
 		internal sthvSyncClients()
 		{
 			API.RegisterCommand("mped", new Action<int, List<object>, string>((src, args, raw) =>
 			{
+				
 				ActivateMissionPed();
 				Debug.WriteLine("mped mission started");
 			}), true);

@@ -11,7 +11,7 @@
 //{
 //	class test : BaseScript
 //	{
-//		static List<Vector4> listofcoords = new List<Vector4>();
+//		static List<Vector3> listofcoords = new List<Vector3>();
 //		public Ped MissionPed { get; set; }
 //		int mpednetid = 0;
 //		public bool ismissionactive { get; set; }
@@ -24,11 +24,11 @@
 //			//missionBlip.Color = BlipColor.TrevorOrange;
 //			//missionBlip.Alpha = 0;
 
-		
+
 //			API.RegisterCommand("log", new Action<int, List<object>, string>((src, args, raw) =>
 //			{
-//				Vector4[] sendarray = listofcoords.ToArray();
-//				TriggerServerEvent("logCoords", sendarray);
+//				//Vector3[] sendarray = listofcoords.ToArray();
+//				TriggerServerEvent("logCoords", listofcoords);
 //				foreach (Vector4 i in listofcoords)
 //				{
 //					Debug.WriteLine($"new Vector4({i.X}f, {i.Y}f, {i.Z}f, {i.W}f),");
@@ -182,19 +182,18 @@
 
 //			await Delay(500);
 //		}
+		
+//		[Command("loc")]
 //		public static void addCoordToList()
 //		{
 //			if (true)//Game.PlayerPed.IsInVehicle()
 //			{
-//				var i = new Vector4(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y, Game.PlayerPed.Position.Z, Game.PlayerPed.Heading);
+//				var i = new Vector3(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y, Game.PlayerPed.Position.Z - Game.PlayerPed.HeightAboveGround);
 //				listofcoords.Add(i);
 
-//				Debug.WriteLine($"new Vector4({i.X}f, {i.Y}f, {i.Z}f, {i.W}f),");
+//				Debug.WriteLine($"new Vector4({i.X}f, {i.Y}f, {i.Z}f),");
 //			}
-//			else
-//			{
-//				Debug.WriteLine("not in car, position not added");
-//			}
+
 //		}
 
 //	}

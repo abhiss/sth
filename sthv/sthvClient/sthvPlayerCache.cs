@@ -19,40 +19,38 @@ namespace sthv
 		static public int playerpedid = Game.PlayerPed.Handle;
 		static public Player runnerPlayer { get; set; } = null;
 		Dictionary<string, int> playersPing = new Dictionary<string, int>();//key is serverid
-		public int[] playersInHeliServerId { get; set; } = { -1 };
 		bool isInHeli = false;
 		public sthvPlayerCache()
 		{
 			Debug.WriteLine($"isAlreadyDead: {isAlreadyDead}");
-			Tick += ScoreboardUpdater;
 			Tick += CheckHeliStatus;
 			ServerId = Game.Player.ServerId;
-			
-			
-			EventHandlers["sthv:refreshsb"] += new Action<string>(async (string playersinheliserverid) =>
-			{
-				Debug.WriteLine("RECEVED REFRESH SCOREBOARD EVENT");
-				playersInHeliServerId = JsonConvert.DeserializeObject<int[]>(playersinheliserverid);
-				await ScoreboardUpdater();
-				Debug.WriteLine("^5updated sb");
-				Debug.WriteLine(this.playersInHeliServerId.ToString());
-			});
-
 		}
 
-		public async Task ScoreboardUpdater()
+		[EventHandler("sthv:refreshsb")]
+		private async void refreshSb(string playerinfo_json)
 		{
+
+			Debug.WriteLine("RECEVED REFRESH SCOREBOARD EVENT: " + playerinfo_json);
+			var sb_playerlist = JsonConvert.DeserializeObject<List<Shared.ScoreboardInfoPlayer>>(playerinfo_json);
+
 			List<NuiModels.Player> playerInfoList = new List<NuiModels.Player>();
-			foreach (Player p in Players)
+
+
+			if (sb_playerlist == null) Debug.WriteLine("playerlist is null");
+			if (playerinfo_json == null) Debug.WriteLine("json is null");
+			if (playerInfoList == null) Debug.WriteLine("playerinfolist is null");
+
+			foreach (var p in sb_playerlist)
 			{
 				playerInfoList.Add(
 					new NuiModels.Player
 					{
-						alive = p.IsAlive,
-						name = p.Name,
-						runner = (sthv.client.RunnerServerId == p.ServerId),
-						serverid = p.ServerId,
-						isinheli = (playersInHeliServerId.Contains(p.ServerId))
+						alive = p.is_alive,
+						name = Players[int.Parse(p.serverid)].Name,
+						runner = p.is_runner,
+						serverid = p.serverid,
+						isinheli = p.is_in_helicopter
 					}
 				);
 			}
@@ -61,22 +59,24 @@ namespace sthv
 				EventName = "sthv:updatesb",
 				EventData = playerInfoList
 			}));
-			await Delay(10000);
+			Debug.WriteLine("^5updated sb");
+
 		}
+
 		async Task CheckHeliStatus()
 		{
-			if(!isInHeli && Game.PlayerPed.IsInFlyingVehicle)
+			if (!isInHeli && Game.PlayerPed.IsInFlyingVehicle)
 			{
 				TriggerServerEvent("sthv:isinheli", true);
 				isInHeli = true;
 			}
-			if(isInHeli && !Game.PlayerPed.IsInFlyingVehicle)
+			if (isInHeli && !Game.PlayerPed.IsInFlyingVehicle)
 			{
 				TriggerServerEvent("sthv:isinheli", false);
 				isInHeli = false;
 			}
 			await Delay(1000);
 		}
-		
+
 	}
 }

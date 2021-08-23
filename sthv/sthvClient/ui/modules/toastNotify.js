@@ -42,7 +42,6 @@ const openAnimation = [
 //.finished is a promise
 //private function
 async function show_toast_notification(message, display_time) {
-    console.log("started new animation with message: " + message);
     const toast_message_elm = document.getElementById('toast_message');
     const toast_message_text_elm = document.getElementById('toast_message_text');
 
@@ -83,7 +82,7 @@ async function show_toast_notification(message, display_time) {
         {
             duration: 250,
             fill: 'both'
-        }
+        } 
     ).finished
     
     //shrink/hide box
@@ -98,7 +97,6 @@ async function show_toast_notification(message, display_time) {
             fill: 'both'
         }
     ).finished
-    console.log('returningg');
 }
 
 // toastAnimation.finished.then(() => {

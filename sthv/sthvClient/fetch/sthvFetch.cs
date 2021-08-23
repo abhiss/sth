@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CitizenFX.Core;
-
+using Newtonsoft.Json;
 
 namespace sthv
 {
 	class sthvFetch : BaseScript
 	{
 		private static int _tokenCounter;
-		public static int NewToken { get
+		public static int NewToken
+		{
+			get
 			{
 				return (++_tokenCounter);
 			}
@@ -19,11 +22,14 @@ namespace sthv
 		private static readonly Dictionary<int, PendingRequest> _pendingRequests = new Dictionary<int, PendingRequest>();
 
 		[EventHandler("__sthv__internal:fetchResponse")]
-		private static void onFetchResponse(int token, bool isSuccesss, string body)
+		private static void onFetchResponse(int token, string jsonBody)
+		//Shared.BaseSharedClass body
 		{
-			if (!_pendingRequests.TryGetValue(token, out var req)) return;
+			Debug.WriteLine("Got fetch response: " + jsonBody);
 
-			req.SetResult(body);
+			if (!_pendingRequests.TryGetValue(token, out var req)) return;
+			
+			req.SetResult(jsonBody);
 
 			_pendingRequests.Remove(token);
 		}
@@ -37,16 +43,16 @@ namespace sthv
 			}
 			Debug.WriteLine("\n");
 		}
-		public static async Task<string> DownloadString(string url)
+		private static async Task<string> MakeFetchRequest(string url)
 		{
-			Debug.WriteLine("making fetch request (DownloadString()), url: [" + url + "]");
+			Debug.WriteLine("making fetch request, url: [" + url + "]");
 			var token = NewToken;
 			var req = _pendingRequests[token] = new PendingRequest(token, url);
 			TriggerServerEvent("__sthv__internal:fetchRequest", token, url);
 			return await req.Task;
 		}
 
-		private  class PendingRequest : TaskCompletionSource<string>
+		private class PendingRequest : TaskCompletionSource<string>
 		{
 			public int Token;
 			public string Url;
@@ -57,5 +63,14 @@ namespace sthv
 				Url = url;
 			}
 		}
+
+		public static async Task<T> Get<T>(string _ ) {
+			string url = typeof(T).Name;
+			string jsonResult = await MakeFetchRequest(url);
+			T res = JsonConvert.DeserializeObject<T>(jsonResult);
+
+			return res;
+		}
+
 	}
 }

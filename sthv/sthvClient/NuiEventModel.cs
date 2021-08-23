@@ -34,7 +34,7 @@ namespace sthv.NuiModels
 	public class Player
 	{
 		public string name { get; set; }
-		public int serverid { get; set; }
+		public string serverid { get; set; }
 		public bool runner { get; set; }
 		public int score { get; set; }
 		public bool alive { get; set; }
@@ -50,5 +50,11 @@ namespace sthv.NuiModels
 	public class NuiSpectatorInfoModel
 	{
 		public int nui_HandleOfSpectatedPlayer { get; set; }
+	}
+
+	public class NuiTaggedCarModel
+	{
+		public string tag { get; set; }
+		public string team { get; set; }
 	}
 }

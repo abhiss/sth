@@ -15,7 +15,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+    <DebugType>embedded</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -36,13 +36,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CitizenFX.Core.Client, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CitizenFX.Core.Client.1.0.2104\lib\net45\CitizenFX.Core.Client.dll</HintPath>
+      <HintPath>..\packages\CitizenFX.Core.Client.1.0.4340\lib\net45\CitizenFX.Core.Client.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -51,12 +54,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Server\shared\gamerules.cs">
-      <Link>shared\gamerules.cs</Link>
+    <Compile Include="..\Server\Shared\SharedEnums.cs">
+      <Link>Shared\SharedEnums.cs</Link>
     </Compile>
+    <Compile Include="..\Server\shared\SharedModels.cs">
+      <Link>shared\SharedModels.cs</Link>
+    </Compile>
+    <Compile Include="BaseGamemode.cs" />
     <Compile Include="client.cs" />
+    <Compile Include="Gamemodes\CheckpointHunt.cs" />
+    <Compile Include="Gamemodes\TerrorTag.cs" />
     <Compile Include="GamemodeUtilities.cs" />
     <Compile Include="NuiEventModel.cs" />
+    <Compile Include="Shared\sthvMapModel.cs" />
     <Compile Include="Spawn\SpawnNuiController.cs" />
     <Compile Include="fetch\sthvFetch.cs" />
     <Compile Include="sthvGameoverHandler.cs" />
@@ -82,9 +92,6 @@
     <None Include="ui\node_modules\%40types\jquery\LICENSE" />
     <None Include="ui\node_modules\%40types\jquery\package.json" />
     <None Include="ui\node_modules\%40types\jquery\README.md" />
-    <None Include="ui\node_modules\%40types\sizzle\LICENSE" />
-    <None Include="ui\node_modules\%40types\sizzle\package.json" />
-    <None Include="ui\node_modules\%40types\sizzle\README.md" />
     <None Include="ui\package-lock.json" />
   </ItemGroup>
   <ItemGroup>
@@ -96,6 +103,9 @@
     <Content Include="ui\assets\heliicon.png" />
     <Content Include="ui\assets\target.png" />
     <Content Include="ui\index.html" />
+    <Content Include="ui\modules\AdminMenu.js" />
+    <Content Include="ui\modules\MapMenu.js" />
+    <Content Include="ui\modules\toastNotify.js" />
     <Content Include="ui\script.js" />
     <Content Include="ui\style.css" />
   </ItemGroup>
@@ -113,12 +123,11 @@
     <TypeScriptCompile Include="ui\node_modules\%40types\jquery\JQueryStatic.d.ts" />
     <TypeScriptCompile Include="ui\node_modules\%40types\jquery\legacy.d.ts" />
     <TypeScriptCompile Include="ui\node_modules\%40types\jquery\misc.d.ts" />
-    <TypeScriptCompile Include="ui\node_modules\%40types\sizzle\index.d.ts" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>pwsh  $(SolutionDir)helper.ps1 -source $(ProjectDir)ui
-xcopy /y /d "$(TargetPath)" "C:\Servers\volumes\fivem_sthv_dev\resources\[local]\sthv"</PostBuildEvent>
+    <PostBuildEvent>xcopy /y /d "$(TargetPath)" "C:\Servers\volumes\fivem_sthv_dev\resources\[local]\sthv"
+pwsh  $(SolutionDir)helper.ps1 -source $(ProjectDir)ui</PostBuildEvent>
   </PropertyGroup>
 </Project>

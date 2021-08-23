@@ -1,24 +1,27 @@
-import {ModuleLoadTest, addToastNotification} from "./modules/toastNotify.js";
-console.log(ModuleLoadTest);
+import { ModuleLoadTest, addToastNotification } from "./modules/toastNotify.js";
+import { OpenAdminMenu, CloseMenu } from "./modules/AdminMenu.js";
+import { OpenMapMakerMenu } from "./modules/MapMenu.js";
 
+console.log(ModuleLoadTest);
 
 var timer = 0;
 var letPlay = false;
+window.sthv = {}
 
 $(document).ready(function () {
 	var time = 20;
 	let spectatedPlayerNameBeingShown = "error"
 	//document.querySelector(".scoreboard").style.display = 'none';//
-
-	//gsap stuff
-	let dur1 = 1
-	gsap.from('.intro-g2', { duration: dur1, opacity: 0, ease: 'back.out(.5)' })
-	gsap.from('.intro-mid', { duration: dur1, opacity: 0, ease: 'back.out(.5)' })
-	addToastNotification("Welcome to Survive the Hunt.", 2000);
-	// var tl = gsap.timeline({onComplete: ()=> {t1.reverse()}});
-	// tl.to("#toast_message_wrapper", {opacity: 100, duration: 1000}, '+=1');
+	document.onkeydown = disableF5;
+	function disableF5(e) {
+		if ((e.which || e.keyCode) == 115) {
+			e.preventDefault();
+			CloseMenu();
+			window.sendNuiEvent("admin_menu_close");
+		}
+	};
 	
-	//t1.play();
+	addToastNotification("Welcome to Survive the Hunt.", 2000);
 
 	window.setInterval(function () {
 		var countdown = $('#countdown');
@@ -44,11 +47,19 @@ $(document).ready(function () {
 			startCountdown(item["Message"], item["Seconds"]);
 			return;
 		}
-		if(event.EventName == "sthv:showToastNotification"){
-			console.log("GOT MESSAGE FOR TOASTNOTIF ")
-			if(item.display_time) addToastNotification(item.message, item.display_time)
+		if (event.EventName == "sthv:showToastNotification") {
+			//console.log("GOT MESSAGE FOR TOASTNOTIF ")
+			if (item.display_time) addToastNotification(item.message, item.display_time)
 			else addToastNotification(item.message);
 		}
+		if (event.EventName == "sthv:toggleHostMenu") {
+			OpenAdminMenu();
+			console.log("sthv:toggleHostMenu")
+		}
+		if(event.EventName == "sthv:map_maker_open_car_label_menu"){
+			OpenMapMakerMenu();
+		}
+		
 		if (event.EventName === "sthv:runneropt") {
 			console.log("show: " + item)
 			if (item) {
@@ -63,7 +74,7 @@ $(document).ready(function () {
 			}
 		}
 		if (event.EventName === "sthvnui:updateAlive") {
-			this.console.log(`^1 sthvnui:updateAlive triggered, serverid= ${item["serverid"]}, isalive = ${item["isalive"]}`);
+			//this.console.log(`^1 sthvnui:updateAlive triggered, serverid= ${item["serverid"]}, isalive = ${item["isalive"]}`);
 			let serverid = item["serverid"];
 			let targetelem = document.getElementById(`player${serverid}`).childNodes[5];
 			if (targetelem) {
@@ -78,7 +89,7 @@ $(document).ready(function () {
 		}
 		if (event.EventName === "sthv.showsb") {
 			let show = item["data"];
-			this.console.log("showing sb:" + item["data"]);
+			//this.console.log("showing sb:" + item["data"]);
 			if (show) {
 				$(".scoreboardtable").css("visibility", "visible");
 			}
@@ -90,10 +101,10 @@ $(document).ready(function () {
 		}
 		if (event.EventName === "sthv:updatesb") {
 			resetsb();
+			console.log(JSON.stringify(item));
 			item.forEach(element => {
-				this.console.log(`^1 list of stuff name = ${element["name"]}, isrunner = ${element["runner"]}, serverid = ${element["serverid"]}, isalive = ${element["alive"]}, isinhel = ${element["isinheli"]}`);
+				//this.console.log(`^1 list of stuff name = ${element["name"]}, isrunner = ${element["runner"]}, serverid = ${element["serverid"]}, isalive = ${element["alive"]}, isinhel = ${element["isinheli"]}`);
 				AddPlayer(element["serverid"], element["name"], element["alive"], element["runner"], element["isinheli"]);
-
 			});
 		}
 
@@ -106,53 +117,8 @@ $(document).ready(function () {
 				$(".spectatingplayer").append("<span class = 'spectatingText'><span>Spectating: </span> <span> " + spectatedPlayer + "</span></span>");
 			}
 		}
-		if (event.EventName == "sthvui:introoff") {
-			gsap.to(".intro-g2", { duration: 1, opacity: 0, ease: 'power2' })
-			gsap.to(".intro-mid", { duration: 1, opacity: 0, ease: 'power2' })
-			setTimeout(() => {
-				$('intro').hide();
-			}, 1000);
-		}
-		if (event.EventName == "sthv:discordVerification") {
-			let hasDiscord = item["has_discord"];
-			let inSth = item["is_in_sth"];
-			let inVc = item["is_in_vc"];
-			let isDiscordOnline = item['is_discord_online']
-			console.log("yaya " + item);
 
-			if (hasDiscord) {
-				document.getElementById("hasdiscord").innerHTML += '<img src="assets/check.png" alt="true">';
-			}
-			else document.getElementById("hasdiscord").innerHTML += '<img src="assets/cross.png" alt="true">';
-			if (inSth || !isDiscordOnline) {
-				if (!isDiscordOnline) {
-					document.getElementById('validatingWithDiscord').innerHTML = '<p><img width="2%" src="./assets/err.png"> Discord validation failed for technical reasons. <br>You can still play. :)</p>'
-					document.getElementById("insth").innerHTML += '<img src="assets/cross.png" alt="true">';
-				}
-				else document.getElementById("insth").innerHTML += '<img src="assets/check.png" alt="true">';
-
-				const playbtn_elm = document.getElementById('playbtn')
-				playbtn_elm.classList.add('intro-selectable');
-				playbtn_elm.click();
-				
-				letPlay = true;
-
-			}
-			else if (!inSth && isDiscordOnline) { //discord works but person isnt in the discord server.
-				document.getElementById("insth").innerHTML += '<img src="assets/cross.png" alt="true">';
-				$('.hide').removeClass('hide')
-				document.getElementById('playbtn').classList.remove('intro-selectable');
-				letPlay = false;
-			}
-			if (inVc) document.getElementById("invc").innerHTML += '<img src="assets/check.png" alt="true">';
-			else {
-				document.getElementById("invc").innerHTML += '<img src="assets/cross.png" alt="true">';
-
-				if (isDiscordOnline) {
-					document.querySelector('.intro-mid').innerHTML += '<p><img width="2%" src="./assets/err.png"> hunters not in pc-voice dont get guns at spawn <img width="2%" src="./assets/err.png"></p>'
-				}
-			}
-		}
+		
 		// switch(event.EventName){
 		// 	case "hunt.countdown":
 		// 		console.log(item);
@@ -171,45 +137,18 @@ $(document).ready(function () {
 		$(".startscreen").hide();
 	});
 
-	document.getElementById("playbtn").addEventListener('click', function () {
-		if (letPlay) {
-			gsap.to(".intro-g2", { duration: 1, opacity: 0, ease: 'power2' })
-			gsap.to(".intro-mid", { duration: 1, opacity: 0, ease: 'power2' })
-			setTimeout(() => {
-				$('intro').hide();
-			}, 1000);
-			sendNuiEvent("sthv:requestspawn")
-		}
-		else {
-			console.log('letplay = false');
-		}
-	});
-	document.querySelector("#discordbtn").addEventListener('click', function () {
-	});
-	document.querySelector("#rulesbtn").addEventListener('click', function () {
-	});
-	document.querySelector("#settingsbtn").addEventListener('click', function () {
-	});
 
 
-	let serverId = 1;
-	let name = "normalname";
-	let ping = 16;
-	let isAlive = true;
-	let isRunner = true;
-	for (var i = 0; i < 10; i++) {
-		AddPlayer(i, name, isAlive, isRunner);
-	}
+	//let serverId = 1;
+	//let name = "normalname";
+	//let ping = 16;
+	//let isAlive = true;
+	//let isRunner = true;
+	//for (var i = 0; i < 10; i++) {
+	//	AddPlayer(i, name, isAlive, isRunner);
+	//}
 
-	AddPlayer(i, "adumblongplayernamewithtoomanyletters", false, false);
-	/*
-	ServerId
-	Name</th
-	Alive</t
-	Ping</th
-	Runner</
-	*/
-
+	//AddPlayer(i, "adumblongplayernamewithtoomanyletters", false, false);
 });
 
 function resetsb() {
@@ -258,7 +197,7 @@ function startCountdown(msg, time) {
 	//$('#countdown-message').text(msg);
 	$('.countdown').show(); //should be .timer but i dont want to hide it anyways
 };
-function sendNuiEvent(name, data = {}) {
+window.sendNuiEvent = function (name, data = {}) {
 	$.post("https://sthv/" + name, JSON.stringify(data));
 };
 
@@ -273,6 +212,5 @@ function addPosPercentToTween(originalTween, addend, isX) {
 		console.log(i)
 		return i
 	}
-
 
 }

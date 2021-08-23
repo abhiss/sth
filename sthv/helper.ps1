@@ -9,7 +9,7 @@ $OutputPath = "C:\Servers\volumes\fivem_sthv_dev\resources\[local]\sthv\"
 Write-Output ($OutputPath +  $OutputSubfolder)
 
 Copy-Item -Path $source -Destination ($OutputPath) -Recurse -Force
-
+Invoke-WebRequest -Uri 'http://localhost:8080/restart&sthv'
 ###Usage
 # -source $(ProjectDir)ui
 ###Done in post event commands.

@@ -23,33 +23,58 @@ namespace sthv
 		public bool ismissionactive { get; set; }
 		public Blip missionBlip { get; set; }
 		int missionPedNetID = 0;
+
+		// allowedweapons is currently a constant, should be changed by an 
+		// event from server via host menu in the future
+		public static WeaponHash[] AllowedWeapons = { WeaponHash.CombatPistol, WeaponHash.SawnOffShotgun };
+
+
 		public sthvRules()
 		{
-			Ped _thisPed = Game.PlayerPed;
-			missionBlip = new Blip(API.AddBlipForRadius(0, 0, 0, 50));
-			missionBlip.Color = BlipColor.TrevorOrange;
-			missionBlip.Alpha = 0;
-
-	
 			//Tick += CheckPedMission;
-			//Tick += ShowRunnerOnMap;
 
 			EventHandlers["sthv:setnewpedmission"] += new Action(SetNewMission);
-
-			
+			EventHandlers["sth:setcops"] += new Action<bool>(isCopsEnabled =>
+			{
+				if (isCopsEnabled)
+				{
+					API.SetMaxWantedLevel(5);
+				}
+				else
+				{
+					API.SetMaxWantedLevel(0);
+				}
+			});
 			_ped = API.PlayerPedId();
 			_pid = API.PlayerId();
 
 			API.StatSetInt((uint)Game.GenerateHash("MP0_STAMINA"), 100, true);
 			//API.SetPoliceIgnorePlayer(_pid, true);  //works like "turn cops blind eye", you get cops if you shoot them or something 
 			API.SetMaxWantedLevel(0);
-			API.SetPlayerCanDoDriveBy(_pid, false); 
+			API.SetPlayerCanDoDriveBy(_pid, false);
 			API.NetworkSetFriendlyFireOption(true);
 			API.SetCanAttackFriendly(_ped, true, true);
 			API.DisablePlayerVehicleRewards(_pid);
 			API.SetEveryoneIgnorePlayer(_pid, true);
 			//sthvClient.client.eventhandlers			
 			Game.PlayerPed.IsInvincible = true;
+
+
+			//enable trains
+			API.SwitchTrainTrack(0, true); //enables main train loop
+			API.SwitchTrainTrack(3, true); //enables metro/subway
+			API.SetTrainTrackSpawnFrequency(0, 120000);
+			API.SetRandomTrains(true);
+
+			//enable random boats spawning
+			API.SetRandomBoats(true);
+
+			//enable planes and stuff
+			API.SetScenarioGroupEnabled("LSA_Planes", true);
+			//API.SetScenarioGroupEnabled("LSA_Planes", true);
+
+
+
 
 			EventHandlers["sthv:updatepednetid"] += new Action<int>(netid =>
 			{
@@ -81,56 +106,24 @@ namespace sthv
 
 			#region ai relationships
 			//calm ai 
-			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_HILLBILLY"),	(uint)API.GetHashKey("PLAYER"));
-			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_BALLAS"),	(uint)API.GetHashKey("PLAYER"));
-			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_MEXICAN"),	(uint)API.GetHashKey("PLAYER"));
-			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_FAMILY"),	(uint)API.GetHashKey("PLAYER"));
-			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_MARABUNTE"),	(uint)API.GetHashKey("PLAYER"));
-			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_SALVA"),		(uint)API.GetHashKey("PLAYER"));
-			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("GANG_1"),		(uint)API.GetHashKey("PLAYER"));
-			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("GANG_2"),		(uint)API.GetHashKey("PLAYER"));
-			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("GANG_9"),		(uint)API.GetHashKey("PLAYER"));
-			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("GANG_10"),	(uint)API.GetHashKey("PLAYER"));
-			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("FIREMAN"),	(uint)API.GetHashKey("PLAYER"));
-			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("MEDIC"),		(uint)API.GetHashKey("PLAYER"));
-			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("COP"),		(uint)API.GetHashKey("PLAYER"));
+			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_HILLBILLY"), (uint)API.GetHashKey("PLAYER"));
+			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_BALLAS"), (uint)API.GetHashKey("PLAYER"));
+			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_MEXICAN"), (uint)API.GetHashKey("PLAYER"));
+			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_FAMILY"), (uint)API.GetHashKey("PLAYER"));
+			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_MARABUNTE"), (uint)API.GetHashKey("PLAYER"));
+			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("AMBIENT_GANG_SALVA"), (uint)API.GetHashKey("PLAYER"));
+			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("GANG_1"), (uint)API.GetHashKey("PLAYER"));
+			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("GANG_2"), (uint)API.GetHashKey("PLAYER"));
+			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("GANG_9"), (uint)API.GetHashKey("PLAYER"));
+			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("GANG_10"), (uint)API.GetHashKey("PLAYER"));
+			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("FIREMAN"), (uint)API.GetHashKey("PLAYER"));
+			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("MEDIC"), (uint)API.GetHashKey("PLAYER"));
+			API.SetRelationshipBetweenGroups(1, (uint)API.GetHashKey("COP"), (uint)API.GetHashKey("PLAYER"));
 			#endregion
 		}
 
-		async Task ShowRunnerOnMap()
-		{
-			if (sthv.sthvPlayerCache.isHuntActive && sthvPlayerCache.runnerPlayer != null)
-			{
-				Player _runner = sthv.sthvPlayerCache.runnerPlayer;
-				RunnerRadiusBlip = new Blip(API.AddBlipForRadius(_runner.Character.Position.X, _runner.Character.Position.Y, _runner.Character.Position.Z, 50));
 
-				Debug.WriteLine("showing runner on map :D");
-				Debug.WriteLine(_runner.Name.ToString());
-
-				RunnerRadiusBlip.Color = BlipColor.Red;
-				RunnerRadiusBlip.Alpha = 80;
-				RunnerRadiusBlip.ShowRoute = true;
-				Debug.WriteLine($"is on minimap: {RunnerRadiusBlip.IsOnMinimap}");
-
-				//API.SetBlipColour(RunnerRadiusBlip.Handle, 20);
-				//API.SetBlipAlpha(RunnerRadiusBlip.Handle, 50);
-
-
-				await Delay(25000);
-				if (RunnerRadiusBlip.Exists())
-				{
-					RunnerRadiusBlip.Delete();
-				}
-
-			}
-			else
-			{
-				Debug.WriteLine("There is no hunter lol");
-			}
-
-			await Delay(50000);
-			RunnerRadiusBlip.Delete();
-		}
+		[Tick]
 		public async Task onTick() //happens always
 		{
 			API.HideHudComponentThisFrame((int)HudComponent.Cash);
@@ -151,7 +144,8 @@ namespace sthv
 			if (API.IsControlJustReleased(0, 86))
 			{
 				Debug.WriteLine("show me on map");
-				//sthv.test.addCoordToList();
+#if DEBUG
+#endif
 			}
 			if (API.IsControlJustPressed(0, 171))
 			{
@@ -171,10 +165,63 @@ namespace sthv
 				else if (API.IsControlJustReleased(0, 162))
 				{
 					TriggerEvent("sthv:input:key:8");
-				} 
+				}
 			}
 		}
+		[Tick]
+		async Task GameRules() //checks rules
+		{
+			Debug.WriteLine("^2 isrunner: " + client.IsRunner);
+			if (client.IsRunner)
+			{
+				Debug.WriteLine("is runner");
+				if (Game.PlayerPed.IsInSub || Game.PlayerPed.IsInFlyingVehicle)
+				{
+					World.AddExplosion(Game.PlayerPed.Position, ExplosionType.Rocket, 5f, 2f);
+				}
+				if (API.IsPedInAnyPoliceVehicle(Game.PlayerPed.Handle))
+				{
+					var runner_vehicle = Game.PlayerPed.CurrentVehicle;
+					Debug.WriteLine("in police car");
+					foreach (var d in runner_vehicle.Doors)
+					{
+						if (!d.IsBroken)
+						{
+							d.Break();
+							goto end_if; //breaks one door every 10 seconds
+						}
+					}
+					runner_vehicle.IsSirenActive = true;
+					runner_vehicle.ApplyForceRelative(new Vector3(0, 10, 0), new Vector3(0, 50, 20), ForceType.MaxForceRot);
+					end_if:;
+				}
+				if (Game.PlayerPed.IsInSub || Game.PlayerPed.IsInFlyingVehicle)
+				{
+					World.AddExplosion(Game.PlayerPed.Position, ExplosionType.Rocket, 5f, 2f);
+				}
+			}
+			if (Game.PlayerPed.IsSittingInVehicle() && (Game.PlayerPed.LastVehicle.ClassType == VehicleClass.Super))
+			{
+				Vehicle veh = Game.PlayerPed.LastVehicle;
+				veh.MaxSpeed = 25f;
+				veh.SoundHorn(5000);
+				//veh.Speed = 100f;
+			}
 
+			//check for disallowed weapons
+			foreach (WeaponHash w in Enum.GetValues(typeof(WeaponHash)))
+			{
+				if (!AllowedWeapons.Contains(w) && Game.PlayerPed.Weapons.HasWeapon(w))
+				{
+					Game.PlayerPed.Weapons.Remove(w);
+					Debug.WriteLine("RULES:", "An unallowed weapon was removed from your inventory.");
+				}
+			}
+
+			await BaseScript.Delay(10000);
+		}
+
+		[Tick]
 		public async Task AutoBrakeLight()              //autobrakelight
 		{
 			_ped = API.PlayerPedId();
@@ -191,10 +238,9 @@ namespace sthv
 			}
 			else
 			{
-				await BaseScript.Delay(200);
+				await BaseScript.Delay(700);
 			}
 		}
-
 
 		[Command("logped")]
 		async void logpedcmd()
@@ -220,7 +266,6 @@ namespace sthv
 
 				API.SetBlockingOfNonTemporaryEvents(MissionPed.Handle, true);
 				API.TaskSetBlockingOfNonTemporaryEvents(MissionPed.Handle, true);
-			
 				ismissionactive = true;
 			}
 			else
@@ -239,7 +284,7 @@ namespace sthv
 				Ped mped = new Ped(_ped);
 				if (API.DoesEntityExist(_mped))
 				{
-					Debug.WriteLine("mped exists");		
+					Debug.WriteLine("mped exists");
 					TriggerServerEvent("missionpedstatus", API.GetEntityHealth(_mped), API.GetEntityCoords(_mped, true));
 				}
 				else
@@ -248,7 +293,6 @@ namespace sthv
 				}
 
 			}
-			
 			await Delay(2000);
 		}
 	}
