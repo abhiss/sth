@@ -59,10 +59,10 @@ namespace sthvServer
 		private void OnPlayerJoin([FromSource] Player source, string playerName, dynamic setKickReason, dynamic deferrals)
 		{
 			Debug.WriteLine("\nw");
+			var player = new SthvPlayer(source);
 			PlayerData.Add(source.getLicense(), new SthvPlayer(source));
 			CheckAlivePlayers();
-
-			//Debug.WriteLine($"^3Player {source.Name} has {matchingPlayers} instances in sthvPlayers^7");
+			TriggerEvent("gamemode::player_join_late", player);
 		}
 
 		[EventHandler("playerDropped")]
@@ -95,6 +95,7 @@ namespace sthvServer
 			{
 				Debug.WriteLine("source returned null onplayerdropped");
 			}
+
 			Debug.WriteLine($"dropped {source.Name}");
 			CheckAlivePlayers();
 			Server.refreshscoreboard();
@@ -148,8 +149,7 @@ namespace sthvServer
 		/// <param name="player"></param>
 		public static void MarkPlayerDead(Player player, string killerName, string killerLicense)
 		{
-			SthvPlayer splayer;
-			if (PlayerData.TryGetValue(player.getLicense(), out splayer))
+			if (PlayerData.TryGetValue(player.getLicense(),  out SthvPlayer splayer))
 			{
 				splayer.KillerNameAndLicense = (killerName, killerLicense);
 				splayer.State = playerState.dead;
@@ -168,8 +168,7 @@ namespace sthvServer
 		/// <param name="teamname">Can be set to null if player is in no team.</param>
 		public static void SetPlayerTeam(Player player, string teamname)
 		{
-			SthvPlayer splayer;
-			if (PlayerData.TryGetValue(player.getLicense(), out splayer))
+			if (PlayerData.TryGetValue(player.getLicense(), out SthvPlayer splayer))
 			{
 				splayer.teamname = teamname;
 			}

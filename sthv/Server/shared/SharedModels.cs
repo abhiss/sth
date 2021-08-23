@@ -50,7 +50,7 @@ namespace Shared
 		public bool isInVc;
 		public bool isDiscordServerOnline;
 		public bool isAllowedHostMenu;
-		public Shared.Gamemode gamemodeId;
+		public Gamemode gamemodeId;
 	}
 	class GameInfo : BaseFetchClass
 	{
