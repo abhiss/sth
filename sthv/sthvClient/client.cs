@@ -184,10 +184,10 @@ namespace sthv
 					}
 				case Shared.Gamemode.InverseTag:
 					{
-						gamemode = new Gamemodes.InverseTag();
+						//gamemode = new Gamemodes.InverseTag();
+
+						break;
 					}
-					
-					break;
 				default:
 					break;
 			}
