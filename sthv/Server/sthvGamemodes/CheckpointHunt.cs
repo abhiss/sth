@@ -20,16 +20,12 @@ namespace sthvServer.sthvGamemodes
 		readonly float check_radius = 15;
 		Random rand = new Random();
 
-		int checkpointsGotten = 0;
-
 		int currentmapid;
-		List<Vector3> UncapturedCheckpoints = new List<Vector3>();
-		internal CheckpointHunt() : base(GamemodeId: Gamemode.CheckpointHunt, gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 2, numberOfTeams: 2)
-		{
-		}
+		readonly List<Vector3> UncapturedCheckpoints = new List<Vector3>();
+		internal CheckpointHunt() : base(GamemodeId: Gamemode.CheckpointHunt, gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 2, numberOfTeams: 2){}
+
 		public override void CreateEvents()
 		{
-
 			AddTimeEvent(0, new Action(async () =>
 			{
 				Tick += CheckpointHandler;
@@ -162,6 +158,18 @@ namespace sthvServer.sthvGamemodes
 			}
 		}
 
+		[EventHandler("gamemode::player_join_late")]
+		async Task player_joined_late_hander(SthvPlayer player)
+		{
+			if(base.TimeSinceRoundStart > 30)
+			{
+				await Delay(10000);
+				TriggerClientEvent("sth:setguns", true);
+				TriggerClientEvent("sth:setcops", GamemodeConfig.isPoliceEnabled);
+				player.Spawn(map.HunterSpawn, false, playerState.alive);
+			}
+		}
+
 		[EventHandler("admin_menu_save_request")]
 		void adminMenuSaveHandler([FromSource] Player source, string jsonData)
 		{
@@ -237,7 +245,6 @@ namespace sthvServer.sthvGamemodes
 
 		async Task CheckpointHandler()
 		{
-
 			await Delay(10000);
 		}
 		private readonly Vector3[] checkpointPositions = {

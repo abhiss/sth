@@ -26,7 +26,12 @@ namespace sthvServer
 		/// <summary>
 		/// Set by BaseGamemode when a new gamemode starts.
 		/// </summary>
-		public static Gamemode GamemodeId = Gamemode.None; 
+#if DEBUG
+		public static Gamemode GamemodeId = Gamemode.MapMaker;
+#elif RELEASE
+		public static Gamemode GamemodeId = Gamemode.None;
+#endif
+
 		public static bool IsDiscordServerOnline { get; set; } = false;
 		public bool AutoHunt { get; set; } = false;
 
@@ -53,9 +58,12 @@ namespace sthvServer
 				Debug.WriteLine($"^3 player: {source.Name} Triggered PlayerJoinInfo handler.^7");
 				string licenseId = source.Handle;
 				source.TriggerEvent("sth:updateRunnerHandle", runnerHandle);
-				sthvLobbyManager.getPlayerByLicense(source.getLicense()).Spawn(currentMap.HunterSpawn, false, playerState.ready); //defaults to hunter spawn
 				refreshscoreboard();
-				
+				if (!gamemode.isGameloopActive)
+				{
+					//spawns player at hunter spawn if gamemode is not active. This usually means server is waiting for more players.
+					sthvLobbyManager.getPlayerByLicense(source.getLicense()).Spawn(currentMap.HunterSpawn, false, playerState.ready);
+				}
 				//retry bc sometimes nui is still not finished loading after player is ready.
 				var send_sb_later = new Action(async () =>
 				{
@@ -277,7 +285,6 @@ namespace sthvServer
 						Debug.WriteLine($"{i.Name} killed {killed.Name}");
 						sthvLobbyManager.MarkPlayerDead(killed, i.Name, i.getLicense());
 
-						Player killer = i;
 						TriggerEvent("gamemode::player_killed", i.getLicense(), killed.getLicense());
 
 						if (runner != null)
