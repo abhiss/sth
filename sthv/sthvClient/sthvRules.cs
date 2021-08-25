@@ -243,12 +243,12 @@ namespace sthv
 		}
 
 		[Command("logped")]
-		async void logpedcmd()
+		void logpedcmd()
 		{
 			Debug.WriteLine(missionPedNetID.ToString());
 		}
 		[Command("requestmpedcontrol")]
-		async void RequestControl()
+		void RequestControl()
 		{
 			API.NetworkRequestControlOfNetworkId(missionPedNetID);
 		}

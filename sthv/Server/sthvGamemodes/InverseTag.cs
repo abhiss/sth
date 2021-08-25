@@ -5,27 +5,25 @@ using System.Threading.Tasks;
 using CitizenFX.Core;
 using CitizenFX.Core.Native;
 using Newtonsoft.Json;
-
 namespace sthvServer.sthvGamemodes
 {
-	internal class ClassicHunt : BaseGamemodeSthv
+	class InverseTag : BaseGamemodeSthv
 	{
+		internal InverseTag() : base(GamemodeId: Shared.Gamemode.InverseTag, gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 2, numberOfTeams: 2){}
+
 		SthvPlayer runner = null;
-		string runnerServerId = null;
-		Shared.sthvMapModel map = Shared.sthvMaps.Maps[2];
-		const string TRunner = "runner";
-		const string THunter = "hunter";
-		
+		readonly string TRunner = "runner";
+		readonly string THunter = "hunter";
 		int currentmapid = 0;
 
-		internal ClassicHunt() : base(GamemodeId: Shared.Gamemode.ClassicHunt, gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 1, numberOfTeams: 2)
+		Shared.sthvMapModel map = Shared.sthvMaps.Maps[5];
+
+
+		override public void CreateEvents()
 		{
-			//Empty constructor so gamemode manager can cheaply loop over gamemodes to get metadata.
-		}
-		public override void CreateEvents()
-		{
-			AddTimeEvent(0, new Action(async () =>
+			AddTimeEvent(0, new Action(() =>
 			{
+
 				Tick += runnerHintHandler;
 				Random rand = new Random();
 				if (GamemodeConfig.huntNextMapIndex > 0)
@@ -48,8 +46,10 @@ namespace sthvServer.sthvGamemodes
 				log(readyPlayers.Count + " ready players in this hunt.");
 
 				//picking and assigning runner
-				int runnerindex = rand.Next(0, readyPlayers.Count);
-				readyPlayers[runnerindex].teamname = TRunner;
+				int runnerindex = rand.Next(0, readyPlayers.Count - 1);
+				runner = readyPlayers[runnerindex];
+				runner.teamname = TRunner;
+
 				//assigning everyone else hunter team
 				foreach (var p in readyPlayers)
 				{
@@ -59,29 +59,20 @@ namespace sthvServer.sthvGamemodes
 					}
 				}
 
-				runner = sthvLobbyManager.GetPlayersInTeam(TRunner)[0];
-
-				if (sthvLobbyManager.GetPlayersInTeam("runner").Count != 1) throw new Exception("Unexpected number of runners were assigned in ClassicHunt");
-				runnerServerId = runner.player.Handle;
-
-				log($"^2runner handle is now: {runnerServerId}^7");
-				TriggerClientEvent("sth:updateRunnerHandle", int.Parse(runnerServerId));
+				//announce teams to clients
+				log($"^2runner handle is now: {runner.player.Handle}^7");
+				TriggerClientEvent("sth:updateRunnerHandle", int.Parse(runner.player.Handle));
 				Server.SendChatMessage("^2HUNT", $"Runner is:{runner.Name}", 255, 255, 255);
-				Server.SendToastNotif($"Hunt starting with runner: {runner.Name}", 3000);
+				Server.SendToastNotif($"InverseTag starting with runner: {runner.Name}", 3000);
 
-				await Delay(100);
-
+				//spawn runner
 				runner.Spawn(map.RunnerSpawn, true, playerState.alive);
-
-
-				//offer hunters to opt into runner ?
-				TriggerClientEvent("removeveh");
-				await Delay(500);
 
 				runner.player.TriggerEvent("sthv:spawnhuntercars", currentmapid);
 				runner.player.TriggerEvent("sthv:spectate", false);
 				Server.refreshscoreboard();
 			}));
+
 			AddTimeEvent(5, new Action(() =>
 			{
 				log("spawning hunters after 5 seconds.");
@@ -90,32 +81,23 @@ namespace sthvServer.sthvGamemodes
 				{
 					h.Spawn(map.HunterSpawn, false, playerState.alive);
 				}
-
-			}));
-			AddTimeEvent(30, new Action(() =>
-			{
-				log("Giving weapons after 30 seconds");
-
-				runner.player.TriggerEvent("sth:updateRunnerHandle", runnerServerId); //incase runner has wrong clothes
-
-				TriggerClientEvent("sth:setguns", true);
-				TriggerClientEvent("sth:setcops", GamemodeConfig.isPoliceEnabled);
-
-				Server.SendChatMessage("^5HUNT", "You now have guns");
-				Server.SendToastNotif("You now have weapons!");
 			}));
 
 			AddFinalizerEvent(new Action(() =>
 			{
 				TriggerClientEvent("sth:updateRunnerHandle", -1);
-				foreach (var p in sthvLobbyManager.GetPlayersOfState(playerState.alive, playerState.ready))
-				{
-					p.Spawn(map.HunterSpawn, false, playerState.ready);
-				}
 
 				TriggerClientEvent("removeveh");
 				Tick -= runnerHintHandler;
 			}));
+		}
+
+		[EventHandler("gamemode::player_join_late")]
+		async Task player_join_late_handler()
+		{
+			await Delay(5000);
+			TriggerClientEvent("sthv:sendChosenMap", currentmapid);
+			TriggerClientEvent("sth:updateRunnerHandle", int.Parse(runner.player.Handle));
 		}
 
 		[EventHandler("gamemode::player_killed")]
@@ -163,6 +145,8 @@ namespace sthvServer.sthvGamemodes
 				}));
 			}
 		}
+
+
 		[EventHandler("admin_menu_save_request")]
 		void adminMenuSaveHandler([FromSource] Player source, string jsonData)
 		{
@@ -216,6 +200,7 @@ namespace sthvServer.sthvGamemodes
 				source.Drop("Permission denied: Host Menu. Contact server owner if you think this is a mistake.");
 			}
 		}
+
 		async Task runnerHintHandler()
 		{
 			TriggerClientEvent("sthv:showRunnerOnMap", int.Parse(runner.player.Handle));
@@ -223,3 +208,4 @@ namespace sthvServer.sthvGamemodes
 		}
 	}
 }
+

@@ -33,6 +33,7 @@ namespace sthv
 		{
 			//only classic hunt uses play areas like this.
 			if (client.GamemodeId != Shared.Gamemode.ClassicHunt) return;
+			Debug.WriteLine("Current gamemode: " + client.GamemodeId);
 
 			float distance = Vector2.Distance(playAreaCenter, new Vector2(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y)); //get horizontal distance between player and playAreaCenter
 			if ((sthv.sthvPlayerCache.isHuntActive) && (Game.PlayerPed.IsAlive) && (distance > Radius) && (distance != 0))

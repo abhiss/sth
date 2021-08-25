@@ -59,17 +59,17 @@ namespace sthvServer
 				string licenseId = source.Handle;
 				source.TriggerEvent("sth:updateRunnerHandle", runnerHandle);
 				refreshscoreboard();
-				if (!gamemode.isGameloopActive)
+				//if (gamemode == null || !gamemode.isGameloopActive)
 				{
 					//spawns player at hunter spawn if gamemode is not active. This usually means server is waiting for more players.
 					sthvLobbyManager.getPlayerByLicense(source.getLicense()).Spawn(currentMap.HunterSpawn, false, playerState.ready);
 				}
-				//retry bc sometimes nui is still not finished loading after player is ready.
+				//retry bc sometimes nui is still loading even after player is ready.
 				var send_sb_later = new Action(async () =>
 				{
 					await Delay(5000);
 					refreshscoreboard();
-					Debug.WriteLine("Trying scoreboard again_________________________________----------www");
+					Debug.WriteLine("updating scoreboard again...");
 				});
 				send_sb_later();
 				//todo isAllowedHostMenu should use database or something instead of ace perms.
@@ -174,7 +174,7 @@ namespace sthvServer
 
 			//wait for atleast 1 player
 			//while (Players.Count() < 1) await Delay(1000);
-			bool toggle = true;
+			bool toggle = !true;
 			while (true)
 			{
 				if (Players.Count() < 2 && !TestMode)
@@ -187,15 +187,15 @@ namespace sthvServer
 				}
 
 				//$ select gamemode based on player count
-				if (toggle)
-				{
-					gamemode = new sthvGamemodes.CheckpointHunt();
-				}
-				else
+				//if (toggle)
+				//{
+				//	gamemode = new sthvGamemodes.CheckpointHunt();
+				//}
+				//else
 				{
 					gamemode = new sthvGamemodes.ClassicHunt();
 				}
-				toggle = !toggle;
+				//toggle = !toggle;
 
 				gamemode.CreateEvents();
 

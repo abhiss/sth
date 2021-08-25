@@ -36,13 +36,6 @@ namespace sthvServer
 		#region manager_methods
 		//used in server.cs for now
 
-
-
-		public async Task AwaitStartConditions()
-		{
-			
-		}
-
 		/// <summary>
 		/// Starts the gamemode!
 		/// </summary>
@@ -54,8 +47,10 @@ namespace sthvServer
 			int playerCount;
 			while (true)
 			{
+				
 				//alive and dead players are "ready" for next hunt since it means they're done loading
 				playerCount = sthvLobbyManager.GetPlayersOfState(playerState.ready, playerState.alive, playerState.dead).Count;
+				Debug.WriteLine("ready,alive,dead players: " + playerCount);
 				if (playerCount > this.MinimumPlayers || (Server.TestMode && playerCount == 1))
 				{
 					break;

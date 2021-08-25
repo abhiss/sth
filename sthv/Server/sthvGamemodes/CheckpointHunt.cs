@@ -14,7 +14,7 @@ namespace sthvServer.sthvGamemodes
 	{
 		SthvPlayer runner = null;
 		string runnerServerId = null;
-		Shared.sthvMapModel map = Shared.sthvMaps.Maps[2];
+		Shared.sthvMapModel map = Shared.sthvMaps.Maps[5];
 		const string TRunner = "runner";
 		const string THunter = "hunter";
 		readonly float check_radius = 15;
@@ -42,6 +42,7 @@ namespace sthvServer.sthvGamemodes
 
 				//picking and assigning runner
 				int runnerindex = rand.Next(0, readyPlayers.Count);
+				Debug.WriteLine("Choosing runner index: " + runnerindex, "readyPlayers size: " + readyPlayers.Count);
 				readyPlayers[runnerindex].teamname = TRunner;
 				//assigning everyone else hunter team
 				foreach (var p in readyPlayers)
@@ -60,8 +61,8 @@ namespace sthvServer.sthvGamemodes
 
 				log($"^2runner handle is now: {runnerServerId}^7");
 				TriggerClientEvent("sth:updateRunnerHandle", int.Parse(runnerServerId));
-				Server.SendChatMessage("^2HUNT", $"Runner is:{runner.Name}", 255, 255, 255);
-				Server.SendToastNotif($"Hunt starting with runner: {runner.Name}", 3000);
+				Server.SendChatMessage("^CheckpointHunt", $"Runner is:{runner.Name}", 255, 255, 255);
+				Server.SendToastNotif($"CheckpointHunt starting with runner: {runner.Name}", 3000);
 
 				await Delay(100);
 
@@ -227,6 +228,8 @@ namespace sthvServer.sthvGamemodes
 		[EventHandler("tookcheckpoint")]
 		void takenCheckpointHandler(int _checkpointId)
 		{
+
+			log("event recieved: tookcheckpoint for checkpointid: " + _checkpointId);
 			if(_checkpointId >= UncapturedCheckpoints.Count)
 			{
 				log("Error in takenCheckpointHandler, _checkpointId >= UncapturedCheckpoints.Count");

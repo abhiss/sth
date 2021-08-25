@@ -10,6 +10,7 @@ namespace Shared
 		ClassicHunt, 
 		CheckpointHunt,
 		TerrorTag,
-		MapMaker
+		MapMaker,
+		InverseTag
 	}
 }

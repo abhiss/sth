@@ -12,7 +12,7 @@ namespace sthv.Gamemodes
 
 		List<(Blip, Checkpoint, int)> CheckpointMarkers = new List<(Blip, Checkpoint, int)>();
 		float Radius;
-		public CheckpointHunt() : base(Shared.Gamemode.CheckpointHunt)
+		 public CheckpointHunt() : base(Shared.Gamemode.CheckpointHunt)
 		{
 			AddEventHandler("createcheckpoint", new Action<int, float, Vector3>((id, radius, pos) =>
 			{

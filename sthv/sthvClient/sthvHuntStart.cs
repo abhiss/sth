@@ -45,9 +45,10 @@ namespace sthv
 
 		public static void SetMap(int mapNumber)
 		{
+			Debug.WriteLine("SetMap:: " + mapNumber);
 			if(mapNumber < 0)
 			{
-				//don't need a playarea naymore
+				//This gamemode doesn't use playarea.
 				sthvPlayArea.RemovePlayarea();
 			}
 			client.CurrentMap = sthvMaps.Maps[mapNumber];

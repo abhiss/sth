@@ -98,7 +98,7 @@ namespace sthv
 				}
 			});
 			#region commands
-			API.RegisterCommand("test2", new Action<int, List<object>, string>(async (src, args, raw) =>
+			API.RegisterCommand("test2", new Action<int, List<object>, string>((src, args, raw) =>
 		   {
 			   API.SetNuiFocus(true, true);
 			   //API.SetPedRandomComponentVariation(Game.Player.Character.Handle, false);
@@ -153,16 +153,14 @@ namespace sthv
 
 			Debug.WriteLine($"^2 serverid recieved, mine: {MyServerId} runner: {RunnerServerId} gamemode: {GamemodeId}^7");
 		}
+
 		[EventHandler("sth:setgamemodeid")]
 		void setGamemodeIdHandler(int id_int)
 		{
 			var id = (Shared.Gamemode)id_int;
 			client.GamemodeId = id;
 
-			//random cleanup from ClassicHunt
-			sthvPlayArea.RemovePlayarea();
-
-			Debug.WriteLine("Gamemode set to " + id);
+			Debug.WriteLine("^2------------Gamemode set to " + id);
 			BaseGamemode gamemode = null;
 
 			switch (id)
@@ -170,6 +168,8 @@ namespace sthv
 				case Shared.Gamemode.None:
 					break;
 				case Shared.Gamemode.ClassicHunt:
+
+
 					break;
 				case Shared.Gamemode.CheckpointHunt:
 					{
@@ -180,12 +180,22 @@ namespace sthv
 				case Shared.Gamemode.TerrorTag:
 					{
 						gamemode = new Gamemodes.TerrorTag();
-					}	
+						break;
+					}
+				case Shared.Gamemode.InverseTag:
+					{
+						gamemode = new Gamemodes.InverseTag();
+					}
 					
 					break;
 				default:
 					break;
 			}
+			if (gamemode == null) return;
+			//gamemode is probably ClassicHunt, which is the "default gamemode"
+			//classic doesn't have a gamemode object because it was the original 
+			//gamemode and it's code is scattered throughout the client files.
+
 
 			Debug.WriteLine($"Gamemode {gamemode.GetType()} initialized with {gamemode.GetTicks().Count()} ticks.");
 			foreach (var cpevent in gamemode.GetEventHandlers())

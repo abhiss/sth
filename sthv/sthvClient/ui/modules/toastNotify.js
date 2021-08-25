@@ -8,24 +8,18 @@ export async function addToastNotification(message, display_time=5000){
     if(!is_tn_q_handler_in_progress){
         toast_notification_queue_handler();
     }
-
 }
 
 let is_tn_q_handler_in_progress = false;
 //recursively handles toast_notification_queue
 async function toast_notification_queue_handler(){
-    //avoid race
-    // if(is_tn_q_handler_in_progress){
-    //     console.log("An error occured: toast_notification_queue_handler was called while in progress.");
-    //     return;
-    // }
     if(toast_notification_queue.length == 0){
         is_tn_q_handler_in_progress = false;
         return;
     }
     else {
         is_tn_q_handler_in_progress = true;
-        const data = toast_notification_queue.shift(); //pop is for stacks 
+        const data = toast_notification_queue.shift(); //pop is for stacks
 
         await show_toast_notification(data.message, data.display_time);
         await new Promise(r => setTimeout(r, 1000))
@@ -98,45 +92,3 @@ async function show_toast_notification(message, display_time) {
         }
     ).finished
 }
-
-// toastAnimation.finished.then(() => {
-//     document.getElementById('toast_message_text').animate(
-//         //  Inline Keyframes
-//         [
-//             { opacity: '0' },
-//             { opacity: '1' }
-//         ],
-//         //  Inline Settings
-//         {
-//             duration: 500,
-//             fill: 'both'
-//         }
-//     )
-// }).then(() => {
-//     return new Promise(r => setTimeout(r, 5000))
-// }).then(() => {
-//     document.getElementById('toast_message_text').animate(
-//         //  Inline Keyframes
-//         [
-//             { opacity: '1' },
-//             { opacity: '0' }
-//         ],
-//         //  Inline Settings
-//         {
-//             duration: 250,
-//             fill: 'both'
-//         }
-//     ).finished.then(() => {
-//         document.getElementById('toast_message').animate(
-//             [
-//                 { transform: 'scaleX(1)', offset: 0 },
-//                 { transform: 'scaleY(1) scaleX(0.01)', offset: 0.7, easing: 'ease-in' },
-//                 { transform: 'scaleY(0) scaleX(0)', offset: 1 }
-//             ],
-//             {
-//                 duration: 500,
-//                 fill: 'both'
-//             }
-//         )
-//     })
-// })
