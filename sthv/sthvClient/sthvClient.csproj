@@ -23,7 +23,7 @@
 
     <!-- The following has to be done to keep directory structure of ui folder. 
      -->
-    <Copy SourceFiles="@(UIFolder)" DestinationFiles="@(UIFolder->'$(SolutionDir)/dist/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(UIFolder)" DestinationFiles="@(UIFolder->'$(SolutionDir)/dist/ui/%(RecursiveDir)%(Filename)%(Extension)')" />
 
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)/dist" />
   </Target>

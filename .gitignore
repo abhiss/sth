@@ -14,7 +14,10 @@
 #Custom
 sthv/dist/**
 !sthv/dist/fxmanifest.lua
-!sthv/dist/
+!sthv/dist/readme.md
+!sthv/dist/loadingscreen/
+!sthv/dist/Newtonsoft.Json.dll
+
 
 
 !dist/fxmanifest.lua
