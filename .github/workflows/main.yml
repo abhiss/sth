@@ -28,12 +28,6 @@ jobs:
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: bash ${{ github.workspace }}/sthv/etc/prebuild.sh
-
-      - name: Zip Release
-        uses: TheDoctor0/zip-release@0.6.0
-        with:
-          directory:  ${{ github.workspace }}/sthv
-          path: ${{ github.workspace }}/sthv/dist
           
       - name: Publish dist directory in releases.
         id: create_release
@@ -41,7 +35,7 @@ jobs:
         with: 
           allowUpdates: true
           artifactErrorsFailBuild: true
-          artifacts: ${{ github.workspace }}/sthv/release.zip
+          artifacts: ${{ github.workspace }}/sthv.zip
           artifactContentType: "raw"
           draft: true
           tag: "test_build"
