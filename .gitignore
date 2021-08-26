@@ -260,3 +260,5 @@ paket-files/
 __pycache__/
 *.pyc
 /sthv/sthvClient/ui/.vscode
+/sthv/MigrationBackup/cea07507/sthvClient/NuGetUpgradeLog.html
+/sthv/MigrationBackup/cea07507/sthvClient
