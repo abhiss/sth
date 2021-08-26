@@ -38,4 +38,6 @@ sudo apt-get install -y tree
 tree ./sthv/dist
 
 sudo apt-get install -y zip
-zip -r sthv.zip ./sthv/dist
+cd ./sthv
+mv ./dist ./sthv
+zip -r sthv.zip ./sthv
