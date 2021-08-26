@@ -32,8 +32,8 @@ jobs:
       - name: Zip Release
         uses: TheDoctor0/zip-release@0.6.0
         with:
-          path: ${{ github.workspace }}/sthv/dist
           directory:  ${{ github.workspace }}/sthv
+          path: ${{ github.workspace }}/sthv/dist
           
       - name: Publish dist directory in releases.
         id: create_release
@@ -41,7 +41,7 @@ jobs:
         with: 
           allowUpdates: true
           artifactErrorsFailBuild: true
-          artifacts: ${{ github.workspace }}/release.zip
+          artifacts: ${{ github.workspace }}/sthv/release.zip
           artifactContentType: "raw"
           draft: true
           tag: "test_build"
