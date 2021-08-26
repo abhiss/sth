@@ -60,21 +60,20 @@
     <Compile Include="..\Server\shared\SharedModels.cs">
       <Link>shared\SharedModels.cs</Link>
     </Compile>
-    <Compile Include="..\Server\Shared\sthvMapModel.cs">
-      <Link>Shared\sthvMapModel.cs</Link>
-    </Compile>
     <Compile Include="BaseGamemode.cs" />
     <Compile Include="client.cs" />
     <Compile Include="Gamemodes\CheckpointHunt.cs" />
     <Compile Include="Gamemodes\TerrorTag.cs" />
     <Compile Include="GamemodeUtilities.cs" />
     <Compile Include="NuiEventModel.cs" />
+    <Compile Include="Shared\sthvMapModel.cs" />
     <Compile Include="Spawn\SpawnNuiController.cs" />
     <Compile Include="fetch\sthvFetch.cs" />
     <Compile Include="sthvGameoverHandler.cs" />
     <Compile Include="sthvHuntStart.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Spawn\Spawn.cs" />
+    <Compile Include="sthvMapModel.cs" />
     <Compile Include="sthvPlayArea.cs" />
     <Compile Include="sthvPlayerCache.cs" />
     <Compile Include="sthvRules.cs" />
