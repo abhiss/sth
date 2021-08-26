@@ -1,148 +1,31 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B09212B0-009F-4700-895A-2CBE898F1813}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>sthv</RootNamespace>
-    <AssemblyName>sthv.client.net</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
+    <AssemblyName>sthvClient.net</AssemblyName>
+    <TargetFramework>net452</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>embedded</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <RunPostBuildEvent>Always</RunPostBuildEvent>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\Server\Shared\SharedEnums.cs">
-      <Link>Shared\SharedEnums.cs</Link>
-    </Compile>
-    <Compile Include="..\Server\Shared\SharedModels.cs">
-      <Link>shared\SharedModels.cs</Link>
-    </Compile>
-    <Compile Include="..\Server\Shared\sthvMapModel.cs">
-      <Link>Shared\sthvMapModel.cs</Link>
-    </Compile>
-    <Compile Include="BaseGamemode.cs" />
-    <Compile Include="client.cs" />
-    <Compile Include="Gamemodes\CheckpointHunt.cs" />
-    <Compile Include="Gamemodes\TerrorTag.cs" />
-    <Compile Include="GamemodeUtilities.cs" />
-    <Compile Include="NuiEventModel.cs" />
-    <Compile Include="Spawn\SpawnNuiController.cs" />
-    <Compile Include="fetch\sthvFetch.cs" />
-    <Compile Include="sthvGameoverHandler.cs" />
-    <Compile Include="sthvHuntStart.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Spawn\Spawn.cs" />
-    <Compile Include="sthvPlayArea.cs" />
-    <Compile Include="sthvPlayerCache.cs" />
-    <Compile Include="sthvRules.cs" />
-    <Compile Include="sthvSpectate.cs" />
-    <Compile Include="sthvSyncLobbyInfo.cs" />
-    <Compile Include="test.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="README.md" />
-    <None Include="ui\node_modules\%40types\gsap\LICENSE" />
-    <None Include="ui\node_modules\%40types\gsap\package.json" />
-    <None Include="ui\node_modules\%40types\gsap\README.md" />
-    <None Include="ui\node_modules\%40types\jquery\LICENSE" />
-    <None Include="ui\node_modules\%40types\jquery\package.json" />
-    <None Include="ui\node_modules\%40types\jquery\README.md" />
-    <None Include="ui\package-lock.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="ui\assets\check.png" />
-    <Content Include="ui\assets\cross.png" />
-    <Content Include="ui\assets\dead.png" />
-    <Content Include="ui\assets\err.png" />
-    <Content Include="ui\assets\heliico3n.png" />
-    <Content Include="ui\assets\heliicon.png" />
-    <Content Include="ui\assets\target.png" />
-    <Content Include="ui\index.html" />
-    <Content Include="ui\modules\AdminMenu.js" />
-    <Content Include="ui\modules\MapMenu.js" />
-    <Content Include="ui\modules\toastNotify.js" />
-    <Content Include="ui\script.js" />
-    <Content Include="ui\style.css" />
-  </ItemGroup>
-  <ItemGroup>
-    <TypeScriptCompile Include="ui\node_modules\%40types\gsap\Animation.d.ts" />
-    <TypeScriptCompile Include="ui\node_modules\%40types\gsap\Ease.d.ts" />
-    <TypeScriptCompile Include="ui\node_modules\%40types\gsap\index.d.ts" />
-    <TypeScriptCompile Include="ui\node_modules\%40types\gsap\Plugins.d.ts" />
-    <TypeScriptCompile Include="ui\node_modules\%40types\gsap\Timeline.d.ts" />
-    <TypeScriptCompile Include="ui\node_modules\%40types\gsap\Tween.d.ts" />
-    <TypeScriptCompile Include="ui\node_modules\%40types\gsap\TweenConfig.d.ts" />
-    <TypeScriptCompile Include="ui\node_modules\%40types\jquery\dist\jquery.slim.d.ts" />
-    <TypeScriptCompile Include="ui\node_modules\%40types\jquery\index.d.ts" />
-    <TypeScriptCompile Include="ui\node_modules\%40types\jquery\JQuery.d.ts" />
-    <TypeScriptCompile Include="ui\node_modules\%40types\jquery\JQueryStatic.d.ts" />
-    <TypeScriptCompile Include="ui\node_modules\%40types\jquery\legacy.d.ts" />
-    <TypeScriptCompile Include="ui\node_modules\%40types\jquery\misc.d.ts" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="CitizenFX.Core.Client">
-      <Version>1.0.4340</Version>
-    </PackageReference>
-    <PackageReference Include="Newtonsoft.Json">
-      <Version>12.0.2</Version>
-    </PackageReference>
-    <PackageReference Include="System.ValueTuple">
-      <Version>4.5.0</Version>
-    </PackageReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 
-    <Target Name="CopyUIFiles">
-        <Copy
-            SourceFiles="@(Content)"
-            DestinationFolder="$(SolutionDir)/ui" />
-      
-        
-        <Copy SourceFiles="$(TargetPath)"
-            DestinationFolder="$(SolutionDir)dist" />
-      
-    
-    </Target>
+  <ItemGroup>
+    <Compile Include="..\Server\Shared\SharedEnums.cs" Link="Shared\SharedEnums.cs" />
+    <Compile Include="..\Server\Shared\SharedModels.cs" Link="shared\SharedModels.cs" />
+    <Compile Include="..\Server\Shared\sthvMapModel.cs" Link="Shared\sthvMapModel.cs" />
+  </ItemGroup>
 
-  <!-- <PropertyGroup>
-    <PostBuildEvent>xcopy /y /d "$(TargetPath)" "C:\Servers\volumes\fivem_sthv_dev\resources\[local]\sthv"
-pwsh  $(SolutionDir)helper.ps1 -source $(ProjectDir)ui</PostBuildEvent>
-  </PropertyGroup> -->
+  <ItemGroup>
+    <PackageReference Include="CitizenFX.Core.Client" Version="1.0.4340" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
 
+  <ItemGroup>
+    <UIFolder Include="$(ProjectDir)ui/**/*.*"/>
+  </ItemGroup>
 
+  <Target Name="CopyUIFiles" AfterTargets="Build">
+
+    <!-- The following has to be done to keep directory structure of ui folder. 
+     -->
+    <Copy SourceFiles="@(UIFolder)" DestinationFiles="@(UIFolder->'$(SolutionDir)/dist/%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SolutionDir)/dist" />
+  </Target>
 
 </Project>
