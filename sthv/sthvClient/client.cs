@@ -17,7 +17,7 @@ namespace sthv
 		int MyServerId { get; } = Game.Player.ServerId;
 		static public int RunnerServerId { get; set; }
 
-		public static sthv.sthvMapModel CurrentMap { get; set; }
+		public static Shared.sthvMapModel CurrentMap { get; set; }
 		public Ped _thisPed { get; set; }
 		private SpawnNuiController spawnnuicontroller { get; set; } = new SpawnNuiController();
 
