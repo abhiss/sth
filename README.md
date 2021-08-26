@@ -8,7 +8,7 @@ Some directories have readme.md files that describe that they are used for. If y
 
 
 ## Building
-The resource projects target .NET Standard 2.0 and .NET Framework for the server and client resource respectively. You need to have .NET SDKs to build source. These can be installed [manually](https://dotnet.microsoft.com/download/visual-studio-sdks) or along with [Visual Stuio](https://visualstudio.microsoft.com/). The resulting files will in [dist](/sthv/dist], which can be started as a resource.
+The resource projects target .NET Standard 2.0 and .NET Framework for the server and client resource respectively. You need to have .NET SDKs to build source. These can be installed [manually](https://dotnet.microsoft.com/download/visual-studio-sdks) or along with [Visual Stuio](https://visualstudio.microsoft.com/). The resulting files will in the [dist](/sthv/dist) directory, which can be started as a resource.
 
 ### Windows - Visual Studio: 
 
