@@ -1,7 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<!-- https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-task-reference?view=vs-2019 -->
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>

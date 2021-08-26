@@ -9,9 +9,9 @@ resource_type 'gametype' { name = 'Survive the Hunt' }
 loadscreen_manual_shutdown "yes"
 
 client_scripts{
-    'sthv.client.net.dll'
+    'sthvClient.net.dll'
 }
-server_script 'sthv.server.net.dll'
+server_script 'sthvServer.net.dll'
 ui_page 'ui/index.html'
 loadscreen 'loadingscreen/loadingscreen.html'
 files {

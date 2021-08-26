@@ -1,12 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<!-- https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-task-reference?view=vs-2019 -->
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>sthvServer.net</AssemblyName>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants></DefineConstants>
+  <PropertyGroup>
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
@@ -15,7 +15,12 @@
   <Target Name="CopyServerDLLs" AfterTargets="Build">
     <Copy
       SourceFiles="$(TargetDir)$(ProjectName).net.dll;$(TargetDir)$(ProjectName).net.pdb"
-      DestinationFolder="$(SolutionDir)/dist" />
+      DestinationFolder="$(SolutionDir)dist" />
+      
+    <ZipDirectory Condition="'$(Configuration)' == 'Release'" SourceDirectory="$(SolutionDir)dist" DestinationFile="$(SolutionDir)../sthv.zip"/>
+    <Exec 
+      Condition="Exists('$(PostBuildScript)')"
+      Command="pwsh $(PostBuildScript)"/>
   </Target> 
 
   <!--allows tests to access internal classes/ctors --> 

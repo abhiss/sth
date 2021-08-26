@@ -12,7 +12,7 @@
 *.net.pdb
 
 sthv/dist/ui
-
+sthv.zip
 
 !dist/fxmanifest.lua
 # User-specific files (MonoDevelop/Xamarin Studio)

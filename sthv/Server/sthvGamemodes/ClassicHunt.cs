@@ -49,6 +49,8 @@ namespace sthvServer.sthvGamemodes
 
 				//picking and assigning runner
 				int runnerindex = rand.Next(0, readyPlayers.Count);
+				log("picked runner index: " + runnerindex);
+
 				readyPlayers[runnerindex].teamname = TRunner;
 				//assigning everyone else hunter team
 				foreach (var p in readyPlayers)
