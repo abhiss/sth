@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>sthv.server.net</AssemblyName>
+    <AssemblyName>sthvServer.net</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -11,9 +11,14 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /y /d &quot;$(TargetDir)sthv.server.net.dll&quot; &quot;C:\Servers\volumes\fivem_sthv_dev\resources\[local]\sthv&quot;&#xD;&#xA;xcopy /y /d &quot;$(TargetDir)sthv.server.net.pdb&quot; &quot;C:\Servers\volumes\fivem_sthv_dev\resources\[local]\sthv&quot;" />
-  </Target>
+  <!-- copy after build -->
+  <Target Name="CopyServerDLLs" AfterTargets="Build">
+    <Copy
+      SourceFiles="$(TargetDir)$(ProjectName).net.dll;$(TargetDir)$(ProjectName).net.pdb"
+      DestinationFolder="$(SolutionDir)/dist" />
+  </Target> 
+
+
 
 <!--allows tests to access internal classes/ctors --> 
   <ItemGroup>
