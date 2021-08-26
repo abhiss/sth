@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Screen</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+</head>
+
+<body>
+    <img id="loady" src="./giphy.gif" alt="Loading..." />
+    <img id="v" src="v_outline.svg" alt="" srcset="">
+    <h1 id="LoadingscreenTitle">Survive the Hunt</h1>
+
+</body>
+
+</html>
+
+
+<style>
+    * {
+        margin: 0px;
+        padding: 0px;
+        border-width: 0px;
+    }
+
+    #loady {
+        z-index: 20;
+        position: absolute;
+        right: 0px;
+        top: 0px;
+        /* margin: auto; */
+    }
+
+    body {
+        background: #000;
+    }
+
+    #v {
+        width: 50%;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 10%;
+        margin: auto;
+        display: inline-block;
+    }
+
+    #LoadingscreenTitle {
+        color: white;
+        display: inline-block;
+        font-family: 'Segoe UI';
+        font-weight: 200;
+        position: absolute;
+        top: 55%;
+        left: 30%;
+        font-size: 9em;
+        background: url('./gold.jpg');
+        background-size: 150%;
+        background-position: 190px -1300px;
+
+
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+
+    }
+</style>
