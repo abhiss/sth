@@ -30,10 +30,12 @@ echo "deb https://download.mono-project.com/repo/debian stable-buster main" | su
 #https://stackoverflow.com/a/55070707/12387791
 export FrameworkPathOverride=/usr/lib/mono/4.5/
 
-cd ./sthv/
-dotnet build ./sthv.sln
+dotnet build ./sthv/sthv.sln
 
-ls -a ./dist
+ls -a ./sthv/dist
 
 sudo apt-get install -y tree
-tree ./dist
+tree ./sthv/dist
+
+sudo apt-get install -y zip
+zip -r sthv.zip ./sthv/dist
