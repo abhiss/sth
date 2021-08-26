@@ -38,6 +38,7 @@ jobs:
           artifacts: ${{ github.workspace }}/sthv/dist
           artifactContentType: "raw"
           draft: true
+          tag: "test_build"
           token: ${{ secrets.GITHUB_TOKEN }}
         
       # Runs a set of commands using the runners shell
