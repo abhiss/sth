@@ -126,8 +126,24 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
+
+    <Target Name="CopyUIFiles">
+        <Copy
+            SourceFiles="@(Content)"
+            DestinationFolder="$(SolutionDir)/ui" />
+      
+        
+        <Copy SourceFiles="$(TargetPath)"
+            DestinationFolder="$(SolutionDir)dist" />
+      
+    
+    </Target>
+
+  <!-- <PropertyGroup>
     <PostBuildEvent>xcopy /y /d "$(TargetPath)" "C:\Servers\volumes\fivem_sthv_dev\resources\[local]\sthv"
 pwsh  $(SolutionDir)helper.ps1 -source $(ProjectDir)ui</PostBuildEvent>
-  </PropertyGroup>
+  </PropertyGroup> -->
+
+
+
 </Project>
