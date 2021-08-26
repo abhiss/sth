@@ -35,9 +35,10 @@ jobs:
         with: 
           allowUpdates: true
           artifactErrorsFailBuild: true
-          artifacts: ${{ github.workspace }}/sthv.zip
+          artifacts: ${{ github.workspace }}/sthv/sthv.zip
           artifactContentType: "raw"
-          draft: true
+          name: STHV
+          replacesArtifacts: true
           tag: "test_build"
           token: ${{ secrets.GITHUB_TOKEN }}
     
