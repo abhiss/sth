@@ -11,13 +11,7 @@
 *.net.dll
 *.net.pdb
 
-#Custom
-sthv/dist/**
-!sthv/dist/fxmanifest.lua
-!sthv/dist/readme.md
-!sthv/dist/loadingscreen/
-!sthv/dist/Newtonsoft.Json.dll
-
+sthv/dist/ui
 
 
 !dist/fxmanifest.lua
