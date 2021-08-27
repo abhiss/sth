@@ -2,6 +2,7 @@ author: abhi
 name: sth_basic
 
 tasks: 
+  # default resources
   - action: download_github
     dest: ./resources
     ref: b907aa74e2826e363979332ac21b9ad98cd82aa1
@@ -11,15 +12,17 @@ tasks:
   - action: ensure_dir
     path: "./resources/[local]/sthv"
   
+  # ext_resources
   - action: download_github
     dest: "./tmp/ext"
     src: "https://github.com/abhiss/sth"
     subpath: ext_resources
-  
+
   - action: move_path
     src: ./tmp/ext
     dest: ./resources/[ext]
 
+  # sthv resource
   - action: download_file
     path: ./sthv.zip
     url: "https://github.com/abhiss/sth/releases/download/latest/sthv.zip"
@@ -27,7 +30,8 @@ tasks:
   - action: unzip
     dest: "./resources/[local]/sthv"
     src: ./sthv.zip
-
+  
+  # server.cfg
   - action: download_file
     path: ./server.cfg
     url: "https://raw.githubusercontent.com/abhiss/sth/master/sthv/etc/server.cfg"
