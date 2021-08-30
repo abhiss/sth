@@ -43,18 +43,6 @@ namespace sthv
 		
 		}
 
-		public static void SetMap(int mapNumber)
-		{
-			Debug.WriteLine("SetMap:: " + mapNumber);
-			if(mapNumber < 0)
-			{
-				//This gamemode doesn't use playarea.
-				sthvPlayArea.RemovePlayarea();
-			}
-			client.CurrentMap = Shared.sthvMaps.Maps[mapNumber];
-			sthvPlayArea.SetPlayarea(client.CurrentMap.Radius, client.CurrentMap.AreaCenter.X, client.CurrentMap.AreaCenter.Y);
-		}
-
 		/// <summary>
 		/// delete props along with vehicles?
 		/// </summary>

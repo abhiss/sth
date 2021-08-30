@@ -48,17 +48,12 @@ namespace sthv
 
 			}), false);
 #endif
-			var playArea = new sthv.sthvPlayArea();
-			Tick += playArea.GetDistance;
 			var rules = new sthv.sthvRules();
 
 
 			EventHandlers["removeveh"] += new Action(async () => { await sthv.sthvHuntStart.RemoveAllVehicles(true); });
 			EventHandlers["sthv:spawnhuntercars"] += new Action<int>((mapid) => { sthvHuntStart.HunterVehicles(mapid); });
-			EventHandlers["sthv:sendChosenMap"] += new Action<int>(i =>
-			{
-				sthvHuntStart.SetMap(i);
-			});
+
 
 			//Killfeed stuff:
 			EventHandlers["baseevents:onPlayerKilled"] += new Action<int, ExpandoObject>(OnPlayerKilled);
@@ -186,8 +181,7 @@ namespace sthv
 				case Shared.Gamemode.None:
 					break;
 				case Shared.Gamemode.ClassicHunt:
-
-
+						gamemode = new Gamemodes.ClassicHunt();
 					break;
 				case Shared.Gamemode.CheckpointHunt:
 					{

@@ -12,9 +12,9 @@ using Newtonsoft.Json;
 namespace sthv
 {
 	class sthvRules : BaseScript
-	{
-		int _ped;
-		int _pid;
+	{	
+		int _ped = Game.PlayerPed.Handle; 
+		int _pid = Game.Player.Handle;
 
 		public Blip RunnerRadiusBlip { get; set; }
 
@@ -33,20 +33,7 @@ namespace sthv
 		{
 			//Tick += CheckPedMission;
 
-			EventHandlers["sthv:setnewpedmission"] += new Action(SetNewMission);
-			EventHandlers["sth:setcops"] += new Action<bool>(isCopsEnabled =>
-			{
-				if (isCopsEnabled)
-				{
-					API.SetMaxWantedLevel(5);
-				}
-				else
-				{
-					API.SetMaxWantedLevel(0);
-				}
-			});
-			_ped = API.PlayerPedId();
-			_pid = API.PlayerId();
+			EventHandlers["sthv:setnewpedmission"] += new Action(SetNewMission);			
 
 			API.StatSetInt((uint)Game.GenerateHash("MP0_STAMINA"), 100, true);
 			//API.SetPoliceIgnorePlayer(_pid, true);  //works like "turn cops blind eye", you get cops if you shoot them or something 
@@ -56,9 +43,6 @@ namespace sthv
 			API.SetCanAttackFriendly(_ped, true, true);
 			API.DisablePlayerVehicleRewards(_pid);
 			API.SetEveryoneIgnorePlayer(_pid, true);
-			//sthvClient.client.eventhandlers			
-			Game.PlayerPed.IsInvincible = true;
-
 
 			//enable trains
 			API.SwitchTrainTrack(0, true); //enables main train loop
@@ -71,9 +55,6 @@ namespace sthv
 			//enable planes and stuff
 			API.SetScenarioGroupEnabled("LSA_Planes", true);
 			//API.SetScenarioGroupEnabled("LSA_Planes", true);
-
-
-
 
 			EventHandlers["sthv:updatepednetid"] += new Action<int>(netid =>
 			{
@@ -123,7 +104,7 @@ namespace sthv
 
 
 		[Tick]
-		public async Task onTick() //happens always
+		public async Task onTick() //happens every frame
 		{
 			API.HideHudComponentThisFrame((int)HudComponent.Cash);
 			API.HideHudComponentThisFrame((int)HudComponent.CashChange);
@@ -167,6 +148,7 @@ namespace sthv
 				}
 			}
 		}
+
 		[Tick]
 		async Task GameRules() //checks rules
 		{
