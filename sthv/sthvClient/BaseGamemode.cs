@@ -35,6 +35,10 @@ namespace sthv
 			});
 		}
 
+		//This function an optionally be overriden to do cleanup after the gamemode ends.
+		public virtual void GamemodeFinalizer(){
+		}
+
 		/// <summary>
 		/// Automatically adds Ticks to client script.
 		/// </summary>

@@ -11,7 +11,8 @@ namespace sthvServer.sthvGamemodes
 	{
 		internal InverseTag() : base(GamemodeId: Shared.Gamemode.InverseTag, gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 2, numberOfTeams: 2){}
 
-		SthvPlayer runner = null;
+		//"runner" is tagged
+		SthvPlayer runner = sthvLobbyManager.GetAllPlayers()[0];
 		readonly string TRunner = "runner";
 		readonly string THunter = "hunter";
 		int currentmapid = 0;
@@ -43,7 +44,7 @@ namespace sthvServer.sthvGamemodes
 				//Assigning teams.
 				//Framework assures all dead players are ready for next hunt. Non-ready players could be loading, not authenticated, etc.
 				var readyPlayers = sthvLobbyManager.GetPlayersOfState(playerState.ready);
-				log(readyPlayers.Count + " ready players in this hunt.");
+				log(readyPlayers.Count + " ready players in this game.");
 
 				//picking and assigning runner
 				int runnerindex = rand.Next(0, readyPlayers.Count - 1);
@@ -93,55 +94,61 @@ namespace sthvServer.sthvGamemodes
 		}
 
 		[EventHandler("gamemode::player_join_late")]
-		async Task player_join_late_handler()
+		async void player_join_late_handler(string playerLicense)
 		{
 			await Delay(5000);
 			TriggerClientEvent("sthv:sendChosenMap", currentmapid);
 			TriggerClientEvent("sth:updateRunnerHandle", int.Parse(runner.player.Handle));
 		}
 
-		[EventHandler("gamemode::player_killed")]
+				[EventHandler("gamemode::player_killed")]
 		void playerKilledHandler(string killerLicense, string killedLicense)
 		{
-			//killerLicense is null when there's no killer. Player died from suicide or natural causes.
-			if (killerLicense == null)
-			{
-				return;
-			}
-			var killer = sthvLobbyManager.getPlayerByLicense(killerLicense);
 			var killed = sthvLobbyManager.getPlayerByLicense(killedLicense);
 
-			log($"{killer.player.Name} ({killer.teamname}) killed {killed.player.Name} ({killed.teamname})");
-
-			//friendly fire
-			if (killer.teamname == killed.teamname)
+			//killerLicense is null when there's no killer. Player died from suicide or natural causes.
+			if (killerLicense != null)
 			{
-				if (GamemodeConfig.isFriendlyFireAllowed)
+				var killer = sthvLobbyManager.getPlayerByLicense(killerLicense);
+				var isTeamkill = killer.teamname == killed.teamname;
+
+				log($"{killer.player.Name} ({killer.teamname}) killed {killed.player.Name} ({killed.teamname}. Teamkill: {isTeamkill})");
+				
+				//friendly fire
+				if (isTeamkill)
 				{
-					Server.SendChatMessage("", $"^5{killer.Name} teamkilled {killed.Name}.");
-					Debug.WriteLine("^5{killer.Name} teamkilled {killed.Name} because friendly fire is enable in GamemodeConfig.");
+					log("Teamkill");
+					if (GamemodeConfig.isFriendlyFireAllowed)
+					{
+						Server.SendChatMessage("", $"^5{killer.Name} teamkilled {killed.Name}.");
+						Debug.WriteLine("^5{killer.Name} teamkilled {killed.Name} because friendly fire is enable in GamemodeConfig.");
+					}
+					else
+					{
+						//punish killer and respawn killed if FF is disallowed.
+
+						killer.player.TriggerEvent("sthv:kill"); //kills the teamkiller
+						killed = killer; //this lets the teamkiller respawn later. 
+						Server.SendChatMessage("", $"^5{killer.Name} was killed by Karma and {killed.Name} respawned.");
+
+						if (killed.teamname == TRunner) killed.Spawn(map.RunnerSpawn, true, playerState.alive); //spawns killed player at spawn location
+						else if (killed.teamname == THunter) killed.Spawn(map.HunterSpawn, false, playerState.alive);
+						else log("Killed isn't a runner or hunter!?");
+ 
+					}
 				}
-				else
-				{
-					//punish killer and respawn killed if FF is disallowed.
-
-					killer.player.TriggerEvent("sthv:kill"); //kills the teamkiller
-					Server.SendChatMessage("", $"^5{killer.Name} was killed by Karma and {killed.Name} respawned.");
-
-					if (killed.teamname == TRunner) killed.Spawn(map.RunnerSpawn, true, playerState.alive); //spawns killed player at spawn location
-					else if (killed.teamname == THunter) killed.Spawn(map.HunterSpawn, false, playerState.alive);
-					else log("Killed isn't a runner or hunter!?");
-					killed = killer;
-				}
-			}
-
+			} 
 			//respawn player after 2 mins
 			var timer = GamemodeConfig.respawnTimeSeconds;
 			if (TimeLeft > timer + 10)
 			{
 				AddTimeEvent(timer + TimeSinceRoundStart, new Action(() =>
 				{
-					if (killed.teamname == THunter) killed.Spawn(map.HunterSpawn, false, playerState.alive);
+					killed.Spawn(map.HunterSpawn, false, playerState.alive);
+				}));
+				AddTimeEvent(timer + TimeSinceRoundStart + 7, new Action(() =>
+				{
+					killed.player.TriggerEvent("sth:setguns", true);
 				}));
 			}
 		}

@@ -21,7 +21,5 @@ namespace sthvServer.sthvGamemodes
 		void TargetVisibleHandler() {
 			//show target position to all hunters when any hunter has line of sight to target
 		}
-
-
 	}
 }

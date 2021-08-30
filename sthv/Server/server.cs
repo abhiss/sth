@@ -20,7 +20,13 @@ namespace sthvServer
 		List<Player> NextRunnerQueue = new List<Player>();
 		List<Player> AlivePlayerList = new List<Player>();
 		static public bool isHuntOver = true;
+
+#if DEBUG
+		public static bool TestMode { get; set; } = true;
+#elif RELEASE
 		public static bool TestMode { get; set; } = false;
+#endif
+
 		public static sthvMapModel currentMap;
 		
 		/// <summary>
@@ -37,13 +43,22 @@ namespace sthvServer
 
 		public sthvDiscordController discord { get; }
 
-		BaseGamemodeSthv gamemode;
+		static BaseGamemodeSthv gamemode;
+		public static bool IsGamemodeActive
+		{
+			get { 
+				if(gamemode == null) return false;
+				else return gamemode.isGameloopActive;
+			 }
+		}
+		
 
 		public static List<int> playersInHeliServerid { get; set; } = new List<int>();
 
 		[Command("test")]
 		void t()
 		{
+
 		}
 		public Server()
 		{
@@ -174,7 +189,8 @@ namespace sthvServer
 
 			//wait for atleast 1 player
 			//while (Players.Count() < 1) await Delay(1000);
-			bool toggle = !true;
+			bool toggle = true;
+
 			while (true)
 			{
 				if (Players.Count() < 2 && !TestMode)
@@ -186,20 +202,18 @@ namespace sthvServer
 					continue;
 				}
 
-				//$ select gamemode based on player count
-				//if (toggle)
-				//{
-				//	gamemode = new sthvGamemodes.CheckpointHunt();
-				//}
-				//else
+				//should select gamemode based on player count
+				if (toggle)
+				{
+					gamemode = new sthvGamemodes.CheckpointHunt();
+				}
+				else
 				{
 					gamemode = new sthvGamemodes.ClassicHunt();
 				}
-				//toggle = !toggle;
-
-				gamemode.CreateEvents();
-
+				toggle = !toggle;
 				Debug.WriteLine("Instantiating gamemode " + gamemode.GamemodeId + ".");
+				gamemode.CreateEvents();
 
 				Debug.WriteLine("^4Registering gamemode script.^7");
 				RegisterScript(gamemode);
@@ -258,9 +272,14 @@ namespace sthvServer
 		void KillfeedEventHandler([FromSource] Player killed, int KillerIndex)
 		{
 			Debug.WriteLine("Halnding killfeed event.");
+			Debug.WriteLine("Onesync health native: " + API.GetEntityHealth(killed.Character.Handle));
 			Debug.WriteLine($"Log: KillfeedEventHandler killed.Name: {killed.Name} KillerIndex: {KillerIndex}");
 
 			TriggerClientEvent("sthv:updateAlive", killed.Handle, false);
+
+			if(sthvLobbyManager.getPlayerByLicense(killed.getLicense()).State != playerState.alive){
+			Debug.WriteLine($"Player {killed.Name} killed, but was already dead. + Onesync health native: " + API.GetEntityHealth(killed.Character.Handle));
+			}
 
 			//if there is no killer
 			if (KillerIndex < 1)
@@ -309,7 +328,6 @@ namespace sthvServer
 
 								//sthvLobbyManager.DeadPlayers.RemoveAll(p => p == killed.getLicense());
 							}
-
 						}
 						else //means before hunt started
 						{

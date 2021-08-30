@@ -8,7 +8,7 @@ namespace sthvServer
 	{
 		public static bool isFriendlyFireAllowed = false;
 		public static uint huntLengthSeconds = 15 * 60;
-		public static uint respawnTimeSeconds;
+		public static uint respawnTimeSeconds = 40;
 		private static string next_runner_serverid;
 		
 		/// <summary>

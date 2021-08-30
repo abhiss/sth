@@ -20,31 +20,34 @@ namespace sthv
 		public static Shared.sthvMapModel CurrentMap { get; set; }
 		public Ped _thisPed { get; set; }
 		private SpawnNuiController spawnnuicontroller { get; set; } = new SpawnNuiController();
-
+		BaseGamemode gamemode = null;
 
 		public client()
 		{
 			TriggerServerEvent("sth:NeedLicense");//so player gets license on resource restarting
 			int _ped = Game.Player.Character.Handle;
+#if DEBUG
 			//test 		
 			API.RegisterCommand("sendpos", new Action<int, List<object>, string>((src, args, raw) =>
 			{
 				TriggerServerEvent("sth:sendServerDebug", $"{Game.PlayerPed.CurrentVehicle.Position.X}f, {Game.PlayerPed.CurrentVehicle.Position.Y}f, {Game.PlayerPed.CurrentVehicle.Position.Z}f");
 			}), false);
-
+			API.RegisterCommand("bring", new Action<int, List<object>, string>((src, args, raw) =>
+			{
+				var me = Game.Player;
+				foreach(var p in Players){
+					if(p.ServerId != me.ServerId){
+						p.Character.Position = me.Character.Position;
+					}
+				}
+			}), false);
 			API.RegisterCommand("test", new Action<int, List<object>, string>(async (src, args, raw) =>
 			{
-				//var pos = Game.PlayerPed.Position; var radius = 10f;
-				//API.CreateCheckpoint(45, pos.X, pos.Y, pos.Z, 0, 0, 0, radius, 225, 0, 0, 80, 0); //red
-				//API.CreateCheckpoint(45, pos.X, pos.Y, pos.Z, 0, 0, 0, radius * 2, 0, 225, 0, 80, 0); //green
-				//API.AddBlipForRadius(pos.X, pos.Y, pos.Z, radius);
-				//Game.PlayerPed.Position = pos + new Vector3(0, radius, 0);
 
 				await World.CreateVehicle(new Model((VehicleHash)3162245632u), Game.PlayerPed.Position, 0);
 
 			}), false);
-
-
+#endif
 			var playArea = new sthv.sthvPlayArea();
 			Tick += playArea.GetDistance;
 			var rules = new sthv.sthvRules();
@@ -157,11 +160,26 @@ namespace sthv
 		[EventHandler("sth:setgamemodeid")]
 		void setGamemodeIdHandler(int id_int)
 		{
+			//cleanup previous gamemode
+			//TODO: cleanup should happen on server event
+			//		maybe also when gamemode starts as a backup? 
+			if(gamemode != null){
+				foreach (var cpevent in gamemode.GetEventHandlers())
+				{
+					EventHandlers[cpevent.Name] -= cpevent.Handler;
+				}
+				foreach (var act in gamemode.GetTicks())
+				{
+					Tick -= act;
+				}
+				gamemode.GamemodeFinalizer();
+			}
+			
 			var id = (Shared.Gamemode)id_int;
 			client.GamemodeId = id;
 
 			Debug.WriteLine("^2------------Gamemode set to " + id);
-			BaseGamemode gamemode = null;
+			gamemode = null;
 
 			switch (id)
 			{
@@ -184,7 +202,7 @@ namespace sthv
 					}
 				case Shared.Gamemode.InverseTag:
 					{
-						//gamemode = new Gamemodes.InverseTag();
+						gamemode = new Gamemodes.InverseTag();
 
 						break;
 					}

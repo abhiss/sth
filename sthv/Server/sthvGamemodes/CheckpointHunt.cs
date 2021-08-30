@@ -20,7 +20,7 @@ namespace sthvServer.sthvGamemodes
 		readonly float check_radius = 15;
 		Random rand = new Random();
 
-		int currentmapid;
+		int currentmapid = 0;
 		readonly List<Vector3> UncapturedCheckpoints = new List<Vector3>();
 		internal CheckpointHunt() : base(GamemodeId: Gamemode.CheckpointHunt, gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 2, numberOfTeams: 2){}
 
@@ -66,7 +66,12 @@ namespace sthvServer.sthvGamemodes
 
 				await Delay(100);
 
+	#if DEBUG
+				runner.Spawn(map.HunterSpawn, true, playerState.alive);
+
+	#else
 				runner.Spawn(map.RunnerSpawn, true, playerState.alive);
+	#endif
 
 				//offer hunters to opt into runner ?
 				TriggerClientEvent("removeveh");
@@ -76,7 +81,7 @@ namespace sthvServer.sthvGamemodes
 				runner.player.TriggerEvent("sthv:spectate", false);
 				Server.refreshscoreboard();
 			}));
-			AddTimeEvent(5, new Action(() =>
+			AddTimeEvent(5, new Action(async() =>
 			{
 				log("spawning hunters after 5 seconds.");
 				var hunters = sthvLobbyManager.GetPlayersInTeam(THunter);
@@ -84,6 +89,10 @@ namespace sthvServer.sthvGamemodes
 				{
 					h.Spawn(map.HunterSpawn, false, playerState.alive);
 				}
+#if DEBUG
+				await Delay(1000);
+				TriggerClientEvent("sth:setguns", true);
+#endif
 			}));
 			AddTimeEvent(30, new Action(() =>
 			{
@@ -116,54 +125,61 @@ namespace sthvServer.sthvGamemodes
 		[EventHandler("gamemode::player_killed")]
 		void playerKilledHandler(string killerLicense, string killedLicense)
 		{
-			//killerLicense is null when there's no killer. Player died from suicide or natural causes.
-			if (killerLicense == null)
-			{
-				return;
-			}
-			var killer = sthvLobbyManager.getPlayerByLicense(killerLicense);
 			var killed = sthvLobbyManager.getPlayerByLicense(killedLicense);
 
-			log($"{killer.player.Name} ({killer.teamname}) killed {killed.player.Name} ({killed.teamname})");
-
-			//friendly fire
-			if (killer.teamname == killed.teamname)
+			//killerLicense is null when there's no killer. Player died from suicide or natural causes.
+			if (killerLicense != null)
 			{
-				if (GamemodeConfig.isFriendlyFireAllowed)
+				var killer = sthvLobbyManager.getPlayerByLicense(killerLicense);
+				var isTeamkill = killer.teamname == killed.teamname;
+
+				log($"{killer.player.Name} ({killer.teamname}) killed {killed.player.Name} ({killed.teamname}. Teamkill: {isTeamkill})");
+				
+				//friendly fire
+				if (isTeamkill)
 				{
-					Server.SendChatMessage("", $"^5{killer.Name} teamkilled {killed.Name}.");
-					Debug.WriteLine("^5{killer.Name} teamkilled {killed.Name} because friendly fire is enable in GamemodeConfig.");
+					log("Teamkill");
+					if (GamemodeConfig.isFriendlyFireAllowed)
+					{
+						Server.SendChatMessage("", $"^5{killer.Name} teamkilled {killed.Name}.");
+						Debug.WriteLine("^5{killer.Name} teamkilled {killed.Name} because friendly fire is enable in GamemodeConfig.");
+					}
+					else
+					{
+						//punish killer and respawn killed if FF is disallowed.
+
+						killer.player.TriggerEvent("sthv:kill"); //kills the teamkiller
+						killed = killer; //this lets the teamkiller respawn later. 
+						Server.SendChatMessage("", $"^5{killer.Name} was killed by Karma and {killed.Name} respawned.");
+
+						if (killed.teamname == TRunner) killed.Spawn(map.RunnerSpawn, true, playerState.alive); //spawns killed player at spawn location
+						else if (killed.teamname == THunter) killed.Spawn(map.HunterSpawn, false, playerState.alive);
+						else log("Killed isn't a runner or hunter!?");
+ 
+					}
 				}
-				else
-				{
-					//punish killer and respawn killed if FF is disallowed.
-
-					killer.player.TriggerEvent("sthv:kill"); //kills the teamkiller
-					Server.SendChatMessage("", $"^5{killer.Name} was killed by Karma and {killed.Name} respawned.");
-
-					if (killed.teamname == TRunner) killed.Spawn(map.RunnerSpawn, true, playerState.alive); //spawns killed player at spawn location
-					else if (killed.teamname == THunter) killed.Spawn(map.HunterSpawn, false, playerState.alive);
-					else log("Killed isn't a runner or hunter!?");
-					killed = killer;
-				}
-			}
-
+			} 
 			//respawn player after 2 mins
 			var timer = GamemodeConfig.respawnTimeSeconds;
 			if (TimeLeft > timer + 10)
 			{
 				AddTimeEvent(timer + TimeSinceRoundStart, new Action(() =>
 				{
-					if (killed.teamname == THunter) killed.Spawn(map.HunterSpawn, false, playerState.alive);
+					killed.Spawn(map.HunterSpawn, false, playerState.alive);
+				}));
+				AddTimeEvent(timer + TimeSinceRoundStart + 7, new Action(() =>
+				{
+					killed.player.TriggerEvent("sth:setguns", true);
 				}));
 			}
 		}
 
 		[EventHandler("gamemode::player_join_late")]
-		async Task player_joined_late_hander(SthvPlayer player)
+		async void player_joined_late_hander(string playerLicense)
 		{
 			if(base.TimeSinceRoundStart > 30)
 			{
+				var player = sthvLobbyManager.getPlayerByLicense(playerLicense);
 				await Delay(10000);
 				TriggerClientEvent("sth:setguns", true);
 				TriggerClientEvent("sth:setcops", GamemodeConfig.isPoliceEnabled);
@@ -232,7 +248,7 @@ namespace sthvServer.sthvGamemodes
 			log("event recieved: tookcheckpoint for checkpointid: " + _checkpointId);
 			if(_checkpointId >= UncapturedCheckpoints.Count)
 			{
-				log("Error in takenCheckpointHandler, _checkpointId >= UncapturedCheckpoints.Count");
+				log("Error in takenCheckpointHandler, _checkpointId >= UncapturedCheckpoints.Count.  UncapturedCheckpoints.Count = " + UncapturedCheckpoints.Count);
 				
 				//todo: remove exception after testing and handle more gracefully. Can be abused cheaters. 
 				throw new Exception("Error in takenCheckpointHandler, _checkpointId >= UncapturedCheckpoints.Count");
@@ -281,7 +297,8 @@ namespace sthvServer.sthvGamemodes
 			new Vector3(1020.065f, -3155.32f, 4.900775f),
 			new Vector3(441.5827f, -1399.592f, 28.31816f),
 			new Vector3(-528.8695f, 663.2872f, 140.4203f),
-			new Vector3(-632.6037f, -354.9757f, 33.82269f)};
+			new Vector3(-632.6037f, -354.9757f, 33.82269f),
+		};
 	}
 
 }

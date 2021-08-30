@@ -42,7 +42,7 @@ namespace sthvServer
 
 				foreach (var p in PlayerData)
 				{
-					Debug.WriteLine($"Player: {p.Value.player.Name} | State: {p.Value.State.ToString()} | Team: {p.Value.teamname} | license: {p.Value.player.getLicense()}\n");
+					Debug.WriteLine($"Player: {p.Value.player.Name} | State: {p.Value.State.ToString()} | Team: {p.Value.teamname} | license: {p.Value.player.getLicense()}\n | OneSync health native: {API.GetEntityHealth(p.Value.player.Character.Handle)}");
 				}
 
 
@@ -62,7 +62,11 @@ namespace sthvServer
 			var player = new SthvPlayer(source);
 			PlayerData.Add(source.getLicense(), new SthvPlayer(source));
 			CheckAlivePlayers();
-			TriggerEvent("gamemode::player_join_late", player);
+			if(isGameActive)
+			{
+				TriggerEvent("gamemode::player_join_late", player.player.getLicense());
+				Debug.WriteLine("^3triggered player_join_late for player: " + player.Name + "^7");
+			}
 		}
 
 		[EventHandler("playerDropped")]
@@ -149,6 +153,8 @@ namespace sthvServer
 		/// <param name="player"></param>
 		public static void MarkPlayerDead(Player player, string killerName, string killerLicense)
 		{
+			Debug.WriteLine("Marking player " + player.Name + " dead.");
+			
 			if (PlayerData.TryGetValue(player.getLicense(),  out SthvPlayer splayer))
 			{
 				splayer.KillerNameAndLicense = (killerName, killerLicense);

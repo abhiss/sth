@@ -43,7 +43,7 @@ $(document).ready(function () {
 		var event = e.data;
 		var item = event.EventData;
 		if (event.EventName === "hunttimer") {
-			this.console.log("hunt timer registered by nui, time: " + item["Seconds"]);
+			//console.log("hunt timer registered by nui, time: " + item["Seconds"]);
 			startCountdown(item["Message"], item["Seconds"]);
 			return;
 		}

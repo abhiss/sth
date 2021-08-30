@@ -7,10 +7,15 @@ using CitizenFX.Core.Native;
 
 namespace sthv.Gamemodes
 {
+	struct Marker {
+		public Blip blip;
+		public Checkpoint checkpoint;
+		public int id;
+	}
 	class CheckpointHunt : BaseGamemode
 	{
 
-		List<(Blip, Checkpoint, int)> CheckpointMarkers = new List<(Blip, Checkpoint, int)>();
+		List<Marker> CheckpointMarkers = new List<Marker>();
 		float Radius;
 		 public CheckpointHunt() : base(Shared.Gamemode.CheckpointHunt)
 		{
@@ -27,64 +32,69 @@ namespace sthv.Gamemodes
 				blip.Alpha = 80;
 				blip.ShowRoute = true;
 
-				CheckpointMarkers.Add((blip, check, id));
+				var marker = new Marker(){blip=blip, checkpoint = check, id = id};
+				CheckpointMarkers.Add(marker);
 			}));
 
 			AddEventHandler("removecheckpoint", new Action<int>((checkpointid) =>
 			{
-				var markers = CheckpointMarkers.FindAll(p => p.Item3 == checkpointid);
+				var markers = CheckpointMarkers.FindAll(p => p.id == checkpointid);
 				foreach (var marker in markers)
 				{
-					Blip b = marker.Item1;
-					b.Delete();
-
-					Checkpoint c = marker.Item2;
-					c.Delete();
+					marker.blip.Delete();
+					marker.checkpoint.Delete();
 				}
-				CheckpointMarkers.RemoveAll(p => p.Item3 == checkpointid);
+				CheckpointMarkers.RemoveAll(p => p.id == checkpointid);
 			}));
 
 			
 
 			AddTick(CheckpointChecker);
 		}
+		
 		async Task CheckpointChecker()
 		{
+		
+			if (client.IsRunner)
 			{
-				if (client.IsRunner)
+				foreach (var mark in CheckpointMarkers)
 				{
-					foreach (var mark in CheckpointMarkers)
+					var b = mark.blip;
+					var me = Game.PlayerPed;
+					var distance = Vector2.Distance(new Vector2(b.Position.X, b.Position.Y), new Vector2(me.Position.X, me.Position.Y));
+					Debug.WriteLine("blips: " + b.Position.X + " " + b.Position.Y + " mine: " + me.Position.X + " " + me.Position.Y);
+					Debug.WriteLine(distance.ToString());
+					if (distance < Radius && (me.Position.Z - b.Position.Z) > 0 && (me.Position.Z - b.Position.Z - 2) < 15)
 					{
-						var b = mark.Item1;
-						var me = Game.PlayerPed;
-						Debug.WriteLine("blips: " + b.Position.X + " " + b.Position.Y + " mine: " + me.Position.X + " " + me.Position.Y);
-						var distance = Vector2.Distance(new Vector2(b.Position.X, b.Position.Y), new Vector2(me.Position.X, me.Position.Y));
-						Debug.WriteLine(distance.ToString());
-						if (distance < Radius && (me.Position.Z - b.Position.Z) > 0 && (me.Position.Z - b.Position.Z - 2) < 15)
-						{
-							Debug.WriteLine("Taken checkpoint");
-							BaseScript.TriggerServerEvent("tookcheckpoint", mark.Item3);
-						}
+						Debug.WriteLine("Taken checkpoint");
+						BaseScript.TriggerServerEvent("tookcheckpoint", mark.id);
 					}
 				}
-				await BaseScript.Delay(500);
 			}
+			await BaseScript.Delay(500);
+		
 		}
 
-		~CheckpointHunt()
+		override public void GamemodeFinalizer()
 		{
+			Debug.WriteLine($"^2---- Gammode Finalized with {CheckpointMarkers.Count} markers. ----");
 			foreach(var marker in CheckpointMarkers)
 			{
-			
-					Blip b = marker.Item1;
-					b.Delete();
+					Blip b = marker.blip;
+					b.Delete(); //deletes blip from game
 
-					Checkpoint c = marker.Item2;
-					c.Delete();
+					Checkpoint c = marker.checkpoint;
+					c.Delete(); //deletes checkpoint from game 
+					Debug.WriteLine($"Marker has blip: {b.Handle} and checkpoint: {c.Handle}");
+
 				
 			}
 			CheckpointMarkers.Clear();
 
+			//TODO: this isn't right? Blips seem to get removed correctly now.
+			foreach(var b in World.GetAllBlips()){
+				Debug.WriteLine("Undeleted blip: " + b.Handle);
+			}
 		}
 	}
 }

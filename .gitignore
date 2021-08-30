@@ -13,6 +13,7 @@
 
 sthv/dist/ui
 sthv.zip
+sthv/.vscode/
 
 !dist/fxmanifest.lua
 # User-specific files (MonoDevelop/Xamarin Studio)
@@ -271,3 +272,4 @@ __pycache__/
 /sthv/sthvClient/ui/.vscode
 /sthv/MigrationBackup/cea07507/sthvClient/NuGetUpgradeLog.html
 /sthv/MigrationBackup/cea07507/sthvClient
+

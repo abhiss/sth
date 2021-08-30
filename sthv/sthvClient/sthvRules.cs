@@ -63,7 +63,6 @@ namespace sthv
 			//enable trains
 			API.SwitchTrainTrack(0, true); //enables main train loop
 			API.SwitchTrainTrack(3, true); //enables metro/subway
-			API.SetTrainTrackSpawnFrequency(0, 120000);
 			API.SetRandomTrains(true);
 
 			//enable random boats spawning
