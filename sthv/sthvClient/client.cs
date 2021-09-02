@@ -236,17 +236,23 @@ namespace sthv
 		}
 		[EventHandler("sthv:showRunnerOnMap")]
 		async void ShowRunnerOnMap(int runnerServerId)
-		{
-			Player _runner = Players[runnerServerId];
+		{	
+			var _runner = Players[runnerServerId];
+			int tries = 0;
+			while (_runner == null) {
+				await Delay(1000);
+				tries += 1;
+				if(tries > 5) return;
+			}
+			var runnerPos = _runner.Character.Position;
 			int radius = 150;
-
 			var r = new Random();
 			int y_offset = r.Next(-radius / 2, radius / 2);
 			int x_offset = r.Next(-radius / 2, radius / 2);
 
-			Debug.WriteLine($"showing runner {_runner.Name} on map");
+			//Debug.WriteLine($"showing runner {_runner.Name} on map");
 
-			var RunnerRadiusBlip = new Blip(API.AddBlipForRadius(_runner.Character.Position.X + x_offset, _runner.Character.Position.Y + y_offset, _runner.Character.Position.Z, radius));
+			var RunnerRadiusBlip = new Blip(API.AddBlipForRadius(runnerPos.X + x_offset, runnerPos.Y + y_offset, runnerPos.Z, radius));
 
 			RunnerRadiusBlip.Color = BlipColor.Red;
 			RunnerRadiusBlip.Alpha = 80;

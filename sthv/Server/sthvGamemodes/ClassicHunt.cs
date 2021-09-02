@@ -81,7 +81,7 @@ namespace sthvServer.sthvGamemodes
 
                 //offer hunters to opt into runner ?
                 TriggerClientEvent("removeveh");
-                await Delay(500);
+                await Delay(3000);
 
                 runner.player.TriggerEvent("sthv:spawnhuntercars", currentmapid);
                 runner.player.TriggerEvent("sthv:spectate", false);
@@ -123,7 +123,7 @@ namespace sthvServer.sthvGamemodes
             }));
         }
 
-      		[EventHandler("gamemode::player_killed")]
+      			[EventHandler("gamemode::player_killed")]
 		void playerKilledHandler(string killerLicense, string killedLicense)
 		{
 			var killed = sthvLobbyManager.getPlayerByLicense(killedLicense);
@@ -150,12 +150,13 @@ namespace sthvServer.sthvGamemodes
 						//punish killer and respawn killed if FF is disallowed.
 
 						killer.player.TriggerEvent("sthv:kill"); //kills the teamkiller
-						killed = killer; //this lets the teamkiller respawn later. 
-						Server.SendChatMessage("", $"^5{killer.Name} was killed by Karma and {killed.Name} respawned.");
+						Server.SendChatMessage("", $"^5{killer.Name} was killed by Karma and {killed.Name} respawned.");				
 
 						if (killed.teamname == TRunner) killed.Spawn(map.RunnerSpawn, true, playerState.alive); //spawns killed player at spawn location
 						else if (killed.teamname == THunter) killed.Spawn(map.HunterSpawn, false, playerState.alive);
 						else log("Killed isn't a runner or hunter!?");
+						killed = killer; //this lets the teamkiller respawn later. Killed is already respawned, so doesn't to set a future respawn. 
+
  
 					}
 				}
@@ -167,6 +168,8 @@ namespace sthvServer.sthvGamemodes
 				AddTimeEvent(timer + TimeSinceRoundStart, new Action(() =>
 				{
 					killed.Spawn(map.HunterSpawn, false, playerState.alive);
+					log("Spawning killed player after respawn time: " + killed.Name);
+					Server.SendChatMessage("sthv", "Spawning " + killed.Name + " after respawn time.");
 				}));
 				AddTimeEvent(timer + TimeSinceRoundStart + 7, new Action(() =>
 				{

@@ -16,6 +16,7 @@ namespace sthvServer.sthvGamemodes
 		readonly string TRunner = "runner";
 		readonly string THunter = "hunter";
 		int currentmapid = 0;
+		bool isRecentlyTagged = false;
 
 		Shared.sthvMapModel map = Shared.sthvMaps.Maps[5];
 
@@ -82,13 +83,14 @@ namespace sthvServer.sthvGamemodes
 				{
 					h.Spawn(map.HunterSpawn, false, playerState.alive);
 				}
+				TriggerClientEvent("sth:new_runner", runner.player.Handle);
 			}));
 
 			AddFinalizerEvent(new Action(() =>
 			{
 				TriggerClientEvent("sth:updateRunnerHandle", -1);
 
-				TriggerClientEvent("removeveh");
+				//TriggerClientEvent("removeveh");
 				Tick -= runnerHintHandler;
 			}));
 		}
@@ -99,6 +101,25 @@ namespace sthvServer.sthvGamemodes
 			await Delay(5000);
 			TriggerClientEvent("sthv:sendChosenMap", currentmapid);
 			TriggerClientEvent("sth:updateRunnerHandle", int.Parse(runner.player.Handle));
+		}
+
+		[EventHandler("sth:tagged_runner")]
+		async void tagged_runner_handler([FromSource]Player source, int runnerServerId){
+			if(isRecentlyTagged) return;
+
+			if(runnerServerId < 1) {
+				log($"^4Got invalid runnerServerId: {runnerServerId} in tagged_runner_handler from player {source.Name}.");
+				
+			}
+
+			isRecentlyTagged = true;
+			log("new runner serverid: " + runnerServerId);
+			this.runner = sthvLobbyManager.getPlayerByLicense(Players[runnerServerId].getLicense());
+			log("new runner: " + runner.Name);
+			TriggerClientEvent("sth:new_runner", runnerServerId);
+			await Delay(5000);
+			
+			isRecentlyTagged = false;
 		}
 
 				[EventHandler("gamemode::player_killed")]
@@ -128,12 +149,13 @@ namespace sthvServer.sthvGamemodes
 						//punish killer and respawn killed if FF is disallowed.
 
 						killer.player.TriggerEvent("sthv:kill"); //kills the teamkiller
-						killed = killer; //this lets the teamkiller respawn later. 
-						Server.SendChatMessage("", $"^5{killer.Name} was killed by Karma and {killed.Name} respawned.");
+						Server.SendChatMessage("", $"^5{killer.Name} was killed by Karma and {killed.Name} respawned.");				
 
 						if (killed.teamname == TRunner) killed.Spawn(map.RunnerSpawn, true, playerState.alive); //spawns killed player at spawn location
 						else if (killed.teamname == THunter) killed.Spawn(map.HunterSpawn, false, playerState.alive);
 						else log("Killed isn't a runner or hunter!?");
+						killed = killer; //this lets the teamkiller respawn later. Killed is already respawned, so doesn't to set a future respawn. 
+
  
 					}
 				}
@@ -145,6 +167,8 @@ namespace sthvServer.sthvGamemodes
 				AddTimeEvent(timer + TimeSinceRoundStart, new Action(() =>
 				{
 					killed.Spawn(map.HunterSpawn, false, playerState.alive);
+					log("Spawning killed player after respawn time: " + killed.Name);
+					Server.SendChatMessage("sthv", "Spawning " + killed.Name + " after respawn time.");
 				}));
 				AddTimeEvent(timer + TimeSinceRoundStart + 7, new Action(() =>
 				{
@@ -210,8 +234,8 @@ namespace sthvServer.sthvGamemodes
 
 		async Task runnerHintHandler()
 		{
-			TriggerClientEvent("sthv:showRunnerOnMap", int.Parse(runner.player.Handle));
-			await Delay((int)GamemodeConfig.secondsBetweenHints * 1000);
+			TriggerClientEvent("sthv:showRunnerOnMap",int.Parse(runner.player.Handle));
+			await Delay((int)GamemodeConfig.secondsBetweenHints + 1 * 1000);
 		}
 	}
 }

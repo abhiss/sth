@@ -52,15 +52,7 @@ namespace sthv
 				}
 			});
 			RegisterNuiEventHandler("sthv:requestspawn", requestspawn);
-			//RegisterNuiEventHandler(("nui:returnWantsToRun"), new Action<IDictionary<string, object>>((i) =>
-			//{
-			//	bool wanttorun = (bool)i["opt"];
-			//	Debug.WriteLine($"opt returned: {wanttorun}");
-			//	if (wanttorun)
-			//	{
-			//		TriggerServerEvent("sthv:opttorun");
-			//	}
-			//}));
+
 			RegisterNuiEventHandler("admin_menu_close", new Action<IDictionary<string, object>>(e =>
 			{
 				API.SetNuiFocus(false, false);

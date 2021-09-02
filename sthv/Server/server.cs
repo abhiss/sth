@@ -188,7 +188,8 @@ namespace sthvServer
 			//StartHunt(25);
 
 			//wait for atleast 1 player
-			//while (Players.Count() < 1) await Delay(1000);
+			while (Players.Count() < 1) await Delay(1000);
+			
 			bool toggle = true;
 
 			while (true)
@@ -202,6 +203,9 @@ namespace sthvServer
 					continue;
 				}
 
+#if DEBUG
+				gamemode= new sthvGamemodes.InverseTag();
+#else
 				//should select gamemode based on player count
 				if (toggle)
 				{
@@ -211,6 +215,7 @@ namespace sthvServer
 				{
 					gamemode = new sthvGamemodes.ClassicHunt();
 				}
+#endif
 				toggle = !toggle;
 				Debug.WriteLine("Instantiating gamemode " + gamemode.GamemodeId + ".");
 				gamemode.CreateEvents();
