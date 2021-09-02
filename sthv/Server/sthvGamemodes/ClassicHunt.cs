@@ -233,7 +233,8 @@ namespace sthvServer.sthvGamemodes
         }
         async Task runnerHintHandler()
         {
-            TriggerClientEvent("sthv:showRunnerOnMap", int.Parse(runner.player.Handle));
+			Vector3 pos = runner.player.Character.Position;
+			TriggerClientEvent("sthv:showRunnerOnMap", pos);
             await Delay((int)GamemodeConfig.secondsBetweenHints * 1000);
         }
     }

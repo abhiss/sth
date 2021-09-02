@@ -235,16 +235,8 @@ namespace sthv
 			TriggerEvent("sthv:spectate", false);
 		}
 		[EventHandler("sthv:showRunnerOnMap")]
-		async void ShowRunnerOnMap(int runnerServerId)
+		async void ShowRunnerOnMap(Vector3 runnerPos)
 		{	
-			var _runner = Players[runnerServerId];
-			int tries = 0;
-			while (_runner == null) {
-				await Delay(1000);
-				tries += 1;
-				if(tries > 5) return;
-			}
-			var runnerPos = _runner.Character.Position;
 			int radius = 150;
 			var r = new Random();
 			int y_offset = r.Next(-radius / 2, radius / 2);
