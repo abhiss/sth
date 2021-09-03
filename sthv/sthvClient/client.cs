@@ -197,7 +197,6 @@ namespace sthv
 				case Shared.Gamemode.InverseTag:
 					{
 						gamemode = new Gamemodes.InverseTag();
-
 						break;
 					}
 				default:
@@ -226,6 +225,8 @@ namespace sthv
 			{
 				await sthv.Spawn.SpawnPlayer("mp_m_freemode_01", location.X, location.Y, location.Z, location.W);
 				API.SetPedRandomComponentVariation(Game.Player.Character.Handle, false);
+				var veh = await World.CreateVehicle(new Model(VehicleHash.Barracks3), new Vector3(location.X, location.Y, location.Z));
+				Game.PlayerPed.SetIntoVehicle(veh, VehicleSeat.Driver);
 			}
 			else
 			{

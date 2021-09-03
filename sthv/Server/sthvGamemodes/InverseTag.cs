@@ -11,30 +11,46 @@ namespace sthvServer.sthvGamemodes
 	{
 		internal InverseTag() : base(GamemodeId: Shared.Gamemode.InverseTag, gameLengthInSeconds: GamemodeConfig.huntLengthSeconds, minimumNumberOfPlayers: 2, numberOfTeams: 2){}
 
-		//"runner" is tagged
-		SthvPlayer runner = sthvLobbyManager.GetAllPlayers()[0];
+		SthvPlayer _runner = sthvLobbyManager.GetAllPlayers()[0];
+		public SthvPlayer runner
+		{
+			get { return _runner; }
+			set { 
+					TriggerClientEvent("sth:new_runner", value.player.Handle);
+					//make old runner hunter since there will 
+					//only be a single runner at a time.
+					_runner.teamname = THunter;
+					value.teamname = TRunner;
+					sthvLobbyManager.getPlayerByLicense(value.player.getLicense()).teamname = TRunner;
+					if(_runner != null)
+					sthvLobbyManager.getPlayerByLicense(_runner.player.getLicense()).teamname = TRunner;
+
+					_runner = value;
+					Server.refreshscoreboard();
+				}
+		}
+		
 		readonly string TRunner = "runner";
 		readonly string THunter = "hunter";
 		int currentmapid = 0;
 		bool isRecentlyTagged = false;
+		Random rand = new Random();
+		int noTagbackTimeMS = 10_000;
 
 		Shared.sthvMapModel map = Shared.sthvMaps.Maps[5];
-
 
 		override public void CreateEvents()
 		{
 			AddTimeEvent(0, new Action(() =>
 			{
-
 				Tick += runnerHintHandler;
-				Random rand = new Random();
 				if (GamemodeConfig.huntNextMapIndex > 0)
 				{
 					currentmapid = GamemodeConfig.huntNextMapIndex;
 				}
 				else
 				{
-					//pick random playarea 
+					//pick random playarea
 					currentmapid = rand.Next(0, Shared.sthvMaps.Maps.Length);
 				}
 				Server.currentMap = Shared.sthvMaps.Maps[currentmapid];
@@ -50,7 +66,7 @@ namespace sthvServer.sthvGamemodes
 				//picking and assigning runner
 				int runnerindex = rand.Next(0, readyPlayers.Count - 1);
 				runner = readyPlayers[runnerindex];
-				runner.teamname = TRunner;
+				log("RUNNER SET TO " + runner.player.Handle + " and has teamname: " + runner.teamname);
 
 				//assigning everyone else hunter team
 				foreach (var p in readyPlayers)
@@ -70,12 +86,11 @@ namespace sthvServer.sthvGamemodes
 				//spawn runner
 				runner.Spawn(map.RunnerSpawn, true, playerState.alive);
 
-				runner.player.TriggerEvent("sthv:spawnhuntercars", currentmapid);
 				runner.player.TriggerEvent("sthv:spectate", false);
 				Server.refreshscoreboard();
 			}));
 
-			AddTimeEvent(5, new Action(() =>
+			AddTimeEvent(5, new Action(async () =>
 			{
 				log("spawning hunters after 5 seconds.");
 				var hunters = sthvLobbyManager.GetPlayersInTeam(THunter);
@@ -83,17 +98,33 @@ namespace sthvServer.sthvGamemodes
 				{
 					h.Spawn(map.HunterSpawn, false, playerState.alive);
 				}
+				await Delay(1000);
+				if(hunters.Count > 0) hunters[0].player.TriggerEvent("sthv:spawnhuntercars", currentmapid);
 				TriggerClientEvent("sth:new_runner", runner.player.Handle);
+				log("setting runner to: " + runner.player.Handle);
 			}));
 
 			AddFinalizerEvent(new Action(() =>
 			{
 				TriggerClientEvent("sth:updateRunnerHandle", -1);
-
-				//TriggerClientEvent("removeveh");
-				Tick -= runnerHintHandler;
+				TriggerClientEvent("removeveh");
 			}));
 		}
+
+#if DEBUG
+		[Command("bring")]
+		void cmd_bring(){
+			if(runner is null)
+			{
+				log("Runner is null.");
+			}
+			foreach(var p in sthvLobbyManager.GetAllPlayers()) {
+				var pos =  runner.player.Character.Position;
+				p.player.Character.Position = pos;
+				
+			}
+		}
+#endif
 
 		[EventHandler("gamemode::player_join_late")]
 		async void player_join_late_handler(string playerLicense)
@@ -105,76 +136,62 @@ namespace sthvServer.sthvGamemodes
 
 		[EventHandler("sth:tagged_runner")]
 		async void tagged_runner_handler([FromSource]Player source, int runnerServerId){
+			log("message from source: " + source.Name + " handle: " + source.Handle + " tagged: " + runnerServerId + " runner: " + runner.Name);
+			//avoid tag-backs			
 			if(isRecentlyTagged) return;
 
 			if(runnerServerId < 1) {
+				TriggerClientEvent("sth:new_runner", runner.player.Handle);
 				log($"^4Got invalid runnerServerId: {runnerServerId} in tagged_runner_handler from player {source.Name}.");
-				
+				return;
+			}
+			if(runnerServerId != int.Parse(runner.player.Handle)){
+				TriggerClientEvent("sth:new_runner", runner.player.Handle);
+				log($"^4Player {source.Name} sent tagged runner with serverid {runnerServerId} but current runner's server id is {runner.player.Handle}.");
+				return;
 			}
 
 			isRecentlyTagged = true;
-			log("new runner serverid: " + runnerServerId);
-			this.runner = sthvLobbyManager.getPlayerByLicense(Players[runnerServerId].getLicense());
+
+			//assign new runner
+			log("new runner serverid: " + source + " " + source.Name);
+			runner = new SthvPlayer(source);
 			log("new runner: " + runner.Name);
-			TriggerClientEvent("sth:new_runner", runnerServerId);
-			await Delay(5000);
-			
+
+			TriggerClientEvent("sthv:no_tagback_time_ms", noTagbackTimeMS);
+			await Delay(noTagbackTimeMS);
 			isRecentlyTagged = false;
+			Server.refreshscoreboard();
 		}
 
-				[EventHandler("gamemode::player_killed")]
+		[EventHandler("sth:player_not_in_car_too_long")]
+		void runner_not_in_car_too_long([FromSource]Player source){
+			//checks
+			if(source.Handle != runner.player.Handle){
+				log("Player " + source.Name + "  " + source.Handle + " triggered sth:player_not_in_car_too_long but isn't runner:" + runner.player.Handle+ ". Exceptional.");
+				source.TriggerEvent("sth:new_runner", runner.player.Handle);
+				return;
+			}
+			else //assign new runner
+			{ 
+				var potential_runners = sthvLobbyManager.GetPlayersInTeam(THunter);
+
+				if(potential_runners.Count > 0){ //usually means everyones dead and gamemode is about to end.
+					log("Runner should be removed for being out of car too long but are no hunters to make runners.");
+					var new_runner_index = rand.Next(0, potential_runners.Count);
+					runner = potential_runners[new_runner_index];
+					
+					Server.SendChatMessage("Inverse Tag", $"Runner " + source.Name + " was not in a car for too long. " + runner.Name + " was randomly chosen as next runner.");
+				}
+			}
+		}
+
+		[EventHandler("gamemode::player_killed")]
 		void playerKilledHandler(string killerLicense, string killedLicense)
 		{
-			var killed = sthvLobbyManager.getPlayerByLicense(killedLicense);
-
-			//killerLicense is null when there's no killer. Player died from suicide or natural causes.
-			if (killerLicense != null)
-			{
-				var killer = sthvLobbyManager.getPlayerByLicense(killerLicense);
-				var isTeamkill = killer.teamname == killed.teamname;
-
-				log($"{killer.player.Name} ({killer.teamname}) killed {killed.player.Name} ({killed.teamname}. Teamkill: {isTeamkill})");
-				
-				//friendly fire
-				if (isTeamkill)
-				{
-					log("Teamkill");
-					if (GamemodeConfig.isFriendlyFireAllowed)
-					{
-						Server.SendChatMessage("", $"^5{killer.Name} teamkilled {killed.Name}.");
-						Debug.WriteLine("^5{killer.Name} teamkilled {killed.Name} because friendly fire is enable in GamemodeConfig.");
-					}
-					else
-					{
-						//punish killer and respawn killed if FF is disallowed.
-
-						killer.player.TriggerEvent("sthv:kill"); //kills the teamkiller
-						Server.SendChatMessage("", $"^5{killer.Name} was killed by Karma and {killed.Name} respawned.");				
-
-						if (killed.teamname == TRunner) killed.Spawn(map.RunnerSpawn, true, playerState.alive); //spawns killed player at spawn location
-						else if (killed.teamname == THunter) killed.Spawn(map.HunterSpawn, false, playerState.alive);
-						else log("Killed isn't a runner or hunter!?");
-						killed = killer; //this lets the teamkiller respawn later. Killed is already respawned, so doesn't to set a future respawn. 
-
- 
-					}
-				}
-			} 
-			//respawn player after 2 mins
-			var timer = GamemodeConfig.respawnTimeSeconds;
-			if (TimeLeft > timer + 10)
-			{
-				AddTimeEvent(timer + TimeSinceRoundStart, new Action(() =>
-				{
-					killed.Spawn(map.HunterSpawn, false, playerState.alive);
-					log("Spawning killed player after respawn time: " + killed.Name);
-					Server.SendChatMessage("sthv", "Spawning " + killed.Name + " after respawn time.");
-				}));
-				AddTimeEvent(timer + TimeSinceRoundStart + 7, new Action(() =>
-				{
-					killed.player.TriggerEvent("sth:setguns", true);
-				}));
-			}
+			var player = sthvLobbyManager.getPlayerByLicense(killedLicense);
+			if(player == null) return;
+			player.Spawn(map.RunnerSpawn, false, playerState.alive);
 		}
 
 
@@ -234,9 +251,14 @@ namespace sthvServer.sthvGamemodes
 
 		async Task runnerHintHandler()
 		{
+			if(runner == null) {
+				log("^3runnerHintHandler ran when runner was null."); 
+				await Delay(6000);
+				return;
+			}
 			Vector3 pos = runner.player.Character.Position;
 			TriggerClientEvent("sthv:showRunnerOnMap", pos);
-			await Delay((int)GamemodeConfig.secondsBetweenHints * 1000);
+			await Delay((int)GamemodeConfig.secondsBetweenHints * 1000/2); //time /2 since tagged players should almost always be on map.
 		}
 	}
 }

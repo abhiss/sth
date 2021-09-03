@@ -89,8 +89,10 @@ namespace sthvServer.sthvGamemodes
 				{
 					h.Spawn(map.HunterSpawn, false, playerState.alive);
 				}
-#if DEBUG
 				await Delay(1000);
+				if(hunters.Count > 0) hunters[0].player.TriggerEvent("sthv:spawnhuntercars", currentmapid);
+				
+#if DEBUG
 				TriggerClientEvent("sth:setguns", true);
 #endif
 			}));
@@ -118,7 +120,6 @@ namespace sthvServer.sthvGamemodes
 				UncapturedCheckpoints.Clear();
 
 				TriggerClientEvent("removeveh");
-				Tick -= CheckpointHandler;
 			}));
 		}
 

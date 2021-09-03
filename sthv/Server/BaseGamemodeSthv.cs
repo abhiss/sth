@@ -43,14 +43,14 @@ namespace sthvServer
 		{
 			Server.GamemodeId = this.GamemodeId;
 			TriggerClientEvent("sth:setgamemodeid", (int)this.GamemodeId);
-
+			Debug.WriteLine("^5STARTING NEW GAMEMODE: " + GamemodeId);
+			
 			int playerCount;
 			while (true)
 			{
 				
 				//alive and dead players are "ready" for next hunt since it means they're done loading
 				playerCount = sthvLobbyManager.GetPlayersOfState(playerState.ready, playerState.alive, playerState.dead).Count;
-				Debug.WriteLine("ready,alive,dead players: " + playerCount);
 				if (playerCount > this.MinimumPlayers || (Server.TestMode && playerCount == 1))
 				{
 					break;
@@ -111,7 +111,7 @@ namespace sthvServer
 			//reset variables
 			TimedEventsList = new Dictionary<uint, Action>();
 			Finalizer = null;
-	
+			foreach(var p in sthvLobbyManager.GetAllPlayers()) p.teamname = "";
 
 			isGameloopActive = false;
 
@@ -139,91 +139,28 @@ namespace sthvServer
 		/// </summary>
 		public abstract void CreateEvents();
 
-
-		//todo remove CreateTeams
 		/// <summary>
-		/// Used by BaseGamemodeSthv to create teams. Not to be used by gamemodes - gamemodes must set teams via SetTeams. 
+		/// Returns the player closest to a location.
 		/// </summary>
-		/// <param name="players">Custom list of players. Only used by unit tests, set to NULL when used in gamemodes.</param>
-		/// <param name="teams">A collection of teams and the associated properties.</param>
-		/// <returns></returns>
-		public string CreateTeams(List<SthvPlayer> players = null, params sthvGamemodeTeam[] teams)
-		{
-			if (teams.Length == 0) throw new Exception("Empty teams array passed to CreateTeams. Cannot create a gamemode with no teams.");
-			if (teams == null) throw new Exception("Null passed to CreateTeams. SetTeams was likely implemented incorrectly.");
+		/// <param name="location"></param>
+		/// <param name="excludedPlayerServerIds">Serverids of players to not include in the search.</param>
+		public Player GetNearestPlayer(Vector3 location, string[] excludedPlayerServerIds){
+			Player nearestPlayer = Players.First();
+			float leastDistance = location.DistanceToSquared(nearestPlayer.Character.Position);
+			foreach(var p in Players){
+				bool dontCheckExclusions = (excludedPlayerServerIds == null) || (excludedPlayerServerIds.Count() < 1);
+				//skip if player's handle is excluded
+				if(!dontCheckExclusions) if(excludedPlayerServerIds.Contains(p.Handle)) continue;
 
-			if (players == null)
-			{
-				players = sthvLobbyManager.GetPlayersOfState(playerState.ready);
-			}
-			if (GamemodeId == Shared.Gamemode.ClassicHunt && GamemodeConfig.huntNextRunnerServerId != null)
-			{
-				foreach (var p in players)
-				{
-					int numOfRunnersAssigned = 0;
-					if (p.player.Handle == GamemodeConfig.huntNextRunnerServerId)
-					{
-						numOfRunnersAssigned++;
-						p.teamname = "runner";
-						Debug.WriteLine(p.Name + " assigned runner as assigned by AdminMenu");
-					}
-					else
-					{
-						p.teamname = "hunter";
-					}
-
-					if (numOfRunnersAssigned != 1)
-					{
-						log("[BaseGamemode] numOfRunnersAssigned was " + numOfRunnersAssigned + " instead of 1. Maybe the assigned player [ServerId: " + GamemodeConfig.huntNextRunnerServerId + "] left.");
-						//doesn't return so the teams are assigned randomly like they normally would.
-					}
-					else
-					{
-						return "teams assigned using GamemodeConfig.huntNextRunnerServerId";
-					}
-				}
-
-			}
-			//shuffle players before picking teams.
-			var random = new Random();
-			players = players.OrderBy(x => random.Next()).ToList();
-
-			int maxIndex = teams.Length - 1;
-			List<int> unallowed = new List<int>(maxIndex + 1);
-			int currentIndex = 0;
-
-			//assign players to teams
-			foreach (SthvPlayer sthvPlayer in players) //sthv guarantees all players are inactive or waiting at gamemode start.
-			{
-				for (; ; )
-				{
-					if (teams[currentIndex].MaximumPlayers == teams[currentIndex].TeamPlayers.Count)
-					{
-						unallowed.Add(currentIndex);
-						currentIndex++;
-						if (currentIndex > maxIndex) currentIndex = 0;
-					}
-					else
-					{
-						teams[currentIndex].TeamPlayers.Add(sthvPlayer);
-						sthvPlayer.teamname = (teams[currentIndex].Name);
-						break;
-					}
+				var newDistance = location.DistanceToSquared(p.Character.Position);
+				if(newDistance < leastDistance){
+					nearestPlayer = p;
+					leastDistance = newDistance;
 				}
 			}
-			gamemodeTeams = teams;
-
-			string output = "";
-			foreach (var t in teams)
-			{
-				foreach (var sthvPlayer in t.TeamPlayers)
-				{
-					output += (sthvPlayer.Name + " is in team " + t.Name + ".\n");
-				}
-			}
-			return output;
+			return nearestPlayer;
 		}
-
+		
 		/// <summary>
 		///	Used to form the timeline of the gamemode.
 		///	The action will be triggered after the specified time passes during the gamemode.

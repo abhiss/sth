@@ -32,11 +32,7 @@ namespace sthvServer
 		/// <summary>
 		/// Set by BaseGamemode when a new gamemode starts.
 		/// </summary>
-#if DEBUG
-		public static Gamemode GamemodeId = Gamemode.MapMaker;
-#elif RELEASE
 		public static Gamemode GamemodeId = Gamemode.None;
-#endif
 
 		public static bool IsDiscordServerOnline { get; set; } = false;
 		public bool AutoHunt { get; set; } = false;

@@ -83,11 +83,10 @@ namespace sthvServer.sthvGamemodes
                 TriggerClientEvent("removeveh");
                 await Delay(3000);
 
-                runner.player.TriggerEvent("sthv:spawnhuntercars", currentmapid);
                 runner.player.TriggerEvent("sthv:spectate", false);
                 Server.refreshscoreboard();
             }));
-            AddTimeEvent(5, new Action(() =>
+            AddTimeEvent(5, new Action(async () =>
             {
                 log("spawning hunters after 5 seconds.");
                 var hunters = sthvLobbyManager.GetPlayersInTeam(THunter);
@@ -95,7 +94,8 @@ namespace sthvServer.sthvGamemodes
                 {
                     h.Spawn(map.HunterSpawn, false, playerState.alive);
                 }
-
+                await Delay(1000);
+                if(hunters.Count > 0) hunters[0].player.TriggerEvent("sthv:spawnhuntercars", currentmapid);
             }));
             AddTimeEvent(30, new Action(() =>
             {
@@ -119,7 +119,6 @@ namespace sthvServer.sthvGamemodes
                 }
 
                 TriggerClientEvent("removeveh");
-                Tick -= runnerHintHandler;
             }));
         }
 
@@ -160,7 +159,7 @@ namespace sthvServer.sthvGamemodes
  
 					}
 				}
-			} 
+			}
 			//respawn player after 2 mins
 			var timer = GamemodeConfig.respawnTimeSeconds;
 			if (TimeLeft > timer + 10)
@@ -233,6 +232,12 @@ namespace sthvServer.sthvGamemodes
         }
         async Task runnerHintHandler()
         {
+            if(runner == null) 
+            {
+				log("^3runnerHintHandler ran when runner was null."); 
+				await Delay(6000);
+				return;
+			}
 			Vector3 pos = runner.player.Character.Position;
 			TriggerClientEvent("sthv:showRunnerOnMap", pos);
             await Delay((int)GamemodeConfig.secondsBetweenHints * 1000);
